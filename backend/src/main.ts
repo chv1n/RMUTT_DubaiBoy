@@ -12,6 +12,8 @@ async function bootstrap() {
     origin: '*',
     credentials: true,
   });
+  app.setGlobalPrefix('api');
+
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',

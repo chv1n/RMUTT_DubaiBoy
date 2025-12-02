@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller({
-  path: 'test',
+  path: '',
   version: '1'
 })
 export class AppController {
@@ -10,6 +10,6 @@ export class AppController {
 
   @Get()
   getHello(): string {
-    return this.appService.getHello();
+    return 'data';
   }
 }
