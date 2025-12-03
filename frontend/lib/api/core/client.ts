@@ -74,5 +74,5 @@ class HttpClient {
 
 // Export a singleton instance or a factory
 export const apiClient = new HttpClient(
-  process.env.NEXT_PUBLIC_API_URL || 'https://jsonplaceholder.typicode.com'
+  process.env.NEXT_PUBLIC_API_URL || 'https://dummyjson.com'
 );

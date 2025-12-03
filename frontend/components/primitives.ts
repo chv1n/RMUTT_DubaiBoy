@@ -3,6 +3,9 @@ import { tv } from "tailwind-variants";
 export const title = tv({
   base: "tracking-tight inline font-semibold",
   variants: {
+    rounded: {
+      true: "rounded-xl",
+    },
     color: {
       violet: "from-[#FF1CF7] to-[#b249f8]",
       yellow: "from-[#FF705B] to-[#FFB457]",

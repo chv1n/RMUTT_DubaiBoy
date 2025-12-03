@@ -12,6 +12,10 @@ export const siteConfig = {
       label: "TestAPI",
       href: "/test-api",
     },
+    {
+      label: "Login",
+      href: "/login",
+    },
   ],
   navMenuItems: [
     {
