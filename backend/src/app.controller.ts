@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller({
-  path: '',
+  path: '/aaa',
   version: '1'
 })
 export class AppController {
