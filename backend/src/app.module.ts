@@ -6,7 +6,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AppModules } from './modules';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 import * as Joi from 'joi';
+import { User } from './modules/user/entities/user.entity';
 
 @Module({
   imports: [
@@ -25,7 +28,10 @@ import * as Joi from 'joi';
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test', 'provision')
           .default('development'),
+        synchronize: true,
       }),
+
+
     }),
     DatabaseModule,
     ThrottlerModule.forRoot([{
@@ -33,6 +39,8 @@ import * as Joi from 'joi';
       limit: 100,
     }]),
     ...AppModules,
+
+
   ],
   controllers: [AppController],
   providers: [
