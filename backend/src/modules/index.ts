@@ -1,4 +1,5 @@
-
+import { AuthModule } from "./auth/auth.module";
+import { UserModule } from "./user/user.module";
 import { MaterialModule } from "./material/material.module";
 import { MaterialGroupModule } from "./material-group/material-group.module";
 import { ContainerTypeModule } from "./container-type/container-type.module";
@@ -12,5 +13,7 @@ export const AppModules = [
     ContainerTypeModule,
     UnitModule,
     SupplierModule,
+    AuthModule,
+    UserModule,
 ]
 
