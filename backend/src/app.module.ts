@@ -40,7 +40,6 @@ import { User } from './modules/user/entities/user.entity';
     }]),
     ...AppModules,
 
-
   ],
   controllers: [AppController],
   providers: [
