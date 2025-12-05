@@ -4,8 +4,9 @@ import { map } from 'rxjs/operators';
 
 export interface Response<T> {
     success: boolean;
+    message: string;
     data: T;
-    meta?: any; // เพิ่ม type meta เผื่อไว้
+    meta?: any;
 }
 
 @Injectable()
@@ -13,18 +14,32 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
     intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
         return next.handle().pipe(
             map((data) => {
+                let message = 'สำเร็จ';
+                let resultData = data;
+                let meta;
 
-                if (data && typeof data === 'object' && 'data' in data && 'meta' in data) {
-                    return {
-                        success: true,
-                        ...data,
-                    };
+                if (data && typeof data === 'object' && !Array.isArray(data)) {
+                    // Handle pagination
+                    if ('data' in data && 'meta' in data) {
+                        resultData = data.data;
+                        meta = data.meta;
+                    }
+                    // Handle custom message and data wrapper
+                    else if ('message' in data) {
+                        message = data.message;
+                        if ('data' in data) {
+                            resultData = data.data;
+                        } else {
+                            resultData = {};
+                        }
+                    }
                 }
-
 
                 return {
                     success: true,
-                    data: data,
+                    message: message,
+                    data: resultData,
+                    meta: meta,
                 };
             }),
         );

@@ -33,6 +33,7 @@ import * as Joi from 'joi';
       limit: 100,
     }]),
     ...AppModules,
+
   ],
   controllers: [AppController],
   providers: [
