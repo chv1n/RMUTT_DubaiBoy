@@ -31,19 +31,17 @@ export class UserService {
     if (!user) {
       throw new Error('User not found');
     }
-
-
-
     return {
       email: user.email,
-      full_name: user.full_name,
-      user_name: user.user_name,
+      fullname: user.fullname,
+      username: user.username,
       id: user.id,
       role: user.role,
+      refresh_token: user.refresh_token,
     };
   }
 
-  async upDate(id: number, updateUserDto: UpdateDto) {
+  async update(id: number, updateUserDto: UpdateDto) {
     const user = await this.user.findOne({ where: { id } });
 
     if (!user) throw new Error('User not found');
@@ -60,7 +58,11 @@ export class UserService {
     return await this.user.delete(id);
   }
 
-  async findByUsername(user_name: string): Promise<User | null> {
-    return await this.user.findOne({ where: { user_name } });
+  async findByUsername(username: string): Promise<User | null> {
+    return await this.user.findOne({ where: { username } });
+  }
+
+  async findById(id: number): Promise<User | null> {
+    return await this.user.findOne({ where: { id } });
   }
 }
