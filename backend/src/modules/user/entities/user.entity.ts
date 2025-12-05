@@ -20,13 +20,13 @@ export class User {
     email: string;
 
     @Column({ unique: true })
-    user_name: string;
+    username: string;
 
-    @Column({ nullable: true })
-    full_name: string;
+    @Column()
+    fullname: string;
 
-    @Column({ type: 'text', nullable: true })
-    pass_word: string;
+    @Column({ type: 'text' })
+    password: string;
 
     @Column({ default: 'user' })
     role: string;
@@ -41,8 +41,8 @@ export class User {
 
     @BeforeInsert()
     async hashPasswordBeforeInsert() {
-        if (this.pass_word) {
-            this.pass_word = await bcrypt.hash(this.pass_word, 10);
+        if (this.password) {
+            this.password = await bcrypt.hash(this.password, 10);
         }
     }
 

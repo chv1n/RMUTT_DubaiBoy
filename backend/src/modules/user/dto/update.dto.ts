@@ -26,4 +26,8 @@ export class UpdateDto {
     @IsOptional()
     @IsEnum(Role)
     role?: Role;
+
+    @IsOptional()
+    @IsString()
+    refresh_token?: string | null;
 }

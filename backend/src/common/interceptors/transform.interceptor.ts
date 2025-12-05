@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 export interface Response<T> {
     success: boolean;
     data: T;
-    meta?: any; // เพิ่ม type meta เผื่อไว้
+    meta?: any;
 }
 
 @Injectable()
