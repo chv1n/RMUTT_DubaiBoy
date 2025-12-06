@@ -1,3 +1,4 @@
+
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import { Link } from "@heroui/link";
@@ -7,6 +8,7 @@ import { Providers } from "./providers";
 
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
+import { SidebarProvider } from "@/components/providers/sidebar-provider";
 
 
 export const metadata: Metadata = {
@@ -37,12 +39,14 @@ export default function RootLayout({
       <head />
       <body
         className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased",
-          fontSans.variable,
+          "min-h-screen text-foreground bg-background ",
+          fontSans.className,
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          {children}
+          <SidebarProvider>
+            {children}
+          </SidebarProvider>
         </Providers>
       </body>
     </html>
