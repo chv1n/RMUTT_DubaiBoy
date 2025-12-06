@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
+import { getKeyValue } from "@heroui/table";
+import { DataTable } from "@/components/common/data-table";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
@@ -11,7 +12,7 @@ import { useTranslation } from "@/components/providers/language-provider";
 import { containerTypeService } from "@/services/material.service";
 import { ContainerType, CreateContainerTypeDTO } from "@/types/materials";
 import { Spinner } from "@heroui/spinner";
-import { getKeyValue } from "@heroui/table";
+import { ConfirmModal } from "@/components/common/confirm-modal";
 
 export function ContainerTypeManagement() {
     const { t } = useTranslation();
@@ -21,6 +22,10 @@ export function ContainerTypeManagement() {
     const [filterValue, setFilterValue] = useState("");
     const [editingContainer, setEditingContainer] = useState<ContainerType | null>(null);
     const [formData, setFormData] = useState<CreateContainerTypeDTO>({ name: "", description: "" });
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
         loadData();
@@ -55,17 +60,25 @@ export function ContainerTypeManagement() {
 
     const handleEdit = (container: ContainerType) => {
         setEditingContainer(container);
-        setFormData({ name: container.name, description: container.description });
+        setFormData({ name: container.name, description: container.description || "" });
         onOpen();
     };
 
-    const handleDelete = async (id: number) => {
-        if (confirm(t("common.confirmDelete"))) {
+    const confirmDelete = (id: number) => {
+        setDeleteId(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (deleteId) {
             try {
-                await containerTypeService.delete(id);
+                await containerTypeService.delete(deleteId);
                 loadData();
             } catch (error) {
                 console.error("Failed to delete container type", error);
+            } finally {
+                setIsDeleteModalOpen(false);
+                setDeleteId(null);
             }
         }
     };
@@ -90,55 +103,43 @@ export function ContainerTypeManagement() {
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <Input
-                    isClearable
-                    className="w-full sm:max-w-[44%]"
-                    placeholder={t("common.search")}
-                    startContent={<Search className="text-default-300" />}
-                    value={filterValue}
-                    onClear={() => setFilterValue("")}
-                    onValueChange={setFilterValue}
-                />
-                <Button color="primary" endContent={<Plus />} onPress={handleAdd}>
-                    {t("containers.addContainer")}
-                </Button>
-            </div>
-            <Table aria-label="Container Type List">
-                <TableHeader columns={columns}>
-                    {(column) => (
-                        <TableColumn key={column.uid} align={column.uid === "actions" ? "center" : "start"}>
-                            {column.name}
-                        </TableColumn>
-                    )}
-                </TableHeader>
-                <TableBody items={filteredItems} emptyContent={"No container types found"} isLoading={loading} loadingContent={<Spinner />}>
-                    {(item) => (
-                        <TableRow key={item.id}>
-                            {(columnKey) => (
-                                <TableCell>
-                                    {columnKey === "actions" ? (
-                                        <div className="relative flex items-center gap-2">
-                                            <Tooltip content={t("common.edit")}>
-                                                <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item)}>
-                                                    <Edit size={20} />
-                                                </span>
-                                            </Tooltip>
-                                            <Tooltip color="danger" content={t("common.delete")}>
-                                                <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => handleDelete(item.id)}>
-                                                    <Trash size={20} />
-                                                </span>
-                                            </Tooltip>
-                                        </div>
-                                    ) : (
-                                        getKeyValue(item, columnKey)
-                                    )}
-                                </TableCell>
-                            )}
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+            <DataTable
+                data={filteredItems.slice((page - 1) * rowsPerPage, page * rowsPerPage)}
+                columns={columns}
+                meta={{
+                    totalItems: filteredItems.length,
+                    itemCount: filteredItems.length,
+                    itemsPerPage: rowsPerPage,
+                    totalPages: Math.ceil(filteredItems.length / rowsPerPage),
+                    currentPage: page,
+                }}
+                isLoading={loading}
+                onPageChange={setPage}
+                onRowsPerPageChange={setRowsPerPage}
+                onSearch={setFilterValue}
+                onAddNew={handleAdd}
+                renderCell={(item, columnKey) => {
+                    switch (columnKey) {
+                        case "actions":
+                            return (
+                                <div className="relative flex items-center gap-2">
+                                    <Tooltip content={t("common.edit")}>
+                                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item)}>
+                                            <Edit size={20} />
+                                        </span>
+                                    </Tooltip>
+                                    <Tooltip color="danger" content={t("common.delete")}>
+                                        <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => confirmDelete(item.id)}>
+                                            <Trash size={20} />
+                                        </span>
+                                    </Tooltip>
+                                </div>
+                            );
+                        default:
+                            return getKeyValue(item, columnKey as any);
+                    }
+                }}
+            />
 
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
@@ -169,6 +170,11 @@ export function ContainerTypeManagement() {
                     )}
                 </ModalContent>
             </Modal>
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+            />
         </div>
     );
 }

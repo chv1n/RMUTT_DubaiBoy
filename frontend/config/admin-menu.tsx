@@ -48,6 +48,15 @@ export const sidebarItems: MenuItem[] = [
         ],
     },
     {
+        key: "suppliers",
+        label: "suppliers.title",
+        icon: <Package className="w-5 h-5" />,
+        children: [
+            { key: "dashboard-suppliers", label: "common.dashboard", href: "/super-admin/suppliers" },
+            { key: "all-suppliers", label: "suppliers.list", href: "/super-admin/suppliers/all" },
+        ],
+    },
+    {
         key: "ecommerce",
         label: "ecommerce.title",
         icon: <ShoppingCart className="w-5 h-5" />,
