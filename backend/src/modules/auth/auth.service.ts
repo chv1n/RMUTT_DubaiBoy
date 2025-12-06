@@ -4,6 +4,8 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import Redis from 'ioredis';
 import { User } from '../user/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -11,11 +13,12 @@ export class AuthService {
     @Inject('REDIS') private redis: Redis,
     private userService: UserService,
     private jwtService: JwtService,
+    @InjectRepository(User) private userRepo: Repository<User>,
   ) { }
 
   async validate(user_name: string, pass_word: string): Promise<any> {
-    const user = await this.userService.findByUsername(user_name);
-    if (user && (await bcrypt.compare(pass_word, user?.password))) {
+    const user = await this.userRepo.findOne({ where: { username: user_name } });
+    if (user && (await bcrypt.compare(pass_word, user.password))) {
       return {
         ...user
       };
@@ -84,7 +87,7 @@ export class AuthService {
 
 
     if (!storedHash) {
-      const userFromDb = await this.userService.findOne(user.id);
+      const userFromDb = await this.userRepo.findOne({ where: { id: user.id } });
       storedHash = userFromDb?.refresh_token || null;
     }
 
