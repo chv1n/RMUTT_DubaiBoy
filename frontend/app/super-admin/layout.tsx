@@ -1,47 +1,20 @@
 import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
-import { Link } from "@heroui/link";
-import clsx from "clsx";
-
-import { Providers } from "@/app/providers";
-
-import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
-import { Navbar } from "@/components/navbar";
-import { ThemeSwitch } from "@/components/theme-switch";
-
+import { Metadata } from "next";
+import AdminSidebarMain from "@/components/admin/AdminSidebarMain";
 
 export const metadata: Metadata = {
-    title: {
-        default: siteConfig.name,
-        template: `%s - ${siteConfig.name}`,
-    },
-    description: siteConfig.description,
-    icons: {
-        icon: "/favicon.ico",
-    },
+    title: "Super Admin Dashboard",
+    description: "Admin dashboard for system management",
 };
 
-export const viewport: Viewport = {
-    themeColor: [
-        { media: "(prefers-color-scheme: light)", color: "white" },
-        { media: "(prefers-color-scheme: dark)", color: "black" },
-    ],
-};
-
-export default function RootLayout({
+export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
     return (
-        <div className="relative flex flex-col h-screen">
-            <Navbar />
-            <div className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
-                {children}
-            </div>
-        </div>
-
-
+        <AdminSidebarMain>
+            {children}
+        </AdminSidebarMain>
     );
 }
