@@ -76,8 +76,15 @@ export class UserService {
     return await this.user.delete(id);
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    return await this.user.findOne({ where: { username } });
+  async findByUsername(username: string) {
+    const user = await this.user.findOne({ where: { username } })
+    return {
+      id: user?.id,
+      email: user?.email,
+      fullname: user?.fullname,
+      username: user?.username,
+      role: user?.role,
+    };
   }
 
   async findById(id: number) {
