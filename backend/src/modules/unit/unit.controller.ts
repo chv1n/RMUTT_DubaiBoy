@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { UnitService } from './unit.service';
 import { CreateUnitDto } from './dto/create-unit.dto';
 import { UpdateUnitDto } from './dto/update-unit.dto';
+import { BaseQueryDto } from '../../common/dto/base-query.dto';
 
 @Controller({
     path: 'units',
@@ -14,14 +15,14 @@ export class UnitController {
     async create(@Body() createUnitDto: CreateUnitDto) {
         const data = await this.service.create(createUnitDto);
         return {
-            message: 'เพิ่มหน่วยนับสำเร็จ',
+            message: 'เพิ่มสำเร็จ',
             data
         };
     }
 
     @Get()
-    findAll() {
-        return this.service.findAll();
+    findAll(@Query() query: BaseQueryDto) {
+        return this.service.findAll(query);
     }
 
     @Get(':id')
@@ -33,16 +34,9 @@ export class UnitController {
     async update(@Param('id') id: number, @Body() updateUnitDto: UpdateUnitDto) {
         const data = await this.service.update(+id, updateUnitDto);
         return {
-            message: 'แก้ไขหน่วยนับสำเร็จ',
+            message: 'แก้ไขสำเร็จ',
             data
         };
     }
 
-    @Delete(':id')
-    async remove(@Param('id') id: number) {
-        await this.service.remove(+id);
-        return {
-            message: 'ลบหน่วยนับสำเร็จ'
-        };
-    }
 }
