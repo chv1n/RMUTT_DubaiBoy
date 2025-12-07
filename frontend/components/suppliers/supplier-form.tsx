@@ -24,7 +24,7 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
         email: "",
         phone: "",
         address: "",
-        status: "active",
+        is_active: true,
     });
 
     useEffect(() => {
@@ -34,7 +34,7 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
                 email: initialData.email,
                 phone: initialData.phone,
                 address: initialData.address,
-                status: initialData.status,
+                is_active: initialData.is_active,
             });
         }
     }, [initialData]);
@@ -81,8 +81,8 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
                 />
                 <Select
                     label={t("common.status")}
-                    selectedKeys={[formData.status]}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                    selectedKeys={[formData.is_active ? "active" : "inactive"]}
+                    onChange={(e) => setFormData({ ...formData, is_active: e.target.value === "active" })}
                     isRequired
                 >
                     <SelectItem key="active">{t("suppliers.active")}</SelectItem>

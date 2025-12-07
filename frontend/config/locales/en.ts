@@ -55,6 +55,8 @@ export const en = {
         totalMaterials: "Total Materials",
         totalValue: "Total Value",
         subMaterials: "Sub Materials",
+        supplier: "Supplier",
+        expiration_date: "Expiration Date"
     },
     suppliers: {
         title: "Supplier Management",

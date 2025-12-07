@@ -61,8 +61,8 @@ export function DataTable<T extends { id: number | string }>({
     onAddNew,
     renderCell,
     statusOptions = [
-        { name: "Active", uid: "active" },
-        { name: "Inactive", uid: "inactive" },
+        { name: "Active", uid: "true" },
+        { name: "Inactive", uid: "false" },
     ],
     initialVisibleColumns,
     onSelectionChange,

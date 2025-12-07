@@ -118,7 +118,7 @@ export interface CreateMaterialDTO {
     supplier_id?: number | null;
     cost_per_unit?: number | null;
     expiration_date?: string | null;
-    active?: number;
+    is_active?: boolean;
 }
 
 export interface UpdateMaterialDTO extends Partial<CreateMaterialDTO> {}

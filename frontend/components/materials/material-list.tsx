@@ -29,7 +29,7 @@ export function MaterialList() {
 
     // Filter states
     const [search, setSearch] = useState("");
-    const [status, setStatus] = useState("all");
+    const [status, setStatus] = useState("");
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -193,8 +193,8 @@ export function MaterialList() {
                 onAddNew={() => router.push("/super-admin/materials/new")}
                 renderCell={renderCell}
                 statusOptions={[
-                    { name: t("common.active"), uid: "active" },
-                    { name: t("common.inactive"), uid: "inactive" }
+                    { name: t("common.active"), uid: "true" },
+                    { name: t("common.inactive"), uid: "false" }
                 ]}
             />
 

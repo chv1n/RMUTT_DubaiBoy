@@ -6,7 +6,9 @@ import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { useTranslation } from "@/components/providers/language-provider";
 import { materialService, materialGroupService, containerTypeService, materialUnitService } from "@/services/material.service";
+import { supplierService } from "@/services/supplier.service";
 import { Material, CreateMaterialDTO, MaterialGroup, ContainerType, MaterialUnit } from "@/types/materials";
+import { Supplier } from "@/types/suppliers";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@heroui/spinner";
 
@@ -22,6 +24,7 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
     const [groups, setGroups] = useState<MaterialGroup[]>([]);
     const [containers, setContainers] = useState<ContainerType[]>([]);
     const [units, setUnits] = useState<MaterialUnit[]>([]);
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
     const [formData, setFormData] = useState<CreateMaterialDTO>({
         material_name: "",
@@ -34,9 +37,9 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
         container_max_stock: 0,
         lifetime: 0,
         lifetime_unit: "month",
-        supplier_id: 0, // Need to handle supplier selection maybe? or optional
+        supplier_id: 0,
         cost_per_unit: 0,
-        active: 1
+        is_active: true
     });
 
     useEffect(() => {
@@ -55,7 +58,7 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
                 lifetime_unit: initialData.lifetimeUnit,
                 supplier_id: initialData.supplierId,
                 cost_per_unit: initialData.price,
-                active: initialData.status === "active" ? 1 : 0,
+                is_active: initialData.status === "active" ? true : false,
                 expiration_date: initialData.expirationDate
             });
         }
@@ -63,14 +66,16 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
 
     const loadDependencies = async () => {
         try {
-            const [groupsData, containersData, unitsData] = await Promise.all([
+            const [groupsData, containersData, unitsData, suppliersData] = await Promise.all([
                 materialGroupService.getAll(),
                 containerTypeService.getAll(),
-                materialUnitService.getAll()
+                materialUnitService.getAll(),
+                supplierService.getAll()
             ]);
             setGroups(groupsData);
             setContainers(containersData);
             setUnits(unitsData);
+            setSuppliers(suppliersData);
         } catch (error) {
             console.error("Failed to load dependencies", error);
         }
@@ -150,6 +155,19 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
                     ))}
                 </Select>
 
+                <Select
+                    label={t("materials.supplier")}
+                    selectedKeys={formData.supplier_id ? [String(formData.supplier_id)] : []}
+                    onChange={(e) => setFormData({ ...formData, supplier_id: Number(e.target.value) })}
+                    placeholder="Select Supplier"
+                >
+                    {suppliers.map((supplier) => (
+                        <SelectItem key={supplier.id}>
+                            {supplier.name}
+                        </SelectItem>
+                    ))}
+                </Select>
+
                 <Input
                     type="number"
                     label={t("materials.price")}
@@ -201,8 +219,8 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
 
                 <Select
                     label={t("common.status")}
-                    selectedKeys={formData.active === 1 ? ["active"] : ["inactive"]}
-                    onChange={(e) => setFormData({ ...formData, active: e.target.value === "active" ? 1 : 0 })}
+                    selectedKeys={formData.is_active ? ["active"] : ["inactive"]}
+                    onChange={(e) => setFormData({ ...formData, is_active: e.target.value === "active" ? true : false })}
                     isRequired
                 >
                     <SelectItem key="active">{t("common.active")}</SelectItem>

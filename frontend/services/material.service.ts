@@ -89,7 +89,7 @@ class MaterialService {
         
         // Backend returns standard pagination structure: { data: [], meta: {} }
         // The DTO from backend is MaterialDTO[]
-        const response = await apiClient.get<ApiResponse<MaterialDTO[]>>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}&status=${status}`);
+        const response = await apiClient.get<ApiResponse<MaterialDTO[]>>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}&is_active=${status}`);
         
         return {
             ...response,

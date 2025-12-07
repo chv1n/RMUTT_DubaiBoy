@@ -1,5 +1,5 @@
 export const MOCK_CONFIG = {
-    useMock: true, // Global toggle
+    useMock: false, // Global toggle
     delay: 500 // Simulated network delay in ms
 };
 
