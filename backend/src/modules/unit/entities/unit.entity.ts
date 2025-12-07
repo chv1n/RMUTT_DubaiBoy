@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('material_units')
 export class MaterialUnits {
@@ -11,6 +11,6 @@ export class MaterialUnits {
     @CreateDateColumn({ name: 'create_at' })
     create_at: Date;
 
-    @DeleteDateColumn({ name: 'deleted_at', select: false })
-    deleted_at: Date;
+    @Column({ name: 'is_active', type: 'boolean', default: true })
+    is_active: boolean;
 }

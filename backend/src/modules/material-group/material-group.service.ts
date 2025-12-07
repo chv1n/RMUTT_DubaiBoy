@@ -5,6 +5,8 @@ import { MaterialGroup } from './entities/material-group.entity';
 import { CreateMaterialGroupDto } from './dto/create-material-group.dto';
 import { UpdateMaterialGroupDto } from './dto/update-material-group.dto';
 import { BaseQueryDto } from '../../common/dto/base-query.dto';
+import { QueryHelper } from '../../common/helpers/query.helper';
+import { CrudHelper } from '../../common/helpers/crud.helper';
 
 @Injectable()
 export class MaterialGroupService {
@@ -18,22 +20,8 @@ export class MaterialGroupService {
         return this.repository.save(entity);
     }
 
-    findAll(query: BaseQueryDto) {
-        const { is_active, sort_order } = query;
-        const where: any = {};
-
-        if (is_active !== undefined) {
-            where.is_active = is_active;
-        }
-
-        console.log(where);
-
-        return this.repository.find({
-            where,
-            order: {
-                group_name: sort_order === 'DESC' ? 'DESC' : 'ASC',
-            },
-        });
+    async findAll(query: BaseQueryDto) {
+        return QueryHelper.paginate(this.repository, query, { sortField: 'group_name' });
     }
 
     findOne(id: number) {
@@ -41,12 +29,13 @@ export class MaterialGroupService {
     }
 
     async update(id: number, updateMaterialGroupDto: UpdateMaterialGroupDto) {
-        const materialGroup = await this.findOne(id);
-        if (!materialGroup) {
-            throw new Error('Material group not found');
-        }
-        const updated = Object.assign(materialGroup, updateMaterialGroupDto);
-        return this.repository.save(updated);
+        return CrudHelper.update(this.repository, id, 'group_id', updateMaterialGroupDto, 'ไม่พบกลุ่มวัตถุดิบที่ต้องการแก้ไข');
     }
 
+    async remove(id: number) {
+        const entity = await this.findOne(id);
+        if (entity) {
+            await this.repository.update(id, { is_active: false });
+        }
+    }
 }

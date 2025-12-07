@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { SupplierService } from './supplier.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { BaseQueryDto } from '../../common/dto/base-query.dto';
 
 @Controller({
     path: 'suppliers',
@@ -20,8 +21,8 @@ export class SupplierController {
     }
 
     @Get()
-    findAll() {
-        return this.service.findAll();
+    findAll(@Query() query: BaseQueryDto) {
+        return this.service.findAll(query);
     }
 
     @Get(':id')

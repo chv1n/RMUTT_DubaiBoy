@@ -1,5 +1,5 @@
-import { IsOptional, IsBoolean, IsString, IsIn } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsOptional, IsBoolean, IsString, IsIn, IsNumber, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class BaseQueryDto {
     @IsOptional()
@@ -10,6 +10,18 @@ export class BaseQueryDto {
     })
     @IsBoolean()
     is_active?: boolean;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    @Min(1)
+    page?: number = 1;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    @Min(1)
+    limit?: number = 10;
 
     @IsOptional()
     @IsString()
