@@ -41,6 +41,12 @@ export const sidebarItems: MenuItem[] = [
         href: "/super-admin",
     },
     {
+        key: "users",
+        label: "user.title",
+        icon: <Users className="w-5 h-5" />,
+        href: "/super-admin/users",
+    },
+    {
         key: "plans",
         label: "plan.title",
         icon: <Calendar className="w-5 h-5" />,

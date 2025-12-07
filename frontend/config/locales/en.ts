@@ -101,5 +101,59 @@ export const en = {
         editContainer: "Edit Container Type",
         name: "Type Name",
         description: "Description",
+    },
+    user: {
+        title: "Users Management",
+        create: "Create User",
+        edit: "Edit User",
+        invite: "Invite User",
+        field: {
+            username: "Username",
+            email: "Email",
+            displayName: "Display Name",
+            fullname: "Full Name",
+            role: "Role",
+            roles: "Roles",
+            department: "Department",
+            status: "Status",
+            lastLogin: "Last Login",
+            createdAt: "Created At",
+            phone: "Phone",
+            locale: "Language",
+            timezone: "Timezone",
+            notes: "Notes"
+        },
+        actions: {
+            viewProfile: "View Profile",
+            resetPassword: "Reset Password",
+            enable: "Enable",
+            disable: "Disable",
+            delete: "Delete",
+            impersonate: "Impersonate"
+        },
+        messages: {
+            created: "User created successfully",
+            updated: "User updated successfully",
+            deleted: "User deleted successfully",
+            invited: "Invite sent successfully",
+            reset: "Password reset email sent"
+        },
+        validation: {
+            required: "This field is required",
+            email: "Invalid email address"
+        },
+        profile: {
+            overview: "Overview",
+            activity: "Activity",
+            security: "Security & Sessions",
+            details: "User Details",
+            bio: "Biography / Notes",
+            sessions: "Active Sessions",
+            lastActive: "Last Active",
+            currentSession: "Current Session",
+            device: "Device",
+            location: "Location (IP)",
+            timeline: "Activity Timeline"
+        }
     }
 };
