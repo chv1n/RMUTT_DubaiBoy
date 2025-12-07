@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { ContainerTypeService } from './container-type.service';
 import { CreateContainerTypeDto } from './dto/create-container-type.dto';
 import { UpdateContainerTypeDto } from './dto/update-container-type.dto';
+import { BaseQueryDto } from '../../common/dto/base-query.dto';
 
 @Controller({
     path: 'container-types',
@@ -20,8 +21,8 @@ export class ContainerTypeController {
     }
 
     @Get()
-    findAll() {
-        return this.service.findAll();
+    findAll(@Query() query: BaseQueryDto) {
+        return this.service.findAll(query);
     }
 
     @Get(':id')

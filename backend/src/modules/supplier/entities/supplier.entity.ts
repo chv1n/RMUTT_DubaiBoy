@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn } from 'typeorm';
 
 @Entity('supplier')
 export class Supplier {
@@ -17,12 +17,9 @@ export class Supplier {
     @Column({ name: 'address', type: 'varchar', nullable: true })
     address: string;
 
-    @Column({ name: 'active', type: 'int', default: 1 })
-    active: number;
+    @Column({ name: 'is_active', type: 'boolean', default: true })
+    is_active: boolean;
 
     @UpdateDateColumn({ name: 'update_date', nullable: true })
     update_date: Date;
-
-    @DeleteDateColumn({ name: 'deleted_at', select: false })
-    deleted_at: Date;
 }

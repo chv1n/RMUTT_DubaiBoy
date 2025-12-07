@@ -32,7 +32,7 @@ export class MaterialService {
 
   async findOne(id: number) {
     const material = await this.materialRepository.findOne({
-      where: { material_id: id },
+      where: { material_id: id, is_active: true },
       relations: ['material_group', 'container_type', 'unit', 'supplier'],
     });
 
@@ -44,16 +44,18 @@ export class MaterialService {
   }
 
   async update(id: number, updateMaterialDto: UpdateMaterialDto) {
-    const material = await this.findOne(id); // Ensure exists
-    await this.materialRepository.update(id, updateMaterialDto);
-    return this.findOne(id);
+    const material = await this.materialRepository.findOneBy({ material_id: id });
+    if (!material) {
+      throw new NotFoundException(`ไม่พบวัสดุที่ต้องการแก้ไข`);
+    }
+    const updated = Object.assign(material, updateMaterialDto);
+    const result = await this.materialRepository.save(updated);
+    return result;
   }
 
-  async remove(id: number) {
-    const material = await this.findOne(id); // Ensure exists
-    await this.materialRepository.softDelete(id);
-    return { message: 'Material deleted (soft delete)' };
-  }
+
+
+
 
   private createBaseQuery(): SelectQueryBuilder<MaterialMaster> {
     return this.materialRepository.createQueryBuilder('material')
@@ -61,6 +63,7 @@ export class MaterialService {
       .leftJoinAndSelect('material.container_type', 'container_type')
       .leftJoinAndSelect('material.unit', 'unit')
       .leftJoinAndSelect('material.supplier', 'supplier');
+
   }
 
   private applyStandardFilters(qb: SelectQueryBuilder<MaterialMaster>, query: MaterialQueryDto) {
@@ -69,7 +72,7 @@ export class MaterialService {
       material_group_id: 'material.material_group_id = :material_group_id',
       container_type_id: 'material.container_type_id = :container_type_id',
       unit_id: 'material.unit_id = :unit_id',
-      active: 'material.active = :active',
+      is_active: 'material.is_active = :is_active',
     };
 
     Object.entries(filterMap).forEach(([key, condition]) => {

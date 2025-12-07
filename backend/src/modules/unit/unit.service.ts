@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MaterialUnits } from './entities/unit.entity';
 import { CreateUnitDto } from './dto/create-unit.dto';
 import { UpdateUnitDto } from './dto/update-unit.dto';
+import { BaseQueryDto } from '../../common/dto/base-query.dto';
+import { QueryHelper } from '../../common/helpers/query.helper';
+import { CrudHelper } from '../../common/helpers/crud.helper';
 
 @Injectable()
 export class UnitService {
@@ -17,20 +20,17 @@ export class UnitService {
         return this.repository.save(entity);
     }
 
-    findAll() {
-        return this.repository.find();
+    async findAll(query: BaseQueryDto) {
+        return QueryHelper.paginate(this.repository, query, { sortField: 'unit_name' });
     }
 
     findOne(id: number) {
-        return this.repository.findOneBy({ unit_id: id });
+        return this.repository.findOneBy({ unit_id: id, is_active: true });
     }
 
     async update(id: number, updateUnitDto: UpdateUnitDto) {
-        await this.repository.update(id, updateUnitDto);
-        return this.findOne(id);
+        return CrudHelper.update(this.repository, id, 'unit_id', updateUnitDto, 'ไม่พบหน่วยนับที่ต้องการแก้ไข');
     }
 
-    remove(id: number) {
-        return this.repository.softDelete(id);
-    }
+
 }
