@@ -1,5 +1,5 @@
 import { IsOptional, IsString, IsNumber, IsDateString, IsIn, Min, IsBoolean } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 export class MaterialQueryDto {
     @IsOptional()
@@ -34,9 +34,12 @@ export class MaterialQueryDto {
     unit_id?: string;
 
     @IsOptional()
-    @IsOptional()
     @IsBoolean()
-    @Type(() => Boolean)
+    @Transform(({ value }) => {
+        if (value === 'true') return true;
+        if (value === 'false') return false;
+        return value;
+    })
     is_active?: boolean;
 
     @IsOptional()

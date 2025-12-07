@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { ProductTypeService } from '../product-type/product-type.service';
+import { QueryProductDto } from './dto/query-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -34,29 +35,29 @@ export class ProductService {
     return await this.productRepository.save(createProductDto);
   }
 
-  async findAll(limit?: number, order: string = 'ASC',
-    sortBy: string = 'product_id',
-    name?: string, typeId?: number, offset?: number, active?: number
-  ) {
-    const query = this.productRepository
+  async findAll(query: QueryProductDto) {
+
+    const { limit, order, sortBy, name, typeId, offset, active } = query;
+    const products = this.productRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.product_type', 't')
       .take(limit)
-      .orderBy(`p.${sortBy}`, order.toUpperCase() as 'ASC' | 'DESC');
+      .skip(offset)
+      .orderBy(`p.${sortBy}`, order?.toUpperCase() as 'ASC' | 'DESC');
 
     if (name) {
-      query.andWhere('p.product_name LIKE :name', { name });
+      products.andWhere('p.product_name LIKE :name', { name });
     }
 
     if (typeId) {
-      query.andWhere('t.product_type_id = :typeId', { typeId });
+      products.andWhere('t.product_type_id = :typeId', { typeId });
     }
 
     if (active) {
-      query.andWhere('p.active = :active', { active });
+      products.andWhere('p.active = :active', { active });
     }
 
-    return await query.getMany();
+    return await products.getMany();
   }
 
   async findOne(id: number) {

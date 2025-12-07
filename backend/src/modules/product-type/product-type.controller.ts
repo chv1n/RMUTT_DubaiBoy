@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query } from '@
 import { ProductTypeService } from './product-type.service';
 import { CreateProductTypeDto } from './dto/create-product-type.dto';
 import { UpdateProductTypeDto } from './dto/update-product-type.dto';
+import { QueryProductTypeDto } from './dto/query-product-type.dto';
 
 @Controller({
   path: 'product-type',
@@ -16,14 +17,8 @@ export class ProductTypeController {
   }
 
   @Get()
-  findAll(@Query('limit') limit: number,
-    @Query('order') order: 'ASC' | 'DESC' = 'ASC',
-    @Query('sortBy') sortBy: string = 'product_type_id',
-    @Query('offset') offset: number = 0,
-    @Query('name') name: string = '',
-    @Query('active') active: number = 1
-  ) {
-    return this.productTypeService.findAll(limit, order, sortBy, name, offset, active);
+  findAll(@Query() query: QueryProductTypeDto) {
+    return this.productTypeService.findAll(query);
   }
 
   @Get(':id')

@@ -4,6 +4,7 @@ import { UpdateProductTypeDto } from './dto/update-product-type.dto';
 import { ProductType } from './entities/product-type.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { QueryProductTypeDto } from './dto/query-product-type.dto';
 
 @Injectable()
 export class ProductTypeService {
@@ -16,23 +17,23 @@ export class ProductTypeService {
     return await this.ProductTypeRepository.save(createProductTypeDto);
   }
 
-  async findAll(limit?: number, order: string = 'ASC',
-    sortBy: string = 'product_type_id', name?: string, offset?: number, active?: number
-  ): Promise<ProductType[]> {
-    const query = this.ProductTypeRepository
+  async findAll(query: QueryProductTypeDto): Promise<ProductType[]> {
+    const { limit, order, sortBy, name, offset, active } = query;
+    const products = this.ProductTypeRepository
       .createQueryBuilder('p')
       .take(limit)
-      .orderBy(`p.${sortBy}`, order.toUpperCase() as 'ASC' | 'DESC');
+      .skip(offset)
+      .orderBy(`p.${sortBy}`, order?.toUpperCase() as 'ASC' | 'DESC');
 
     if (name) {
-      query.andWhere('p.type_name LIKE :name', { name });
+      products.andWhere('p.type_name LIKE :name', { name });
     }
 
     if (active) {
-      query.andWhere('p.active = :active', { active });
+      products.andWhere('p.active = :active', { active });
     }
 
-    return await query.getMany();
+    return await products.getMany();
   }
 
   async findOne(id: number) {

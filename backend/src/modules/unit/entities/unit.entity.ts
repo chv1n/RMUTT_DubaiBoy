@@ -5,6 +5,10 @@ export class MaterialUnits {
     @PrimaryGeneratedColumn({ name: 'unit_id' })
     unit_id: number;
 
+
+    @OneToMany(() => Bom, (bom) => bom.unit)
+    boms: Bom[];
+
     @Column({ name: 'unit_name', type: 'varchar' })
     unit_name: string;
 
