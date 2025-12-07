@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { MaterialGroup } from './entities/material-group.entity';
 import { CreateMaterialGroupDto } from './dto/create-material-group.dto';
 import { UpdateMaterialGroupDto } from './dto/update-material-group.dto';
+import { BaseQueryDto } from '../../common/dto/base-query.dto';
 
 @Injectable()
 export class MaterialGroupService {
@@ -17,21 +18,35 @@ export class MaterialGroupService {
         return this.repository.save(entity);
     }
 
-    findAll() {
-        return this.repository.find();
+    findAll(query: BaseQueryDto) {
+        const { is_active, sort_order } = query;
+        const where: any = {};
+
+        if (is_active !== undefined) {
+            where.is_active = is_active;
+        }
+
+        console.log(where);
+
+        return this.repository.find({
+            where,
+            order: {
+                group_name: sort_order === 'DESC' ? 'DESC' : 'ASC',
+            },
+        });
     }
 
     findOne(id: number) {
-        return this.repository.findOneBy({ group_id: id });
+        return this.repository.findOneBy({ group_id: id, is_active: true });
     }
 
     async update(id: number, updateMaterialGroupDto: UpdateMaterialGroupDto) {
-        await this.repository.update(id, updateMaterialGroupDto);
-        return this.findOne(id);
-    }
-
-    remove(id: number) {
-        return this.repository.softDelete(id);
+        const materialGroup = await this.findOne(id);
+        if (!materialGroup) {
+            throw new Error('Material group not found');
+        }
+        const updated = Object.assign(materialGroup, updateMaterialGroupDto);
+        return this.repository.save(updated);
     }
 
 }

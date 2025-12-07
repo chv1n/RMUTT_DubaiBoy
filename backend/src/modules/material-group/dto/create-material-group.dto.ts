@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsBoolean } from 'class-validator';
 
 export class CreateMaterialGroupDto {
     @IsString()
@@ -8,4 +8,7 @@ export class CreateMaterialGroupDto {
     @IsString()
     @IsNotEmpty()
     abbreviation: string;
+
+    @IsBoolean()
+    is_active: boolean;
 }
