@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsDateString, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDateString, Min, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IsLessThanOrEqual } from '../../../common/validators/is-less-than-or-equal.validator';
 
@@ -51,8 +51,8 @@ export class CreateMaterialDto {
     lifetime_unit?: string;
 
     @IsOptional()
-    @IsNumber()
-    active?: number;
+    @IsBoolean()
+    is_active?: boolean;
 
     @IsOptional()
     @IsNumber()

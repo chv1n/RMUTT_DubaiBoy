@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn } from 'typeorm';
 import { MaterialGroup } from '../../material-group/entities/material-group.entity';
 import { MaterialContainerType } from '../../container-type/entities/container-type.entity';
 import { MaterialUnits } from '../../unit/entities/unit.entity';
@@ -51,8 +51,8 @@ export class MaterialMaster {
     @Column({ name: 'lifetime_unit', type: 'varchar', nullable: true })
     lifetime_unit: string;
 
-    @Column({ name: 'active', type: 'int', default: 1 })
-    active: number;
+    @Column({ name: 'is_active', type: 'boolean', default: true })
+    is_active: boolean;
 
     @UpdateDateColumn({ name: 'update_date' })
     update_date: Date;
@@ -69,7 +69,4 @@ export class MaterialMaster {
     @ManyToOne(() => Supplier)
     @JoinColumn({ name: 'supplier_id' })
     supplier: Supplier;
-
-    @DeleteDateColumn({ name: 'deleted_at', select: false })
-    deleted_at: Date;
 }
