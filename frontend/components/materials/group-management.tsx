@@ -4,14 +4,13 @@ import React, { useEffect, useState } from "react";
 import { getKeyValue } from "@heroui/table";
 import { DataTable } from "@/components/common/data-table";
 import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
+import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { Tooltip } from "@heroui/tooltip";
-import { Search, Plus, Edit, Trash } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import { useTranslation } from "@/components/providers/language-provider";
 import { materialGroupService } from "@/services/material.service";
 import { MaterialGroup, CreateMaterialGroupDTO } from "@/types/materials";
-import { Spinner } from "@heroui/spinner";
 import { ConfirmModal } from "@/components/common/confirm-modal";
 
 export function GroupManagement() {
@@ -21,7 +20,7 @@ export function GroupManagement() {
     const [loading, setLoading] = useState(true);
     const [filterValue, setFilterValue] = useState("");
     const [editingGroup, setEditingGroup] = useState<MaterialGroup | null>(null);
-    const [formData, setFormData] = useState<CreateMaterialGroupDTO>({ name: "", description: "" });
+    const [formData, setFormData] = useState<CreateMaterialGroupDTO>({ group_name: "", abbreviation: "" });
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [page, setPage] = useState(1);
@@ -52,7 +51,7 @@ export function GroupManagement() {
             loadData();
             onClose();
             setEditingGroup(null);
-            setFormData({ name: "", description: "" });
+            setFormData({ group_name: "", abbreviation: "" });
         } catch (error) {
             console.error("Failed to save group", error);
         }
@@ -60,7 +59,7 @@ export function GroupManagement() {
 
     const handleEdit = (group: MaterialGroup) => {
         setEditingGroup(group);
-        setFormData({ name: group.name, description: group.description || "" });
+        setFormData({ group_name: group.name, abbreviation: group.abbreviation });
         onOpen();
     };
 
@@ -85,7 +84,7 @@ export function GroupManagement() {
 
     const handleAdd = () => {
         setEditingGroup(null);
-        setFormData({ name: "", description: "" });
+        setFormData({ group_name: "", abbreviation: "" });
         onOpen();
     };
 
@@ -97,7 +96,7 @@ export function GroupManagement() {
 
     const columns = [
         { name: t("groups.name"), uid: "name" },
-        { name: t("groups.description"), uid: "description" },
+        { name: t("groups.abbreviation"), uid: "abbreviation" },
         { name: t("common.actions"), uid: "actions" },
     ];
 
@@ -124,12 +123,12 @@ export function GroupManagement() {
                             return (
                                 <div className="relative flex items-center gap-2">
                                     <Tooltip content={t("common.edit")}>
-                                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item)}>
+                                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item as MaterialGroup)}>
                                             <Edit size={20} />
                                         </span>
                                     </Tooltip>
                                     <Tooltip color="danger" content={t("common.delete")}>
-                                        <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => confirmDelete(item.id)}>
+                                        <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => confirmDelete((item as MaterialGroup).id)}>
                                             <Trash size={20} />
                                         </span>
                                     </Tooltip>
@@ -149,13 +148,13 @@ export function GroupManagement() {
                             <ModalBody>
                                 <Input
                                     label={t("groups.name")}
-                                    value={formData.name}
-                                    onValueChange={(val) => setFormData({ ...formData, name: val })}
+                                    value={formData.group_name}
+                                    onValueChange={(val) => setFormData({ ...formData, group_name: val })}
                                 />
-                                <Textarea
-                                    label={t("groups.description")}
-                                    value={formData.description}
-                                    onValueChange={(val) => setFormData({ ...formData, description: val })}
+                                <Input
+                                    label={t("groups.abbreviation")}
+                                    value={formData.abbreviation}
+                                    onValueChange={(val) => setFormData({ ...formData, abbreviation: val })}
                                 />
                             </ModalBody>
                             <ModalFooter>

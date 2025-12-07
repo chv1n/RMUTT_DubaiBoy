@@ -1,23 +1,30 @@
 export interface Supplier {
     id: number;
-    name: string;
-    contactPerson: string;
-    email: string;
-    phone: string;
-    address: string;
-    rating: number; // 1-5
-    status: 'active' | 'inactive' | 'blacklisted';
-    category: string;
-    totalOrders: number;
-    totalSpent: number;
-    lastOrderDate: string;
-    logoUrl?: string;
-    paymentTerms: string; // e.g., "Net 30", "Immediate"
-    createdAt?: string;
-    updatedAt?: string;
+    name: string | null;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+    status: 'active' | 'inactive';
+    updatedAt?: string | null;
 }
 
-export interface CreateSupplierDTO extends Omit<Supplier, 'id' | 'totalOrders' | 'totalSpent' | 'lastOrderDate' | 'createdAt' | 'updatedAt'> {}
+export interface SupplierDTO {
+    supplier_id: number;
+    supplier_name: string | null;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+    active: number;
+    update_date: string | null;
+}
+
+export interface CreateSupplierDTO {
+    name: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    status?: 'active' | 'inactive';
+}
 export interface UpdateSupplierDTO extends Partial<CreateSupplierDTO> {}
 
 export interface SupplierStats {

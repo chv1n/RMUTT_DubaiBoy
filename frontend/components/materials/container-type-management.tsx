@@ -4,14 +4,13 @@ import React, { useEffect, useState } from "react";
 import { getKeyValue } from "@heroui/table";
 import { DataTable } from "@/components/common/data-table";
 import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
+import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { Tooltip } from "@heroui/tooltip";
-import { Search, Plus, Edit, Trash } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import { useTranslation } from "@/components/providers/language-provider";
 import { containerTypeService } from "@/services/material.service";
 import { ContainerType, CreateContainerTypeDTO } from "@/types/materials";
-import { Spinner } from "@heroui/spinner";
 import { ConfirmModal } from "@/components/common/confirm-modal";
 
 export function ContainerTypeManagement() {
@@ -21,7 +20,7 @@ export function ContainerTypeManagement() {
     const [loading, setLoading] = useState(true);
     const [filterValue, setFilterValue] = useState("");
     const [editingContainer, setEditingContainer] = useState<ContainerType | null>(null);
-    const [formData, setFormData] = useState<CreateContainerTypeDTO>({ name: "", description: "" });
+    const [formData, setFormData] = useState<CreateContainerTypeDTO>({ type_name: "" });
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [page, setPage] = useState(1);
@@ -52,7 +51,7 @@ export function ContainerTypeManagement() {
             loadData();
             onClose();
             setEditingContainer(null);
-            setFormData({ name: "", description: "" });
+            setFormData({ type_name: "" });
         } catch (error) {
             console.error("Failed to save container type", error);
         }
@@ -60,7 +59,7 @@ export function ContainerTypeManagement() {
 
     const handleEdit = (container: ContainerType) => {
         setEditingContainer(container);
-        setFormData({ name: container.name, description: container.description || "" });
+        setFormData({ type_name: container.name });
         onOpen();
     };
 
@@ -70,12 +69,13 @@ export function ContainerTypeManagement() {
     };
 
     const handleDelete = async () => {
-        if (deleteId) {
+        if (deleteId !== null) {
             try {
                 await containerTypeService.delete(deleteId);
-                loadData();
-            } catch (error) {
+                await loadData();
+            } catch (error: any) {
                 console.error("Failed to delete container type", error);
+                alert(error?.message || "Failed to delete container type");
             } finally {
                 setIsDeleteModalOpen(false);
                 setDeleteId(null);
@@ -85,7 +85,7 @@ export function ContainerTypeManagement() {
 
     const handleAdd = () => {
         setEditingContainer(null);
-        setFormData({ name: "", description: "" });
+        setFormData({ type_name: "" });
         onOpen();
     };
 
@@ -97,7 +97,6 @@ export function ContainerTypeManagement() {
 
     const columns = [
         { name: t("containers.name"), uid: "name" },
-        { name: t("containers.description"), uid: "description" },
         { name: t("common.actions"), uid: "actions" },
     ];
 
@@ -124,12 +123,12 @@ export function ContainerTypeManagement() {
                             return (
                                 <div className="relative flex items-center gap-2">
                                     <Tooltip content={t("common.edit")}>
-                                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item)}>
+                                        <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item as ContainerType)}>
                                             <Edit size={20} />
                                         </span>
                                     </Tooltip>
                                     <Tooltip color="danger" content={t("common.delete")}>
-                                        <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => confirmDelete(item.id)}>
+                                        <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => confirmDelete((item as ContainerType).id)}>
                                             <Trash size={20} />
                                         </span>
                                     </Tooltip>
@@ -149,13 +148,8 @@ export function ContainerTypeManagement() {
                             <ModalBody>
                                 <Input
                                     label={t("containers.name")}
-                                    value={formData.name}
-                                    onValueChange={(val) => setFormData({ ...formData, name: val })}
-                                />
-                                <Textarea
-                                    label={t("containers.description")}
-                                    value={formData.description}
-                                    onValueChange={(val) => setFormData({ ...formData, description: val })}
+                                    value={formData.type_name}
+                                    onValueChange={(val) => setFormData({ ...formData, type_name: val })}
                                 />
                             </ModalBody>
                             <ModalFooter>

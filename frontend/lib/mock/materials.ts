@@ -8,7 +8,7 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
         order_leadtime: 7,
         container_type_id: 1,
         quantity_per_container: 50,
-        unit_id: "PCS",
+        unit_id: 1,
         container_min_stock: 10,
         container_max_stock: 100,
         lifetime: 24,
@@ -19,7 +19,7 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
         cost_per_unit: 15.50,
         expiration_date: "2027-11-01T00:00:00Z",
         container_type: { type_id: 1, type_name: "Box" },
-        unit: { unit_id: "PCS", unit_name: "Pieces" },
+        unit: { unit_id: 1, unit_name: "Pieces" },
         supplier: {
             supplier_id: 1,
             supplier_name: "Global Tech Supplies",
@@ -37,7 +37,7 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
         order_leadtime: 5,
         container_type_id: 2,
         quantity_per_container: 20,
-        unit_id: "KG",
+        unit_id: 2,
         container_min_stock: 5,
         container_max_stock: 40,
         lifetime: 12,
@@ -48,7 +48,7 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
         cost_per_unit: 22.0,
         expiration_date: "2026-06-01T00:00:00Z",
         container_type: { type_id: 2, type_name: "Bag" },
-        unit: { unit_id: "KG", unit_name: "Kilogram" },
+        unit: { unit_id: 2, unit_name: "Kilogram" },
         supplier: {
             supplier_id: 10,
             supplier_name: "Techno Materials Co., Ltd.",
@@ -66,7 +66,7 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
         order_leadtime: 3,
         container_type_id: 3,
         quantity_per_container: 100,
-        unit_id: "M",
+        unit_id: 3,
         container_min_stock: 20,
         container_max_stock: 200,
         lifetime: 36,
@@ -77,7 +77,7 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
         cost_per_unit: 5.75,
         expiration_date: "2028-10-15T00:00:00Z",
         container_type: { type_id: 3, type_name: "Spool" },
-        unit: { unit_id: "M", unit_name: "Meter" },
+        unit: { unit_id: 3, unit_name: "Meter" },
         supplier: {
             supplier_id: 2,
             supplier_name: "ElectroComponents Inc.",
@@ -96,7 +96,7 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
         order_leadtime: 2,
         container_type_id: 1,
         quantity_per_container: 500,
-        unit_id: "REAM",
+        unit_id: 4,
         container_min_stock: 10,
         container_max_stock: 50,
         lifetime: 0,
@@ -107,7 +107,7 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
         cost_per_unit: 4.50,
         expiration_date: "2030-01-01T00:00:00Z",
         container_type: { type_id: 1, type_name: "Box" },
-        unit: { unit_id: "REAM", unit_name: "Ream" },
+        unit: { unit_id: 4, unit_name: "Ream" },
         supplier: {
             supplier_id: 3,
             supplier_name: "Office Depot Mock",
@@ -120,14 +120,14 @@ export const MOCK_MATERIALS_DATA: MaterialDTO[] = [
     }))
 ];
 
-export const MOCK_MATERIAL_GROUPS = [
-    { id: 1, name: "Electronics", description: "Electronic components" },
-    { id: 4, name: "Construction", description: "Building materials" },
-    { id: 5, name: "Office Supplies", description: "General office supplies" }
+export const MOCK_MATERIAL_GROUPS: any[] = [
+    { group_id: 1, group_name: "Electronics", abbreviation: "ELEC" },
+    { group_id: 4, group_name: "Construction", abbreviation: "CONST" },
+    { group_id: 5, group_name: "Office Supplies", abbreviation: "OFF" }
 ];
 
-export const MOCK_CONTAINER_TYPES = [
-    { id: 1, name: "Box", description: "Standard cardboard box" },
-    { id: 2, name: "Bag", description: "Plastic or fabric bag" },
-    { id: 3, name: "Spool", description: "For wires and cables" }
+export const MOCK_CONTAINER_TYPES: any[] = [
+    { type_id: 1, type_name: "Box" },
+    { type_id: 2, type_name: "Bag" },
+    { type_id: 3, type_name: "Spool" }
 ];

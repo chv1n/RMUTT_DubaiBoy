@@ -23,7 +23,7 @@ export interface IAuthService {
 }
 
 class AuthService implements IAuthService {
-  private readonly endpoint = '/user/login';
+  private readonly endpoint = '/auth/login';
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     return apiClient.post<LoginResponse>(this.endpoint, credentials);

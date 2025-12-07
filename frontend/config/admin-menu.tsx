@@ -12,7 +12,8 @@ import {
     Package,
     CreditCard,
     HelpCircle,
-    LucideIcon
+    LucideIcon,
+    Box
 } from "lucide-react";
 
 export interface SubMenuItem {
@@ -45,6 +46,16 @@ export const sidebarItems: MenuItem[] = [
             { key: "all-materials", label: "materials.list", href: "/super-admin/materials/all" },
             { key: "material-groups", label: "materials.groups", href: "/super-admin/materials/groups" },
             { key: "container-types", label: "materials.containerTypes", href: "/super-admin/materials/container-types" },
+            { key: "units", label: "materials.unit", href: "/super-admin/materials/units" },
+        ],
+    },
+    {
+        key: "products",
+        label: "products.title",
+        icon: <Box className="w-5 h-5" />,
+        children: [
+            { key: "all-products", label: "products.list", href: "/super-admin/products" },
+            { key: "product-types", label: "products.productTypes", href: "/super-admin/products/types" },
         ],
     },
     {

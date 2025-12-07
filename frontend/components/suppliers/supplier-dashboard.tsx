@@ -48,17 +48,17 @@ export function SupplierDashboard() {
                 <Card className="bg-success-50 dark:bg-success-900/20">
                     <CardBody>
                         <p className="text-sm text-default-500">{t("suppliers.totalSpent")}</p>
-                        <h3 className="text-2xl font-bold">${stats.totalSpent.toLocaleString()}</h3>
+                        {/* <h3 className="text-2xl font-bold">${stats.totalSpent.toLocaleString()}</h3> */}
                     </CardBody>
                 </Card>
                 <Card className="bg-warning-50 dark:bg-warning-900/20">
                     <CardBody>
                         <p className="text-sm text-default-500">{t("suppliers.topSuppliers")}</p>
-                        <div className="flex -space-x-2 mt-2">
+                        <div className="flex flex-col gap-1">
                             {stats.topSuppliers.map((s) => (
-                                <Tooltip key={s.id} content={s.name}>
-                                    <Avatar src={s.logoUrl} size="sm" isBordered />
-                                </Tooltip>
+                                <div key={s.id} className="text-small">
+                                    {s.name}
+                                </div>
                             ))}
                         </div>
                     </CardBody>

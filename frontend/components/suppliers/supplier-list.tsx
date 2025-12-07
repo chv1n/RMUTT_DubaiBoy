@@ -120,13 +120,9 @@ export function SupplierList() {
         const dataToExport = suppliers.map(item => ({
             ID: item.id,
             Name: item.name,
-            Contact: item.contactPerson,
             Email: item.email,
             Phone: item.phone,
-            Category: item.category,
-            Rating: item.rating,
             Status: item.status,
-            TotalSpent: item.totalSpent
         }));
         exportToExcel(dataToExport, "Suppliers");
     };
@@ -135,22 +131,17 @@ export function SupplierList() {
         const dataToExport = suppliers.map(item => ({
             ID: item.id,
             Name: item.name,
-            Contact: item.contactPerson,
             Email: item.email,
             Phone: item.phone,
-            Category: item.category,
-            Rating: item.rating,
             Status: item.status,
-            TotalSpent: item.totalSpent
         }));
         exportToCSV(dataToExport, "Suppliers");
     };
 
     const columns: Column[] = [
         { name: t("suppliers.name"), uid: "name", sortable: true },
-        { name: t("suppliers.category"), uid: "category" },
-        { name: t("suppliers.rating"), uid: "rating", sortable: true },
-        { name: t("suppliers.totalSpent"), uid: "totalSpent", sortable: true },
+        { name: t("suppliers.email"), uid: "email" },
+        { name: t("suppliers.phone"), uid: "phone" },
         { name: t("suppliers.status"), uid: "status" },
         { name: t("common.actions"), uid: "actions", align: "center" },
     ];
@@ -162,25 +153,12 @@ export function SupplierList() {
             case "name":
                 return (
                     <User
-                        avatarProps={{ radius: "lg", src: item.logoUrl }}
+                        avatarProps={{ radius: "lg", src: "" }}
                         description={item.email}
                         name={item.name}
                     >
                         {item.email}
                     </User>
-                );
-            case "rating":
-                return (
-                    <div className="flex items-center gap-1">
-                        <span className="text-warning">★</span>
-                        <span>{item.rating}</span>
-                    </div>
-                );
-            case "totalSpent":
-                return (
-                    <div className="flex flex-col">
-                        <p className="text-bold text-sm capitalize">${item.totalSpent.toLocaleString()}</p>
-                    </div>
                 );
             case "status":
                 return (

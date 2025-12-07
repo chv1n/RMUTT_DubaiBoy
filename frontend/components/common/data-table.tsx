@@ -43,6 +43,7 @@ interface DataTableProps<T> {
     renderCell: (item: T, columnKey: React.Key) => React.ReactNode;
     statusOptions?: { name: string; uid: string }[];
     initialVisibleColumns?: string[];
+    onSelectionChange?: (keys: Selection) => void;
 }
 
 export function DataTable<T extends { id: number | string }>({
@@ -64,6 +65,7 @@ export function DataTable<T extends { id: number | string }>({
         { name: "Inactive", uid: "inactive" },
     ],
     initialVisibleColumns,
+    onSelectionChange,
 }: DataTableProps<T>) {
     const { t } = useTranslation();
     const [filterValue, setFilterValue] = useState("");
@@ -179,8 +181,14 @@ export function DataTable<T extends { id: number | string }>({
                                     </Button>
                                 </DropdownTrigger>
                                 <DropdownMenu aria-label="Export Actions">
-                                    {onExportExcel && <DropdownItem key="excel" onPress={onExportExcel}>{t("common.exportExcel")}</DropdownItem>}
-                                    {onExportCSV && <DropdownItem key="csv" onPress={onExportCSV}>{t("common.exportCSV")}</DropdownItem>}
+                                    {[
+                                        ...(onExportExcel ? [{ key: "excel", label: t("common.exportExcel"), handler: onExportExcel }] : []),
+                                        ...(onExportCSV ? [{ key: "csv", label: t("common.exportCSV"), handler: onExportCSV }] : [])
+                                    ].map((item) => (
+                                        <DropdownItem key={item.key} onPress={item.handler}>
+                                            {item.label}
+                                        </DropdownItem>
+                                    ))}
                                 </DropdownMenu>
                             </Dropdown>
                         )}
@@ -226,7 +234,9 @@ export function DataTable<T extends { id: number | string }>({
         onAddNew,
         meta.totalItems,
         rowsPerPage,
-        t
+        t,
+        onExportExcel,
+        onExportCSV
     ]);
 
     const bottomContent = useMemo(() => {
@@ -260,6 +270,7 @@ export function DataTable<T extends { id: number | string }>({
 
     return (
         <Table
+            suppressHydrationWarning
             aria-label="Data Table"
             isHeaderSticky
             bottomContent={bottomContent}
@@ -272,7 +283,12 @@ export function DataTable<T extends { id: number | string }>({
             sortDescriptor={sortDescriptor}
             topContent={topContent}
             topContentPlacement="outside"
-            onSelectionChange={setSelectedKeys}
+            onSelectionChange={(keys) => {
+                setSelectedKeys(keys);
+                if (onSelectionChange) {
+                    onSelectionChange(keys);
+                }
+            }}
             onSortChange={onSortChange}
         >
             <TableHeader columns={headerColumns}>

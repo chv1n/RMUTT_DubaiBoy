@@ -21,30 +21,20 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
 
     const [formData, setFormData] = useState<CreateSupplierDTO>({
         name: "",
-        contactPerson: "",
         email: "",
         phone: "",
         address: "",
-        rating: 5,
         status: "active",
-        category: "",
-        paymentTerms: "",
-        logoUrl: ""
     });
 
     useEffect(() => {
         if (initialData) {
             setFormData({
                 name: initialData.name,
-                contactPerson: initialData.contactPerson,
                 email: initialData.email,
                 phone: initialData.phone,
                 address: initialData.address,
-                rating: initialData.rating,
                 status: initialData.status,
-                category: initialData.category,
-                paymentTerms: initialData.paymentTerms,
-                logoUrl: initialData.logoUrl
             });
         }
     }, [initialData]);
@@ -76,12 +66,6 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
                     isRequired
                 />
                 <Input
-                    label={t("suppliers.contact")}
-                    value={formData.contactPerson}
-                    onValueChange={(val) => setFormData({ ...formData, contactPerson: val })}
-                    isRequired
-                />
-                <Input
                     type="email"
                     label={t("suppliers.email")}
                     value={formData.email}
@@ -95,28 +79,6 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
                     onValueChange={(val) => setFormData({ ...formData, phone: val })}
                     isRequired
                 />
-                <Input
-                    label={t("suppliers.category")}
-                    value={formData.category}
-                    onValueChange={(val) => setFormData({ ...formData, category: val })}
-                    isRequired
-                />
-                <Input
-                    label={t("suppliers.paymentTerms")}
-                    value={formData.paymentTerms}
-                    onValueChange={(val) => setFormData({ ...formData, paymentTerms: val })}
-                    isRequired
-                />
-                <Input
-                    type="number"
-                    label={t("suppliers.rating")}
-                    value={formData.rating.toString()}
-                    onValueChange={(val) => setFormData({ ...formData, rating: Number(val) })}
-                    min={1}
-                    max={5}
-                    step={0.1}
-                    isRequired
-                />
                 <Select
                     label={t("common.status")}
                     selectedKeys={[formData.status]}
@@ -125,7 +87,6 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
                 >
                     <SelectItem key="active">{t("suppliers.active")}</SelectItem>
                     <SelectItem key="inactive">{t("suppliers.inactive")}</SelectItem>
-                    <SelectItem key="blacklisted">{t("suppliers.blacklisted")}</SelectItem>
                 </Select>
             </div>
             <Textarea
@@ -134,11 +95,7 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
                 onValueChange={(val) => setFormData({ ...formData, address: val })}
                 isRequired
             />
-            <Input
-                label="Logo URL"
-                value={formData.logoUrl || ""}
-                onValueChange={(val) => setFormData({ ...formData, logoUrl: val })}
-            />
+
             <div className="flex gap-2 justify-end">
                 <Button color="danger" variant="light" onPress={() => router.back()}>
                     {t("common.cancel")}

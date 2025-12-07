@@ -55,7 +55,7 @@ export function AdminSidebar() {
 
                 {/* Bottom Menu */}
                 <div className="mt-auto flex flex-col gap-1">
-                    {!isCollapsed && <p className="text-xs font-semibold text-default-500 uppercase px-3 mb-2 mt-4">System</p>}
+                    {!isCollapsed && <p className="text-xs font-semibold text-default-500 uppercase px-3 mb-2 mt-4">{t("common.system")}</p>}
                     {bottomItems.map((item) => (
                         <SidebarItem key={item.key} item={item} isCollapsed={isCollapsed} isActive={isItemActive(item)} pathname={pathname} t={t} />
                     ))}
@@ -85,7 +85,7 @@ export function AdminSidebar() {
             {/* Desktop Sidebar */}
             <div
                 className={cn(
-                    "hidden md:flex flex-col h-screen border-r border-divider bg-background sticky top-0 transition-all duration-300 ease-in-out z-40",
+                    "hidden md:flex flex-col h-screen border-r border-default/20 bg-background sticky top-0 transition-all duration-300 ease-in-out z-40",
                     isCollapsed ? "w-20" : "w-64"
                 )}
             >
@@ -140,7 +140,7 @@ function SidebarItem({ item, isCollapsed, isActive, pathname, t }: { item: MenuI
                         </div>
                     </PopoverTrigger>
                     <PopoverContent className="p-1 min-w-[180px]">
-                        <div className="px-2 py-1.5 text-xs font-semibold text-default-500 uppercase border-b border-divider mb-1">
+                        <div className="px-2  text-xs font-semibold text-default-500 uppercase border-b border-divider mb-1">
                             {t(item.label)}
                         </div>
                         <Listbox aria-label={t(item.label)}>
@@ -170,7 +170,7 @@ function SidebarItem({ item, isCollapsed, isActive, pathname, t }: { item: MenuI
                     itemClasses={{
                         base: "px-0",
                         trigger: cn(
-                            "-mx-1 py-2 rounded-xl data-[hover=true]:bg-default-100 transition-colors",
+                            " py-2 rounded-xl data-[hover=true]:bg-default-100 transition-colors",
                             isActive ? "text-primary" : "text-default-600"
                         ),
                         title: "text-sm font-medium",

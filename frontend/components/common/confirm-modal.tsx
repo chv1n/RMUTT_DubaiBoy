@@ -1,8 +1,16 @@
 "use client";
 
 import React from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import {
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    useDisclosure
+} from "@heroui/modal";
 import { Button } from "@heroui/button";
+import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "@/components/providers/language-provider";
 
 interface ConfirmModalProps {
@@ -13,7 +21,7 @@ interface ConfirmModalProps {
     message?: string;
     confirmText?: string;
     cancelText?: string;
-    variant?: "danger" | "primary" | "default";
+    variant?: "danger" | "warning" | "primary";
     isLoading?: boolean;
 }
 
@@ -31,18 +39,31 @@ export function ConfirmModal({
     const { t } = useTranslation();
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onClose} backdrop="blur">
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            backdrop="blur"
+            hideCloseButton={isLoading}
+            isDismissable={!isLoading}
+        >
             <ModalContent>
                 {(onClose) => (
                     <>
-                        <ModalHeader className="flex flex-col gap-1">
+                        <ModalHeader className="flex gap-2 items-center text-default-900">
+                            {variant === "danger" && <AlertTriangle className="text-danger" size={24} />}
                             {title || t("common.confirmDelete")}
                         </ModalHeader>
                         <ModalBody>
-                            <p>{message || t("common.confirmDeleteMessage")}</p>
+                            <p className="text-default-500">
+                                {message || t("common.confirmDeleteMessage")}
+                            </p>
                         </ModalBody>
                         <ModalFooter>
-                            <Button color="default" variant="light" onPress={onClose} isDisabled={isLoading}>
+                            <Button
+                                variant="light"
+                                onPress={onClose}
+                                isDisabled={isLoading}
+                            >
                                 {cancelText || t("common.cancel")}
                             </Button>
                             <Button
