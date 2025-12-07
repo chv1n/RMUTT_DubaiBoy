@@ -32,7 +32,7 @@ export class MaterialService {
 
   async findOne(id: number) {
     const material = await this.materialRepository.findOne({
-      where: { material_id: id, is_active: true },
+      where: { material_id: id },
       relations: ['material_group', 'container_type', 'unit', 'supplier'],
     });
 

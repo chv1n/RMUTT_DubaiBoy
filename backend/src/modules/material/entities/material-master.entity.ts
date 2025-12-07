@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { MaterialGroup } from '../../material-group/entities/material-group.entity';
 import { MaterialContainerType } from '../../container-type/entities/container-type.entity';
 import { MaterialUnits } from '../../unit/entities/unit.entity';
