@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Supplier } from './entities/supplier.entity';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { BaseQueryDto } from '../../common/dto/base-query.dto';
+import { QueryHelper } from '../../common/helpers/query.helper';
+import { CrudHelper } from '../../common/helpers/crud.helper';
 
 @Injectable()
 export class SupplierService {
@@ -17,20 +20,16 @@ export class SupplierService {
         return this.repository.save(entity);
     }
 
-    findAll() {
-        return this.repository.find();
+    async findAll(query: BaseQueryDto) {
+        return QueryHelper.paginate(this.repository, query, { sortField: 'supplier_name' });
     }
 
     findOne(id: number) {
-        return this.repository.findOneBy({ supplier_id: id });
+        return this.repository.findOneBy({ supplier_id: id, is_active: true });
     }
 
     async update(id: number, updateSupplierDto: UpdateSupplierDto) {
-        await this.repository.update(id, updateSupplierDto);
-        return this.findOne(id);
+        return CrudHelper.update(this.repository, id, 'supplier_id', updateSupplierDto, 'ไม่พบรายการที่ต้องการแก้ไข');
     }
 
-    remove(id: number) {
-        return this.repository.softDelete(id);
-    }
 }

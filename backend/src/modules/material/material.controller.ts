@@ -15,7 +15,7 @@ export class MaterialController {
   async create(@Body() createMaterialDto: CreateMaterialDto) {
     const data = await this.materialService.create(createMaterialDto);
     return {
-      message: `เพิ่ม ${data.material_name} สำเร็จ`,
+      message: `เพิ่มสำเร็จ`,
       data,
     };
   }
@@ -37,16 +37,9 @@ export class MaterialController {
   ) {
     const data = await this.materialService.update(id, updateMaterialDto);
     return {
-      message: `แก้ไข ${data.material_name} สำเร็จ`,
+      message: `แก้ไขสำเร็จ`,
       data,
     };
   }
 
-  @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    await this.materialService.remove(id);
-    return {
-      message: 'ลบสำเร็จ (Soft Delete)',
-    };
-  }
 }

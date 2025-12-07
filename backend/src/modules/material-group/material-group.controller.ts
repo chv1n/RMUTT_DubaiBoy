@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { MaterialGroupService } from './material-group.service';
 import { CreateMaterialGroupDto } from './dto/create-material-group.dto';
 import { UpdateMaterialGroupDto } from './dto/update-material-group.dto';
+import { BaseQueryDto } from '../../common/dto/base-query.dto';
 
 @Controller({
     path: 'material-groups',
@@ -14,14 +15,14 @@ export class MaterialGroupController {
     async create(@Body() createMaterialGroupDto: CreateMaterialGroupDto) {
         const data = await this.service.create(createMaterialGroupDto);
         return {
-            message: 'เพิ่มกลุ่มวัตถุดิบสำเร็จ',
+            message: 'เพิ่มสำเร็จ',
             data
         };
     }
 
     @Get()
-    findAll() {
-        return this.service.findAll();
+    findAll(@Query() query: BaseQueryDto) {
+        return this.service.findAll(query);
     }
 
     @Get(':id')
@@ -33,16 +34,8 @@ export class MaterialGroupController {
     async update(@Param('id', ParseIntPipe) id: number, @Body() updateMaterialGroupDto: UpdateMaterialGroupDto) {
         const data = await this.service.update(id, updateMaterialGroupDto);
         return {
-            message: 'แก้ไขกลุ่มวัตถุดิบสำเร็จ',
+            message: 'แก้ไขสำเร็จ',
             data
-        };
-    }
-
-    @Delete(':id')
-    async remove(@Param('id', ParseIntPipe) id: number) {
-        await this.service.remove(id);
-        return {
-            message: 'ลบสำเร็จ',
         };
     }
 }

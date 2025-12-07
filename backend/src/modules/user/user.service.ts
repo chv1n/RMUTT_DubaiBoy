@@ -15,14 +15,27 @@ export class UserService {
 
   async register(
     registerDto: RegisterDto,
-  ): Promise<User> {
+  ) {
     const user = await this.user.create(registerDto);
-
-    return await this.user.save(user);
+    await this.user.save(user);
+    return {
+      email: user.email,
+      fullname: user.fullname,
+      username: user.username,
+      id: user.id,
+      role: user.role,
+    }
   }
 
   async findAll() {
-    return await this.user.find();
+    const users = await this.user.find();
+    return users.map(user => ({
+      email: user.email,
+      fullname: user.fullname,
+      username: user.username,
+      id: user.id,
+      role: user.role,
+    }));
   }
 
   async findOne(id: number) {
@@ -37,7 +50,6 @@ export class UserService {
       username: user.username,
       id: user.id,
       role: user.role,
-      refresh_token: user.refresh_token,
     };
   }
 
@@ -50,19 +62,42 @@ export class UserService {
       updateUserDto.pass_word = await bcrypt.hash(updateUserDto.pass_word, 10);
     }
     Object.assign(user, updateUserDto);
-
-    return await this.user.save(user);
+    await this.user.save(user)
+    return {
+      email: user.email,
+      fullname: user.fullname,
+      username: user.username,
+      id: user.id,
+      role: user.role,
+    };
   }
 
   async remove(id: number) {
     return await this.user.delete(id);
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    return await this.user.findOne({ where: { username } });
+  async findByUsername(username: string) {
+    const user = await this.user.findOne({ where: { username } })
+    return {
+      id: user?.id,
+      email: user?.email,
+      fullname: user?.fullname,
+      username: user?.username,
+      role: user?.role,
+    };
   }
 
-  async findById(id: number): Promise<User | null> {
-    return await this.user.findOne({ where: { id } });
+  async findById(id: number) {
+    const user = await this.user.findOne({ where: { id } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return {
+      email: user.email,
+      fullname: user.fullname,
+      username: user.username,
+      id: user.id,
+      role: user.role,
+    };
   }
 }

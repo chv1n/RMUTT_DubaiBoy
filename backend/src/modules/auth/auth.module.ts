@@ -10,6 +10,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { RedisModule } from 'src/common/redis/redis.module';
+import { User } from '../user/entities/user.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 
 @Module({
@@ -17,6 +19,7 @@ import { RedisModule } from 'src/common/redis/redis.module';
     UserModule,
     PassportModule,
     RedisModule,
+    TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

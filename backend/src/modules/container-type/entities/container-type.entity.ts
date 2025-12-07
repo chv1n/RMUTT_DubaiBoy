@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('material_container_type')
 export class MaterialContainerType {
@@ -10,5 +10,8 @@ export class MaterialContainerType {
 
     @CreateDateColumn({ name: 'create_at' })
     create_at: Date;
+
+    @Column({ name: 'is_active', type: 'boolean', default: true })
+    is_active: boolean;
 
 }
