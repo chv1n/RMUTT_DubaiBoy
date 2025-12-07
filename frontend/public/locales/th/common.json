@@ -1,6 +1,7 @@
 {
     "common": {
         "dashboard": "แดชบอร์ด",
+        "home": "หน้าหลัก",
         "materials": "วัสดุอุปกรณ์",
         "settings": "ตั้งค่า",
         "save": "บันทึก",
@@ -17,7 +18,6 @@
         "loading": "กำลังโหลด...",
         "success": "สำเร็จ",
         "error": "เกิดข้อผิดพลาด",
-        "fillRequired": "กรุณากรอกข้อมูลที่จำเป็น",
         "confirmDelete": "ยืนยันการทำรายการ",
         "confirmDeleteMessage": "คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ? การกระทำนี้ไม่สามารถย้อนกลับได้",
         "confirm": "ยืนยัน",
@@ -30,23 +30,7 @@
         "analytics": "การวิเคราะห์",
         "reports": "รายงาน",
         "help": "ช่วยเหลือ",
-        "home": "หน้าแรก",
-        "profile": "โปรไฟล์",
-        "login": "เข้าสู่ระบบ",
-        "logout": "ออกจากระบบ",
-        "customize": "ปรับแต่ง",
-        "system": "ระบบ",
-        "sponsor": "สนับสนุน",
-        "ranges": {
-            "today": "วันนี้",
-            "thisWeek": "สัปดาห์นี้",
-            "thisMonth": "เดือนนี้",
-            "thisYear": "ปีนี้"
-        },
-        "projects": "โปรเจค",
-        "team": "ทีมงาน",
-        "calendar": "ปฏิทิน",
-        "feedback": "ช่วยเหลือและข้อเสนอแนะ"
+        "customize": "ปรับแต่ง"
     },
     "materials": {
         "title": "จัดการวัสดุอุปกรณ์",
@@ -73,7 +57,25 @@
         "totalMaterials": "วัสดุทั้งหมด",
         "totalValue": "มูลค่ารวม",
         "subMaterials": "วัสดุย่อย",
-        "expiration_date": "วันหมดอายุ"
+        "tab": {
+            "overview": "ภาพรวม",
+            "history": "ประวัติ",
+            "linkedSuppliers": "ซัพพลายเออร์ที่เกี่ยวข้อง",
+            "documents": "เอกสาร"
+        },
+        "field": {
+            "created": "วันที่สร้าง",
+            "updated": "อัปเดตล่าสุด",
+            "leadTime": "ระยะเวลานำสั่งซื้อ",
+            "lifetime": "อายุการเก็บรักษา",
+            "maxStock": "จำนวนสูงสุด",
+            "supplier": "ซัพพลายเออร์หลัก"
+        },
+        "status": {
+            "active": "ใช้งาน",
+            "inactive": "ระงับการใช้งาน",
+            "discontinued": "เลิกผลิต"
+        }
     },
     "suppliers": {
         "title": "จัดการซัพพลายเออร์",
@@ -99,7 +101,19 @@
         "spendingAnalysis": "วิเคราะห์การใช้จ่าย",
         "topSuppliers": "ซัพพลายเออร์ยอดนิยม",
         "spendingByCategory": "การใช้จ่ายตามหมวดหมู่",
-        "monthlySpending": "การใช้จ่ายรายเดือน"
+        "monthlySpending": "การใช้จ่ายรายเดือน",
+        "tab": {
+            "overview": "ภาพรวม",
+            "products": "สินค้า",
+            "performance": "ประสิทธิภาพ",
+            "documents": "เอกสาร"
+        },
+        "actions": {
+            "call": "โทร",
+            "email": "อีเมล",
+            "blacklist": "แบลิสต์",
+            "activate": "เปิดใช้งาน"
+        }
     },
     "ecommerce": {
         "title": "อีคอมเมิร์ซ",
@@ -112,65 +126,7 @@
         "addGroup": "เพิ่มกลุ่ม",
         "editGroup": "แก้ไขกลุ่ม",
         "name": "ชื่อกลุ่ม",
-        "abbreviation": "ชื่อย่อ",
         "description": "รายละเอียด"
-    },
-    "products": {
-        "title": "จัดการสินค้า",
-        "list": "รายการสินค้า",
-        "detail": "รายละเอียดสินค้า",
-        "addProduct": "เพิ่มสินค้า",
-        "editProduct": "แก้ไขสินค้า",
-        "code": "รหัสสินค้า",
-        "name": "ชื่อสินค้า",
-        "nameEN": "ชื่อสินค้า (EN)",
-        "category": "หมวดหมู่",
-        "status": "สถานะ",
-        "lastUpdated": "อัปเดตล่าสุด",
-        "view": "ดูรายละเอียด",
-        "bom": "สูตรการผลิต (BOM)",
-        "routing": "ขั้นตอนการผลิต",
-        "specs": "สเปค & QA",
-        "documents": "เอกสาร",
-        "auditLog": "ประวัติการแก้ไข",
-        "overview": "ภาพรวม",
-        "actions": "การจัดการ",
-        "approve": "อนุมัติ",
-        "reject": "ไม่อนุมัติ",
-        "export": "ส่งออกข้อมูล",
-        "version": "เวอร์ชัน",
-        "compare": "เปรียบเทียบ",
-        "draft": "ร่าง",
-        "pending": "รออนุมัติ",
-        "approved": "อนุมัติแล้ว",
-        "rejected": "ตีกลับ",
-        "addComponent": "เพิ่มส่วนประกอบ",
-        "component": "ส่วนประกอบ",
-        "quantity": "จำนวน",
-        "unit": "หน่วย",
-        "effectiveDate": "วันที่มีผล",
-        "workCenter": "ศูนย์งาน",
-        "setupTime": "เวลาเตรียมเครื่อง",
-        "runTime": "เวลาเดินเครื่อง",
-        "parameter": "พารามิเตอร์",
-        "target": "ค่าเป้าหมาย",
-        "tolerance": "ค่าความคลาดเคลื่อน",
-        "url": "ลิงก์",
-        "productTypes": "ประเภทผลิตภัณฑ์",
-        "addProductType": "เพิ่มประเภทผลิตภัณฑ์",
-        "createDescription": "สร้างรายละเอียดสินค้าใหม่",
-        "placeholders": {
-            "name": "ระบุชื่อสินค้า",
-            "sku": "ระบุรหัสสินค้า/SKU",
-            "category": "เลือกหมวดหมู่",
-            "unit": "เช่น ชิ้น, ชุด, กก.",
-            "description": "ระบุรายละเอียดสินค้า"
-        },
-        "descriptions": {
-            "sku": "รหัสระบุเฉพาะสำหรับสินค้า"
-        },
-        "statusActive": "สินค้าเปิดขายและแสดงผล",
-        "statusInactive": "สินค้าถูกซ่อน"
     },
     "containers": {
         "title": "ประเภทภาชนะ",
@@ -178,5 +134,66 @@
         "editContainer": "แก้ไขประเภทภาชนะ",
         "name": "ชื่อประเภท",
         "description": "รายละเอียด"
+    },
+    "plan": {
+        "title": "จัดการแผนการผลิต",
+        "create": "สร้างแผน",
+        "edit": "แก้ไขแผน",
+        "delete": "ลบแผน",
+        "duplicate": "ทำซ้ำ",
+        "approve": "อนุมัติ",
+        "reject": "ปฏิเสธ",
+        "status": {
+            "draft": "ร่าง",
+            "submitted": "ส่งแล้ว",
+            "approved": "อนุมัติ",
+            "rejected": "ปฏิเสธ",
+            "active": "ใช้งาน",
+            "inactive": "ไม่ใช้งาน"
+        },
+        "field": {
+            "plan_code": "รหัสแผน",
+            "name": "ชื่อแผน",
+            "description": "รายละเอียด",
+            "type": "ประเภท",
+            "owner": "ผู้ดูแล",
+            "start_date": "วันที่เริ่ม",
+            "end_date": "วันที่สิ้นสุด",
+            "items": "รายการ",
+            "actions": "จัดการ",
+            "search": "ค้นหาแผน",
+            "view_list": "มุมมองรายการ",
+            "view_board": "มุมมองบอร์ด",
+            "sort": {
+                "date": "วันที่",
+                "name": "ชื่อ",
+                "status": "สถานะ"
+            },
+            "filter": {
+                "all": "สถานะทั้งหมด",
+                "draft": "ร่าง",
+                "submitted": "ส่งแล้ว",
+                "approved": "อนุมัติ",
+                "rejected": "ปฏิเสธ",
+                "active": "ใช้งาน"
+            }
+        },
+        "validation": {
+            "required": "กรุณาระบุ {{field}}",
+            "date_invalid": "วันที่สิ้นสุดต้องหลังจากวันที่เริ่ม",
+            "min_items": "ต้องมีรายการอย่างน้อย 1 รายการ"
+        },
+        "messages": {
+            "saved": "บันทึกแผนเรียบร้อย",
+            "deleted": "ลบแผนเรียบร้อย",
+            "approved": "อนุมัติแผนเรียบร้อย",
+            "rejected": "ปฏิเสธแผนเรียบร้อย",
+            "import_success": "นำเข้าสำเร็จ: {{success}} รายการ, ล้มเหลว {{failed}} รายการ"
+        }
+    },
+    "products": {
+        "title": "จัดการสินค้า",
+        "list": "รายการสินค้า",
+        "productTypes": "ประเภทสินค้า"
     }
 }

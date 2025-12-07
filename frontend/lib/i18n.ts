@@ -2,8 +2,8 @@
 
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
+import LanguageDetector from 'i18next-browser-languagedetector';
 
 i18n
   .use(Backend)
@@ -14,15 +14,19 @@ i18n
     supportedLngs: ['en', 'th', 'ja'],
     ns: ['common'],
     defaultNS: 'common',
-    debug: false,
+    debug: process.env.NODE_ENV === 'development',
+    detection: {
+        order: ['localStorage', 'cookie', 'navigator', 'htmlTag', 'path', 'subdomain'],
+        caches: ['localStorage', 'cookie'],
+    },
     interpolation: {
-      escapeValue: false, // not needed for react as it escapes by default
+      escapeValue: false,
     },
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
     react: {
-        useSuspense: false // Avoid hydration mismatch issues if possible
+        useSuspense: false
     }
   });
 

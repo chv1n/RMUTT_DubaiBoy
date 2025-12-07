@@ -13,7 +13,10 @@ import {
     CreditCard,
     HelpCircle,
     LucideIcon,
-    Box
+    Box,
+    Calendar,
+    Layers,
+    Truck
 } from "lucide-react";
 
 export interface SubMenuItem {
@@ -32,15 +35,31 @@ export interface MenuItem {
 
 export const sidebarItems: MenuItem[] = [
     {
-        key: "dashboard",
-        label: "common.dashboard",
+        key: "home",
+        label: "common.home",
         icon: <LayoutDashboard className="w-5 h-5" />,
         href: "/super-admin",
     },
     {
+        key: "plans",
+        label: "plan.title",
+        icon: <Calendar className="w-5 h-5" />,
+        href: "/super-admin/plans",
+    },
+    {
+        key: "products",
+        label: "products.title",
+        icon: <Package className="w-5 h-5" />,
+        children: [
+            { key: "all-products", label: "products.list", href: "/super-admin/products" },
+            { key: "product-types", label: "products.productTypes", href: "/super-admin/products/types" },
+        ],
+    },
+
+    {
         key: "materials",
-        label: "common.materials",
-        icon: <Users className="w-5 h-5" />,
+        label: "materials.title",
+        icon: <Layers className="w-5 h-5" />,
         children: [
             { key: "dashboard-materials", label: "common.dashboard", href: "/super-admin/materials" },
             { key: "all-materials", label: "materials.list", href: "/super-admin/materials/all" },
@@ -50,31 +69,12 @@ export const sidebarItems: MenuItem[] = [
         ],
     },
     {
-        key: "products",
-        label: "products.title",
-        icon: <Box className="w-5 h-5" />,
-        children: [
-            { key: "all-products", label: "products.list", href: "/super-admin/products" },
-            { key: "product-types", label: "products.productTypes", href: "/super-admin/products/types" },
-        ],
-    },
-    {
         key: "suppliers",
         label: "suppliers.title",
-        icon: <Package className="w-5 h-5" />,
+        icon: <Truck className="w-5 h-5" />,
         children: [
             { key: "dashboard-suppliers", label: "common.dashboard", href: "/super-admin/suppliers" },
             { key: "all-suppliers", label: "suppliers.list", href: "/super-admin/suppliers/all" },
-        ],
-    },
-    {
-        key: "ecommerce",
-        label: "ecommerce.title",
-        icon: <ShoppingCart className="w-5 h-5" />,
-        children: [
-            { key: "products", label: "ecommerce.products", href: "" },
-            { key: "orders", label: "ecommerce.orders", href: "" },
-            { key: "customers", label: "ecommerce.customers", href: "" },
         ],
     },
     {

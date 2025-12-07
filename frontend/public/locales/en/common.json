@@ -1,9 +1,23 @@
 {
     "common": {
         "dashboard": "Dashboard",
+        "home": "Home",
         "materials": "Materials",
+        "settings": "Settings",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "add": "Add",
+        "all": "All",
+        "search": "Search...",
+        "actions": "Actions",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "loading": "Loading...",
+        "success": "Success",
         "error": "Error",
-        "fillRequired": "Please fill required fields",
         "confirmDelete": "Confirm Action",
         "confirmDeleteMessage": "Are you sure you want to proceed with this action? This cannot be undone.",
         "confirm": "Confirm",
@@ -16,25 +30,7 @@
         "analytics": "Analytics",
         "reports": "Reports",
         "help": "Help & Support",
-        "home": "Home",
-        "profile": "Profile",
-        "settings": "Settings",
-        "login": "Login",
-        "logout": "Logout",
-        "search": "Search...",
-        "customize": "Customize",
-        "system": "System",
-        "sponsor": "Sponsor",
-        "ranges": {
-            "today": "Today",
-            "thisWeek": "This Week",
-            "thisMonth": "This Month",
-            "thisYear": "This Year"
-        },
-        "projects": "Projects",
-        "team": "Team",
-        "calendar": "Calendar",
-        "feedback": "Help & Feedback"
+        "customize": "Customize"
     },
     "materials": {
         "title": "Material Management",
@@ -61,7 +57,25 @@
         "totalMaterials": "Total Materials",
         "totalValue": "Total Value",
         "subMaterials": "Sub Materials",
-        "expiration_date": "Expiration Date"
+        "tab": {
+            "overview": "Overview",
+            "history": "History",
+            "linkedSuppliers": "Linked Suppliers",
+            "documents": "Documents"
+        },
+        "field": {
+            "created": "Created At",
+            "updated": "Last Updated",
+            "leadTime": "Lead Time",
+            "lifetime": "Shelf Life",
+            "maxStock": "Max Stock",
+            "supplier": "Default Supplier"
+        },
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive",
+            "discontinued": "Discontinued"
+        }
     },
     "suppliers": {
         "title": "Supplier Management",
@@ -87,7 +101,19 @@
         "spendingAnalysis": "Spending Analysis",
         "topSuppliers": "Top Suppliers",
         "spendingByCategory": "Spending by Category",
-        "monthlySpending": "Monthly Spending"
+        "monthlySpending": "Monthly Spending",
+        "tab": {
+            "overview": "Overview",
+            "products": "Products",
+            "performance": "Performance",
+            "documents": "Documents"
+        },
+        "actions": {
+            "call": "Call",
+            "email": "Email",
+            "blacklist": "Blacklist",
+            "activate": "Activate"
+        }
     },
     "ecommerce": {
         "title": "E-Commerce",
@@ -100,60 +126,7 @@
         "addGroup": "Add Group",
         "editGroup": "Edit Group",
         "name": "Group Name",
-        "abbreviation": "Abbreviation",
         "description": "Description"
-    },
-    "products": {
-        "title": "Product Management",
-        "list": "Product List",
-        "detail": "Product Detail",
-        "addProduct": "Add Product",
-        "editProduct": "Edit Product",
-        "code": "Product Code",
-        "name": "Product Name",
-        "nameEN": "Product Name (EN)",
-        "category": "Category",
-        "status": "Status",
-        "lastUpdated": "Last Updated",
-        "view": "View Detail",
-        "bom": "Bill of Materials (BOM)",
-        "routing": "Routing",
-        "specs": "Specs & QA",
-        "documents": "Documents",
-        "auditLog": "Audit Log",
-        "overview": "Overview",
-        "actions": "Actions",
-        "approve": "Approve",
-        "reject": "Reject",
-        "export": "Export Data",
-        "version": "Version",
-        "compare": "Compare",
-        "draft": "Draft",
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected",
-        "addComponent": "Add Component",
-        "component": "Component",
-        "quantity": "Quantity",
-        "unit": "Unit",
-        "effectiveDate": "Effective Date",
-        "description": "Description",
-        "productTypes": "Product Types",
-        "addProductType": "Add Product Type",
-        "editProductType": "Edit Product Type",
-        "createDescription": "Create a new product definition",
-        "placeholders": {
-            "name": "Enter product name",
-            "sku": "Enter SKU/Code",
-            "category": "Select category",
-            "unit": "e.g. pcs, set, kg",
-            "description": "Enter detailed product description"
-        },
-        "descriptions": {
-            "sku": "Unique identifier for the product"
-        },
-        "statusActive": "Product is active and visible",
-        "statusInactive": "Product is hidden"
     },
     "containers": {
         "title": "Container Types",
@@ -161,5 +134,66 @@
         "editContainer": "Edit Container Type",
         "name": "Type Name",
         "description": "Description"
+    },
+    "plan": {
+        "title": "Plan Management",
+        "create": "Create Plan",
+        "edit": "Edit Plan",
+        "delete": "Delete Plan",
+        "duplicate": "Duplicate",
+        "approve": "Approve",
+        "reject": "Reject",
+        "status": {
+            "draft": "Draft",
+            "submitted": "Submitted",
+            "approved": "Approved",
+            "rejected": "Rejected",
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "field": {
+            "plan_code": "Plan Code",
+            "name": "Name",
+            "description": "Description",
+            "type": "Type",
+            "owner": "Owner",
+            "start_date": "Start Date",
+            "end_date": "End Date",
+            "items": "Items",
+            "actions": "Actions",
+            "search": "Search Plans",
+            "view_list": "List View",
+            "view_board": "Board View",
+            "sort": {
+                "date": "Date",
+                "name": "Name",
+                "status": "Status"
+            },
+            "filter": {
+                "all": "All Status",
+                "draft": "Draft",
+                "submitted": "Submitted",
+                "approved": "Approved",
+                "rejected": "Rejected",
+                "active": "Active"
+            }
+        },
+        "validation": {
+            "required": "{{field}} is required",
+            "date_invalid": "End date must be the same or after start date",
+            "min_items": "At least one item is required"
+        },
+        "messages": {
+            "saved": "Plan saved",
+            "deleted": "Plan deleted",
+            "approved": "Plan approved",
+            "rejected": "Plan rejected",
+            "import_success": "Import completed: {{success}} success, {{failed}} failed"
+        }
+    },
+    "products": {
+        "title": "Product Management",
+        "list": "Product List",
+        "productTypes": "Product Types"
     }
 }

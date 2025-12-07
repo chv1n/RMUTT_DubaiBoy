@@ -1,0 +1,214 @@
+"use client";
+
+import React from "react";
+import { Card, CardBody } from "@heroui/card";
+import { Chip } from "@heroui/chip";
+import { User } from "@heroui/user";
+import { Button } from "@heroui/button";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+import { Plan } from "@/types/plan";
+import { useTranslation } from "@/components/providers/language-provider";
+import { Calendar, Package, MoreVertical, Eye, Edit, Copy, CheckCircle, XCircle, Trash2, ArrowRight } from "lucide-react";
+
+interface PlanCardProps {
+    plan: Plan;
+    onAction: (key: string, plan: Plan) => void;
+    viewMode?: "list" | "board";
+    // DnD props
+    draggable?: boolean;
+    onDragStart?: (e: React.DragEvent, plan: Plan) => void;
+}
+
+const statusColorMap: Record<string, "success" | "danger" | "warning" | "default" | "primary" | "secondary"> = {
+    active: "success",
+    submitted: "warning",
+    draft: "default",
+    rejected: "danger",
+    approved: "success",
+    inactive: "default",
+};
+
+export default function PlanCard({ plan, onAction, viewMode = "list", draggable, onDragStart }: PlanCardProps) {
+    const { t, locale } = useTranslation();
+
+    const handleDragStart = (e: React.DragEvent) => {
+        if (onDragStart) onDragStart(e, plan);
+    }
+
+    if (viewMode === 'board') {
+        return (
+            <Card
+                className="w-full shadow-sm hover:shadow-md transition-shadow border-none bg-content1 rounded-xl cursor-grab active:cursor-grabbing"
+                draggable={draggable}
+                onDragStart={handleDragStart}
+            >
+                <CardBody className="p-3 flex flex-col gap-3">
+                    {/* Header: Code & Status */}
+                    <div className="flex justify-between items-start">
+                        <div className="flex flex-col">
+                            <h3 className="text-md font-bold text-foreground">{plan.plan_code}</h3>
+                            <span className="text-tiny text-default-400 capitalize">{plan.type}</span>
+                        </div>
+                        <Chip
+                            className="capitalize border-none h-6 text-tiny px-1"
+                            color={statusColorMap[plan.status]}
+                            size="sm"
+                            variant="flat"
+                        >
+                            {plan.status}
+                        </Chip>
+                    </div>
+
+                    {/* Name */}
+                    <p className="text-sm text-default-600 line-clamp-2 font-medium">
+                        {plan.name[locale as 'en' | 'th' | 'ja'] || plan.name.en}
+                    </p>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 gap-2 bg-default-50 p-2 rounded-lg">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] text-default-400 uppercase">{t('plan.field.items')}</span>
+                            <div className="flex items-center gap-1 text-xs font-semibold">
+                                <Package size={14} className="text-default-400" />
+                                {plan.items_count}
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] text-default-400 uppercase">{t('plan.field.owner')}</span>
+                            <div className="flex items-center gap-1">
+                                <User
+                                    name={plan.owner.name}
+                                    avatarProps={{ src: plan.owner.avatar, size: "sm" }}
+                                    classNames={{ name: "text-xs", description: "hidden" }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer: Date & Actions */}
+                    <div className="flex justify-between items-center pt-1 border-t border-default-100">
+                        <div className="flex gap-1 items-center text-[10px] text-default-400">
+                            <Calendar size={12} />
+                            <span>{plan.end_date}</span>
+                        </div>
+
+                        <Dropdown>
+                            <DropdownTrigger>
+                                <Button isIconOnly size="sm" variant="light" className="h-6 w-6 text-default-400 min-w-0">
+                                    <MoreVertical size={16} />
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="Plan Actions" onAction={(key) => onAction(key as string, plan)}>
+                                <DropdownItem key="view" startContent={<Eye size={16} />}>{t('common.actions')}</DropdownItem>
+                                <DropdownItem key="edit" startContent={<Edit size={16} />}>{t('common.edit')}</DropdownItem>
+                                <DropdownItem key="duplicate" startContent={<Copy size={16} />}>{t('plan.duplicate')}</DropdownItem>
+                                {plan.status === 'submitted' ? (
+                                    <DropdownItem key="approve" className="text-success" color="success" startContent={<CheckCircle size={16} />}>{t('plan.approve')}</DropdownItem>
+                                ) : null}
+                                {plan.status === 'submitted' ? (
+                                    <DropdownItem key="reject" className="text-danger" color="danger" startContent={<XCircle size={16} />}>{t('plan.reject')}</DropdownItem>
+                                ) : null}
+                                <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 size={16} />}>
+                                    {t('common.delete')}
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                    </div>
+                </CardBody>
+            </Card>
+        );
+    }
+
+    return (
+        <Card className="w-full mb-3 shadow-sm hover:shadow-md transition-shadow border-none bg-content1 rounded-xl">
+            <CardBody className="p-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+
+                    {/* Left: Code, Dates, Name */}
+                    <div className="flex items-center gap-6 w-full sm:w-1/3">
+                        <div className="flex flex-col">
+                            <h3 className="text-lg font-bold text-foreground">{plan.plan_code}</h3>
+                            <p className="text-small text-default-500 truncate max-w-[200px]">
+                                {plan.name[locale as 'en' | 'th' | 'ja'] || plan.name.en}
+                            </p>
+                        </div>
+
+                        <div className="hidden sm:flex items-center gap-3 text-default-400">
+                            <div className="text-xs flex flex-col items-center">
+                                <span className="font-semibold">{plan.start_date}</span>
+                                <span className="text-[10px]">Start</span>
+                            </div>
+                            <ArrowRight size={16} />
+                            <div className="text-xs flex flex-col items-center">
+                                <span className="font-semibold">{plan.end_date}</span>
+                                <span className="text-[10px]">End</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Middle: Type & Stats */}
+                    <div className="flex items-center gap-8 w-full sm:w-1/3 justify-start sm:justify-center border-l-0 sm:border-l border-default-200 px-0 sm:px-6">
+                        <div className="flex items-center gap-2">
+                            <Package size={18} className="text-default-400" />
+                            <div className="flex flex-col">
+                                <span className="text-small font-semibold capitalize">{plan.type}</span>
+                                <span className="text-tiny text-default-400">{plan.items_count} Items</span>
+                            </div>
+                        </div>
+                        {/* Add more stats if needed, like Total Qty */}
+                    </div>
+
+                    {/* Right: Owner, Status, Actions */}
+                    <div className="flex items-center gap-4 w-full sm:w-1/3 justify-end">
+                        <div className="flex items-center gap-3">
+                            <User
+                                name={plan.owner.name}
+                                description={plan.owner.email}
+                                avatarProps={{
+                                    src: plan.owner.avatar,
+                                    size: "sm",
+                                    isBordered: true
+                                }}
+                                classNames={{
+                                    name: "text-small font-semibold",
+                                    description: "hidden sm:block text-tiny"
+                                }}
+                            />
+                        </div>
+
+                        <Chip
+                            className="capitalize border-none gap-1 px-1"
+                            color={statusColorMap[plan.status]}
+                            size="sm"
+                            variant="flat"
+                        >
+                            {t(`plan.status.${plan.status}`)}
+                        </Chip>
+
+                        <Dropdown>
+                            <DropdownTrigger>
+                                <Button isIconOnly size="sm" variant="light" className="text-default-400">
+                                    <MoreVertical size={20} />
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="Plan Actions" onAction={(key) => onAction(key as string, plan)}>
+                                <DropdownItem key="view" startContent={<Eye size={16} />}>{t('common.actions')}</DropdownItem>
+                                <DropdownItem key="edit" startContent={<Edit size={16} />}>{t('common.edit')}</DropdownItem>
+                                <DropdownItem key="duplicate" startContent={<Copy size={16} />}>{t('plan.duplicate')}</DropdownItem>
+                                {plan.status === 'submitted' ? (
+                                    <DropdownItem key="approve" className="text-success" color="success" startContent={<CheckCircle size={16} />}>{t('plan.approve')}</DropdownItem>
+                                ) : null}
+                                {plan.status === 'submitted' ? (
+                                    <DropdownItem key="reject" className="text-danger" color="danger" startContent={<XCircle size={16} />}>{t('plan.reject')}</DropdownItem>
+                                ) : null}
+                                <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 size={16} />}>
+                                    {t('common.delete')}
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                    </div>
+                </div>
+            </CardBody>
+        </Card>
+    );
+}

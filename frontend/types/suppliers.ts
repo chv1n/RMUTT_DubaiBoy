@@ -4,8 +4,18 @@ export interface Supplier {
     email: string | null;
     phone: string | null;
     address: string | null;
-    status: 'active' | 'inactive';
+    status: 'active' | 'inactive' | 'blacklisted';
     updatedAt?: string | null;
+    
+    // Extended Details (Mock/Enriched)
+    contactPerson?: string;
+    rating?: number;
+    category?: string;
+    totalOrders?: number;
+    totalSpent?: number;
+    lastOrderDate?: string;
+    paymentTerms?: string;
+    logoUrl?: string;
 }
 
 export interface SupplierDTO {

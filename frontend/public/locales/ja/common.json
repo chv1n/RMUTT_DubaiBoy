@@ -1,12 +1,9 @@
 {
     "common": {
         "dashboard": "ダッシュボード",
+        "home": "ホーム",
         "materials": "資材",
-        "error": "エラー",
-        "fillRequired": "必須項目を入力してください",
-        "confirmDelete": "動作確認",
-        "confirmDeleteMessage": "この操作を実行してもよろしいですか？この操作は取り消せません。",
-        "confirm": "確認",
+        "settings": "設定",
         "save": "保存",
         "cancel": "キャンセル",
         "edit": "編集",
@@ -20,37 +17,24 @@
         "inactive": "無効",
         "loading": "読み込み中...",
         "success": "成功",
+        "error": "エラー",
+        "confirmDelete": "アクションの確認",
+        "confirmDeleteMessage": "本当にこのアクションを実行しますか？この操作は元に戻せません。",
+        "confirm": "確認",
         "export": "エクスポート",
         "exportExcel": "Excelへエクスポート",
         "exportCSV": "CSVへエクスポート",
         "filter": "フィルター",
         "clearFilters": "フィルターをクリア",
-        "sortBy": "並び替え",
+        "sortBy": "並べ替え",
         "analytics": "分析",
         "reports": "レポート",
-        "help": "ヘルプ＆サポート",
-        "home": "ホーム",
-        "profile": "プロフィール",
-        "settings": "設定",
-        "login": "ログイン",
-        "logout": "ログアウト",
-        "customize": "カスタマイズ",
-        "system": "システム",
-        "sponsor": "スポンサー",
-        "ranges": {
-            "today": "今日",
-            "thisWeek": "今週",
-            "thisMonth": "今月",
-            "thisYear": "今年"
-        },
-        "projects": "プロジェクト",
-        "team": "チーム",
-        "calendar": "カレンダー",
-        "feedback": "フィードバック"
+        "help": "ヘルプとサポート",
+        "customize": "カスタマイズ"
     },
     "materials": {
         "title": "資材管理",
-        "list": "資材一覧",
+        "list": "資材リスト",
         "detail": "資材詳細",
         "groups": "資材グループ",
         "containerTypes": "コンテナタイプ",
@@ -69,15 +53,33 @@
         "inventoryLevel": "在庫レベル",
         "distribution": "資材分布",
         "recentActivity": "最近のアクティビティ",
-        "lowStock": "在庫不足アイテム",
+        "lowStock": "在庫不足品目",
         "totalMaterials": "総資材数",
         "totalValue": "総額",
         "subMaterials": "サブ資材",
-        "expiration_date": "有効期限"
+        "tab": {
+            "overview": "概要",
+            "history": "履歴",
+            "linkedSuppliers": "関連サプライヤー",
+            "documents": "文書"
+        },
+        "field": {
+            "created": "作成日",
+            "updated": "最終更新日",
+            "leadTime": "リードタイム",
+            "lifetime": "保存期間",
+            "maxStock": "最大在庫",
+            "supplier": "デフォルトサプライヤー"
+        },
+        "status": {
+            "active": "有効",
+            "inactive": "無効",
+            "discontinued": "生産終了"
+        }
     },
     "suppliers": {
         "title": "サプライヤー管理",
-        "list": "サプライヤー一覧",
+        "list": "サプライヤーリスト",
         "detail": "サプライヤー詳細",
         "addSupplier": "サプライヤーを追加",
         "editSupplier": "サプライヤーを編集",
@@ -87,10 +89,10 @@
         "phone": "電話番号",
         "address": "住所",
         "rating": "評価",
-        "category": "カテゴリ",
+        "category": "カテゴリー",
         "totalOrders": "総注文数",
         "totalSpent": "総支出",
-        "lastOrder": "最終注文",
+        "lastOrder": "前回の注文",
         "paymentTerms": "支払い条件",
         "status": "ステータス",
         "active": "有効",
@@ -98,12 +100,24 @@
         "blacklisted": "ブラックリスト",
         "spendingAnalysis": "支出分析",
         "topSuppliers": "トップサプライヤー",
-        "spendingByCategory": "カテゴリ別支出",
-        "monthlySpending": "月次支出"
+        "spendingByCategory": "カテゴリー別支出",
+        "monthlySpending": "月次支出",
+        "tab": {
+            "overview": "概要",
+            "products": "商品",
+            "performance": "パフォーマンス",
+            "documents": "文書"
+        },
+        "actions": {
+            "call": "電話",
+            "email": "メール",
+            "blacklist": "ブラックリスト",
+            "activate": "有効化"
+        }
     },
     "ecommerce": {
         "title": "Eコマース",
-        "products": "製品",
+        "products": "商品",
         "orders": "注文",
         "customers": "顧客"
     },
@@ -112,60 +126,7 @@
         "addGroup": "グループを追加",
         "editGroup": "グループを編集",
         "name": "グループ名",
-        "abbreviation": "略称",
         "description": "説明"
-    },
-    "products": {
-        "title": "製品管理",
-        "list": "製品一覧",
-        "detail": "製品詳細",
-        "addProduct": "製品を追加",
-        "editProduct": "製品を編集",
-        "code": "製品コード",
-        "name": "製品名",
-        "nameEN": "製品名 (英語)",
-        "category": "カテゴリ",
-        "status": "ステータス",
-        "lastUpdated": "最終更新日",
-        "view": "詳細を表示",
-        "bom": "部品表 (BOM)",
-        "routing": "ルーティング",
-        "specs": "仕様 & QA",
-        "documents": "ドキュメント",
-        "auditLog": "監査ログ",
-        "overview": "概要",
-        "actions": "アクション",
-        "approve": "承認",
-        "reject": "却下",
-        "export": "データをエクスポート",
-        "version": "バージョン",
-        "compare": "比較",
-        "draft": "下書き",
-        "pending": "保留中",
-        "approved": "承認済み",
-        "rejected": "却下",
-        "addComponent": "コンポーネントを追加",
-        "component": "コンポーネント",
-        "quantity": "数量",
-        "unit": "単位",
-        "effectiveDate": "発効日",
-        "description": "説明",
-        "productTypes": "製品タイプ",
-        "addProductType": "製品タイプを追加",
-        "editProductType": "製品タイプを編集",
-        "createDescription": "新しい製品定義を作成",
-        "placeholders": {
-            "name": "製品名を入力",
-            "sku": "SKU/コードを入力",
-            "category": "カテゴリを選択",
-            "unit": "例：個、セット、kg",
-            "description": "詳細な製品説明を入力"
-        },
-        "descriptions": {
-            "sku": "製品の一意の識別子"
-        },
-        "statusActive": "製品は有効で表示されます",
-        "statusInactive": "製品は非表示です"
     },
     "containers": {
         "title": "コンテナタイプ",
@@ -173,5 +134,66 @@
         "editContainer": "コンテナタイプを編集",
         "name": "タイプ名",
         "description": "説明"
+    },
+    "plan": {
+        "title": "計画管理",
+        "create": "計画を作成",
+        "edit": "計画を編集",
+        "delete": "計画を削除",
+        "duplicate": "複製",
+        "approve": "承認",
+        "reject": "拒否",
+        "status": {
+            "draft": "ドラフト",
+            "submitted": "提出済み",
+            "approved": "承認済み",
+            "rejected": "拒否済み",
+            "active": "有効",
+            "inactive": "無効"
+        },
+        "field": {
+            "plan_code": "計画コード",
+            "name": "計画名",
+            "description": "説明",
+            "type": "タイプ",
+            "owner": "所有者",
+            "start_date": "開始日",
+            "end_date": "終了日",
+            "items": "アイテム",
+            "actions": "アクション",
+            "search": "計画を検索",
+            "view_list": "リスト表示",
+            "view_board": "ボード表示",
+            "sort": {
+                "date": "日付",
+                "name": "名前",
+                "status": "ステータス"
+            },
+            "filter": {
+                "all": "すべてのステータス",
+                "draft": "ドラフト",
+                "submitted": "提出済み",
+                "approved": "承認済み",
+                "rejected": "拒否済み",
+                "active": "有効"
+            }
+        },
+        "validation": {
+            "required": "{{field}} は必須です",
+            "date_invalid": "終了日は開始日以降である必要があります",
+            "min_items": "少なくとも1つのアイテムが必要です"
+        },
+        "messages": {
+            "saved": "計画が保存されました",
+            "deleted": "計画が削除されました",
+            "approved": "計画が承認されました",
+            "rejected": "計画が拒否されました",
+            "import_success": "インポート完了: 成功 {{success}}, 失敗 {{failed}}"
+        }
+    },
+    "products": {
+        "title": "商品管理",
+        "list": "商品リスト",
+        "productTypes": "商品タイプ"
     }
 }
