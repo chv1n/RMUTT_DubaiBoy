@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
 import { MaterialGroup } from '../../material-group/entities/material-group.entity';
 import { MaterialContainerType } from '../../container-type/entities/container-type.entity';
 import { MaterialUnits } from '../../unit/entities/unit.entity';
 import { Supplier } from '../../supplier/entities/supplier.entity';
+import { Bom } from 'src/modules/bom/entities/bom.entity';
 
 @Entity('material_master')
 export class MaterialMaster {
@@ -15,6 +16,9 @@ export class MaterialMaster {
     @ManyToOne(() => MaterialGroup)
     @JoinColumn({ name: 'material_group_id' })
     material_group: MaterialGroup;
+
+    @OneToMany(() => Bom, (bom) => bom.material)
+    boms: Bom[];
 
     @Column({ name: 'material_name', type: 'varchar' })
     material_name: string;
