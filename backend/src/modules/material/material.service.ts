@@ -54,7 +54,7 @@ export class MaterialService {
   }
 
 
- 
+
 
 
   private createBaseQuery(): SelectQueryBuilder<MaterialMaster> {
@@ -62,8 +62,8 @@ export class MaterialService {
       .leftJoinAndSelect('material.material_group', 'material_group')
       .leftJoinAndSelect('material.container_type', 'container_type')
       .leftJoinAndSelect('material.unit', 'unit')
-      .leftJoinAndSelect('material.supplier', 'supplier')
-      .where('material.is_active = :is_active', { is_active: true });
+      .leftJoinAndSelect('material.supplier', 'supplier');
+
   }
 
   private applyStandardFilters(qb: SelectQueryBuilder<MaterialMaster>, query: MaterialQueryDto) {
