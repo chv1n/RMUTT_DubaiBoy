@@ -5,6 +5,7 @@ import { MaterialGroupModule } from "./material-group/material-group.module";
 import { ContainerTypeModule } from "./container-type/container-type.module";
 import { UnitModule } from "./unit/unit.module";
 import { SupplierModule } from "./supplier/supplier.module";
+import { BomModule } from "./bom/bom.module";
 
 
 export const AppModules = [
@@ -15,5 +16,6 @@ export const AppModules = [
     SupplierModule,
     AuthModule,
     UserModule,
+    BomModule,
 ]
 

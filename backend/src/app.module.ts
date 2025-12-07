@@ -6,10 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AppModules } from './modules';
-import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './modules/user/user.module';
 import * as Joi from 'joi';
-import { User } from './modules/user/entities/user.entity';
+
 
 @Module({
   imports: [
