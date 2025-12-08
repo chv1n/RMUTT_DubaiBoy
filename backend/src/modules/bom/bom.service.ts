@@ -37,7 +37,7 @@ export class BomService {
       throw new Error('Product is not active');
     }
 
-    if (material.active == 0) {
+    if (material.is_active) {
       throw new Error('Material is not active');
     }
 

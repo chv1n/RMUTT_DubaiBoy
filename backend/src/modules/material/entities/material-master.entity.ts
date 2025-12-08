@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { MaterialGroup } from '../../material-group/entities/material-group.entity';
 import { MaterialContainerType } from '../../container-type/entities/container-type.entity';
 import { MaterialUnits } from '../../unit/entities/unit.entity';
 import { Supplier } from '../../supplier/entities/supplier.entity';
 import { Bom } from 'src/modules/bom/entities/bom.entity';
+import { MaterialInventory } from 'src/modules/material-inventory/entities/material-inventory.entity';
 
 @Entity('material_master')
 export class MaterialMaster {
@@ -19,6 +20,9 @@ export class MaterialMaster {
 
     @OneToMany(() => Bom, (bom) => bom.material)
     boms: Bom[];
+
+    @OneToMany(() => MaterialInventory, (inventory) => inventory.material)
+    materialInventory: MaterialInventory[];
 
     @Column({ name: 'material_name', type: 'varchar' })
     material_name: string;
