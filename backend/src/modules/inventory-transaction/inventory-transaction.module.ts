@@ -7,6 +7,7 @@ import { MaterialInventory } from '../material-inventory/entities/material-inven
 import { WarehouseMaster } from '../warehouse-master/entities/warehouse-master.entity';
 
 
+
 @Module({
   imports: [TypeOrmModule.forFeature([InventoryTransaction, MaterialInventory, WarehouseMaster])],
   controllers: [InventoryTransactionController],
