@@ -25,7 +25,7 @@ export function RoutingEditor({ productId }: RoutingEditorProps) {
     const loadData = async () => {
         setLoading(true);
         try {
-            const data = await productService.getRouting(productId, 'active'); // mock version
+            const data = await productService.getRouting(productId); // mock version
             setSteps(data.sort((a, b) => a.sequence - b.sequence));
         } catch (e) {
             console.error(e);

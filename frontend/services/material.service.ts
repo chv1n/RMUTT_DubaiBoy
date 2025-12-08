@@ -39,6 +39,7 @@ const mapMaterialDTOToDomain = (dto: MaterialDTO): Material => {
         materialGroupId: dto.material_group_id,
         containerTypeId: dto.container_type_id,
         status: dto.is_active === true ? "active" : "inactive",
+        is_active: dto.is_active,
         imageUrl: "",
         
         orderLeadTime: dto.order_leadtime || 0,

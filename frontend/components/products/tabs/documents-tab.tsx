@@ -51,7 +51,7 @@ export function DocumentsTab({ productId }: DocumentsTabProps) {
                             </div>
                             <div className="flex-1 overflow-hidden">
                                 <h4 className="font-semibold truncate">{doc.name}</h4>
-                                <p className="text-tiny text-default-400">{doc.type.toUpperCase()} • {doc.size} • {doc.uploadDate}</p>
+                                <p className="text-tiny text-default-400">{doc.type.toUpperCase()} • {doc.size} • {new Date(doc.uploadedAt).toLocaleDateString()}</p>
                             </div>
                             <div className="flex gap-1">
                                 <Button isIconOnly size="sm" variant="light">

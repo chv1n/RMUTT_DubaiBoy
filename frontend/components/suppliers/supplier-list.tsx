@@ -71,8 +71,8 @@ export function SupplierList() {
         if (search) {
             const lowerSearch = search.toLowerCase();
             filtered = filtered.filter(s =>
-                s.name.toLowerCase().includes(lowerSearch) ||
-                s.email.toLowerCase().includes(lowerSearch)
+                (s.name ?? "").toLowerCase().includes(lowerSearch) ||
+                (s.email ?? "").toLowerCase().includes(lowerSearch)
             );
         }
 

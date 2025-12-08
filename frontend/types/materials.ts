@@ -1,7 +1,8 @@
 import { SupplierDTO } from "./suppliers";
-import { Key, ReactNode } from "react";
+
 
 export interface MaterialDTO {
+    data: MaterialDTO;
     material_id: number;
     material_group_id: number | null;
     material_name: string;
@@ -72,8 +73,6 @@ export interface MaterialGroupDTO {
 }
 
 export interface MaterialGroup {
-    group_id: Key | null | undefined;
-    group_name: ReactNode;
     id: number;
     name: string;
     abbreviation: string;
@@ -86,8 +85,6 @@ export interface ContainerTypeDTO {
 }
 
 export interface ContainerType {
-    type_id: Key | null | undefined;
-    type_name: ReactNode;
     id: number;
     name: string;
 }
@@ -100,8 +97,6 @@ export interface MaterialUnitDTO {
 }
 
 export interface MaterialUnit {
-    unit_id: Key | null | undefined;
-    unit_name: ReactNode;
     id: number;
     name: string;
 }
