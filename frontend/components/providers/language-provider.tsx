@@ -1,64 +1,44 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { en } from "@/config/locales/en";
-import { th } from "@/config/locales/th";
-
-type Locale = "en" | "th";
-type Translations = typeof en;
-
-interface LanguageContextType {
-    locale: Locale;
-    setLocale: (locale: Locale) => void;
-    t: (key: string) => string;
-    translations: Translations;
-}
-
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+import React from "react";
+import { useTranslation as useI18NextTranslation } from "react-i18next";
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-    const [locale, setLocale] = useState<Locale>("en");
-    const [mounted, setMounted] = useState(false);
+    const [isMounted, setIsMounted] = React.useState(false);
 
-    useEffect(() => {
-        setMounted(true);
-        const storedLocale = localStorage.getItem("locale") as Locale;
-        if (storedLocale && (storedLocale === "en" || storedLocale === "th")) {
-            setLocale(storedLocale);
-        }
+    React.useEffect(() => {
+        setIsMounted(true);
     }, []);
 
-    const handleSetLocale = (newLocale: Locale) => {
-        setLocale(newLocale);
-        localStorage.setItem("locale", newLocale);
-    };
-
-    const translations = locale === "th" ? th : en;
-
-    const t = (path: string) => {
-        const keys = path.split(".");
-        let current: any = translations;
-        for (const key of keys) {
-            if (current[key] === undefined) {
-                console.warn(`Translation key not found: ${path}`);
-                return path;
-            }
-            current = current[key];
-        }
-        return current as string;
-    };
-
-    return (
-        <LanguageContext.Provider value={{ locale, setLocale: handleSetLocale, t, translations }}>
-            {mounted ? children : <div className="invisible">{children}</div>}
-        </LanguageContext.Provider>
-    );
-}
-
-export function useTranslation() {
-    const context = useContext(LanguageContext);
-    if (context === undefined) {
-        throw new Error("useTranslation must be used within a LanguageProvider");
+    if (!isMounted) {
+        return null; // or a loading spinner
     }
-    return context;
+
+    return <>{children}</>;
 }
+
+export const useTranslation = () => {
+    const { t, i18n } = useI18NextTranslation();
+    const [isMounted, setIsMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    const effectiveT = (key: string, options?: any): string => {
+        if (!isMounted) return key;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return t(key, options) as any;
+    };
+
+    const setLocale = (lang: string) => {
+        i18n.changeLanguage(lang);
+    };
+
+    return {
+        t: effectiveT,
+        locale: isMounted && i18n.language ? i18n.language.substring(0, 2) : 'en',
+        setLocale,
+        i18n
+    };
+};

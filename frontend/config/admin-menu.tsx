@@ -12,7 +12,11 @@ import {
     Package,
     CreditCard,
     HelpCircle,
-    LucideIcon
+    LucideIcon,
+    Box,
+    Calendar,
+    Layers,
+    Truck
 } from "lucide-react";
 
 export interface SubMenuItem {
@@ -31,30 +35,52 @@ export interface MenuItem {
 
 export const sidebarItems: MenuItem[] = [
     {
-        key: "dashboard",
-        label: "common.dashboard",
+        key: "home",
+        label: "common.home",
         icon: <LayoutDashboard className="w-5 h-5" />,
         href: "/super-admin",
     },
     {
-        key: "materials",
-        label: "common.materials",
+        key: "users",
+        label: "user.title",
         icon: <Users className="w-5 h-5" />,
+        href: "/super-admin/users",
+    },
+    {
+        key: "plans",
+        label: "plan.title",
+        icon: <Calendar className="w-5 h-5" />,
+        href: "/super-admin/plans",
+    },
+    {
+        key: "products",
+        label: "products.title",
+        icon: <Package className="w-5 h-5" />,
+        children: [
+            { key: "all-products", label: "products.list", href: "/super-admin/products" },
+            { key: "product-types", label: "products.productTypes", href: "/super-admin/products/types" },
+        ],
+    },
+
+    {
+        key: "materials",
+        label: "materials.title",
+        icon: <Layers className="w-5 h-5" />,
         children: [
             { key: "dashboard-materials", label: "common.dashboard", href: "/super-admin/materials" },
             { key: "all-materials", label: "materials.list", href: "/super-admin/materials/all" },
             { key: "material-groups", label: "materials.groups", href: "/super-admin/materials/groups" },
             { key: "container-types", label: "materials.containerTypes", href: "/super-admin/materials/container-types" },
+            { key: "units", label: "materials.unit", href: "/super-admin/materials/units" },
         ],
     },
     {
-        key: "ecommerce",
-        label: "ecommerce.title",
-        icon: <ShoppingCart className="w-5 h-5" />,
+        key: "suppliers",
+        label: "suppliers.title",
+        icon: <Truck className="w-5 h-5" />,
         children: [
-            { key: "products", label: "ecommerce.products", href: "" },
-            { key: "orders", label: "ecommerce.orders", href: "" },
-            { key: "customers", label: "ecommerce.customers", href: "" },
+            { key: "dashboard-suppliers", label: "common.dashboard", href: "/super-admin/suppliers" },
+            { key: "all-suppliers", label: "suppliers.list", href: "/super-admin/suppliers/all" },
         ],
     },
     {

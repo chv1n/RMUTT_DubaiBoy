@@ -3,6 +3,10 @@ import { MaterialGroup } from '../../modules/material-group/entities/material-gr
 import { MaterialUnits } from '../../modules/unit/entities/unit.entity';
 import { MaterialContainerType } from '../../modules/container-type/entities/container-type.entity';
 import { Supplier } from '../../modules/supplier/entities/supplier.entity';
+import { User } from '../../modules/user/entities/user.entity'; // Import User entity
+import { Role } from '../../common/enums/role.enum'; // Import Role enum
+import { Product } from '../../modules/product/entities/product.entity';
+import { ProductType } from '../../modules/product-type/entities/product-type.entity';
 
 async function seed() {
     try {
@@ -115,6 +119,88 @@ async function seed() {
             if (!exists) {
                 await supplierRepo.save(supplierRepo.create(supplierData));
                 console.log(`Seeded Supplier: ${supplierData.supplier_name}`);
+            }
+        }
+
+
+        // Seed Product Types
+        const productTypeRepo = AppDataSource.getRepository(ProductType);
+        const productTypes = [
+            { type_name: 'Finished Goods', active: 1 },
+            { type_name: 'Semi-Finished Goods', active: 1 },
+            { type_name: 'Prototype', active: 1 },
+        ];
+
+        for (const typeData of productTypes) {
+            const exists = await productTypeRepo.findOneBy({ type_name: typeData.type_name });
+            if (!exists) {
+                await productTypeRepo.save(productTypeRepo.create(typeData));
+                console.log(`Seeded ProductType: ${typeData.type_name}`);
+            }
+        }
+
+        // Seed Products
+        const productRepo = AppDataSource.getRepository(Product);
+        // We need to fetch the types to link them, assuming they were just seeded or exist
+        const finishedType = await productTypeRepo.findOneBy({ type_name: 'Finished Goods' });
+        const semiType = await productTypeRepo.findOneBy({ type_name: 'Semi-Finished Goods' });
+
+        if (finishedType && semiType) {
+            const products = [
+                { product_name: '300mm Polished Wafer', product_type: finishedType, active: 1 },
+                { product_name: 'Patterned Wafer', product_type: semiType, active: 1 },
+                { product_name: 'Packaged Chip Type A', product_type: finishedType, active: 1 },
+                { product_name: 'Solar Cell Unit', product_type: finishedType, active: 1 },
+                { product_name: 'Test Die', product_type: semiType, active: 1 },
+            ];
+
+            for (const productData of products) {
+                const exists = await productRepo.findOneBy({ product_name: productData.product_name });
+                if (!exists) {
+                    await productRepo.save(productRepo.create(productData));
+                    console.log(`Seeded Product: ${productData.product_name}`);
+                }
+            }
+        }
+
+        // Seed Users
+        const userRepo = AppDataSource.getRepository(User);
+        const users = [
+            {
+                username: 'superadmin',
+                email: 'superadmin@example.com',
+                password: '123123',
+                fullname: 'Super Admin User',
+                role: Role.SUPER_ADMIN,
+                active: true,
+            },
+            {
+                username: 'admin',
+                email: 'admin@example.com',
+                password: '123123',
+                fullname: 'Admin User',
+                role: Role.ADMIN,
+                active: true,
+            },
+            {
+                username: 'user',
+                email: 'user@example.com',
+                password: '123123',
+                fullname: 'Regular User',
+                role: Role.USER,
+                active: true,
+            },
+        ];
+
+        for (const userData of users) {
+            const exists = await userRepo.findOneBy({ username: userData.username });
+            if (!exists) {
+                // We depend on the @BeforeInsert hook in User entity to hash the password
+                const newUser = userRepo.create(userData);
+                await userRepo.save(newUser);
+                console.log(`Seeded User: ${userData.username} (${userData.role})`);
+            } else {
+                console.log(`User already exists: ${userData.username}`);
             }
         }
 
