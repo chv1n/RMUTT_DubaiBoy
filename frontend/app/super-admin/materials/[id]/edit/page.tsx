@@ -22,8 +22,10 @@ export default function EditMaterialPage() {
 
     const loadMaterial = async (id: string) => {
         try {
+            // console.log(id);
             const data = await materialService.getById(id);
             setMaterial(data);
+            // console.log(data);
         } catch (error) {
             console.error("Failed to load material", error);
         } finally {

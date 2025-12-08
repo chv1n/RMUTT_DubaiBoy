@@ -24,17 +24,17 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
         email: "",
         phone: "",
         address: "",
-        is_active: true,
+        status: "active",
     });
 
     useEffect(() => {
         if (initialData) {
             setFormData({
-                name: initialData.name,
-                email: initialData.email,
-                phone: initialData.phone,
-                address: initialData.address,
-                is_active: initialData.is_active,
+                name: initialData.name || "",
+                email: initialData.email || "",
+                phone: initialData.phone || "",
+                address: initialData.address || "",
+                status: initialData.status === "blacklisted" ? "inactive" : initialData.status,
             });
         }
     }, [initialData]);
@@ -68,21 +68,21 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
                 <Input
                     type="email"
                     label={t("suppliers.email")}
-                    value={formData.email}
+                    value={formData.email || ""}
                     onValueChange={(val) => setFormData({ ...formData, email: val })}
                     isRequired
                 />
                 <Input
                     type="tel"
                     label={t("suppliers.phone")}
-                    value={formData.phone}
+                    value={formData.phone || ""}
                     onValueChange={(val) => setFormData({ ...formData, phone: val })}
                     isRequired
                 />
                 <Select
                     label={t("common.status")}
-                    selectedKeys={[formData.is_active ? "active" : "inactive"]}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.value === "active" })}
+                    selectedKeys={formData.status ? [formData.status] : []}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as "active" | "inactive" })}
                     isRequired
                 >
                     <SelectItem key="active">{t("suppliers.active")}</SelectItem>
@@ -91,10 +91,11 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
             </div>
             <Textarea
                 label={t("suppliers.address")}
-                value={formData.address}
+                value={formData.address || ""}
                 onValueChange={(val) => setFormData({ ...formData, address: val })}
                 isRequired
             />
+
 
             <div className="flex gap-2 justify-end">
                 <Button color="danger" variant="light" onPress={() => router.back()}>

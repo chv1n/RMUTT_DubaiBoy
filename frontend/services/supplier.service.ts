@@ -17,7 +17,7 @@ const mapSupplierDTOToDomain = (dto: SupplierDTO): Supplier => ({
     email: dto.email,
     phone: dto.phone,
     address: dto.address,
-    status: dto.active === 1 ? 'active' : 'inactive',
+    status: dto.is_active ? 'active' : 'inactive',
     updatedAt: dto.update_date
 });
 
@@ -108,7 +108,7 @@ class SupplierService { // Fixed: Renamed from SupplierService to avoid conflict
             phone: data.phone || null,
             email: data.email || null,
             address: data.address || null,
-            active: data.status === 'active' ? 1 : 0
+            is_active: data.status === 'active'
         };
 
         const response = await apiClient.post<BackendResponse<SupplierDTO>>(this.endpoint, backendPayload);
@@ -141,7 +141,7 @@ class SupplierService { // Fixed: Renamed from SupplierService to avoid conflict
         if (data.phone !== undefined) backendPayload.phone = data.phone;
         if (data.email !== undefined) backendPayload.email = data.email;
         if (data.address !== undefined) backendPayload.address = data.address;
-        if (data.status !== undefined) backendPayload.active = data.status === 'active' ? 1 : 0;
+        if (data.status !== undefined) backendPayload.is_active = data.status === 'active';
 
         const response = await apiClient.put<BackendResponse<SupplierDTO>>(`${this.endpoint}/${id}`, backendPayload);
         return mapSupplierDTOToDomain(response.data);

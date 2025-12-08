@@ -40,6 +40,7 @@ export function MaterialList() {
         setLoading(true);
         try {
             const response = await materialService.getAll(page, rowsPerPage, search, status);
+            console.log(response.data);
             setMaterials(response.data);
             setMeta(response.meta);
         } catch (error) {
@@ -81,7 +82,7 @@ export function MaterialList() {
             Price: item.price,
             Quantity: item.quantity,
             Unit: item.unit,
-            Status: item.status
+            Status: item.is_active === true ? "Active" : "Inactive"
         }));
         exportToExcel(dataToExport, "Materials");
     };
@@ -95,7 +96,7 @@ export function MaterialList() {
             Price: item.price,
             Quantity: item.quantity,
             Unit: item.unit,
-            Status: item.status
+            Status: item.is_active === true ? "Active" : "Inactive"
         }));
         exportToCSV(dataToExport, "Materials");
     };
@@ -136,7 +137,7 @@ export function MaterialList() {
             case "status":
                 return (
                     <Chip className="capitalize" color={item.status === "active" ? "success" : "danger"} size="sm" variant="flat">
-                        {t(`common.${item.status}`)}
+                        {item.status}
                     </Chip>
                 );
             case "actions":

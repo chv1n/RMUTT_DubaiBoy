@@ -75,7 +75,8 @@
             "active": "有効",
             "inactive": "無効",
             "discontinued": "生産終了"
-        }
+        },
+        "expiration_date": "有効期限"
     },
     "suppliers": {
         "title": "サプライヤー管理",
@@ -126,6 +127,7 @@
         "addGroup": "グループを追加",
         "editGroup": "グループを編集",
         "name": "グループ名",
+        "abbreviation": "略語",
         "description": "説明"
     },
     "containers": {
@@ -190,6 +192,13 @@
             "rejected": "計画が拒否されました",
             "import_success": "インポート完了: 成功 {{success}}, 失敗 {{failed}}"
         }
+    },
+    "units": {
+        "title": "単位管理",
+        "addUnit": "単位を追加",
+        "editUnit": "単位を編集",
+        "name": "単位名",
+        "description": "説明"
     },
     "products": {
         "title": "商品管理",

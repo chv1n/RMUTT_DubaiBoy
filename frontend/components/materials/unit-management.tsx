@@ -187,7 +187,7 @@ export function UnitManagement() {
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">
-                                {editingUnit ? t("materials.editMaterial") : t("materials.addMaterial")}
+                                {editingUnit ? t("units.editUnit") : t("units.addUnit")}
                             </ModalHeader>
                             <ModalBody>
                                 <Input

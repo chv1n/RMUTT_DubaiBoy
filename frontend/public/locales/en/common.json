@@ -75,7 +75,8 @@
             "active": "Active",
             "inactive": "Inactive",
             "discontinued": "Discontinued"
-        }
+        },
+        "expiration_date": "Expiration Date"
     },
     "suppliers": {
         "title": "Supplier Management",
@@ -126,6 +127,7 @@
         "addGroup": "Add Group",
         "editGroup": "Edit Group",
         "name": "Group Name",
+        "abbreviation": "Abbreviation",
         "description": "Description"
     },
     "containers": {
@@ -190,6 +192,13 @@
             "rejected": "Plan rejected",
             "import_success": "Import completed: {{success}} success, {{failed}} failed"
         }
+    },
+    "units": {
+        "title": "Material Units",
+        "addUnit": "Add Unit",
+        "editUnit": "Edit Unit",
+        "name": "Unit Name",
+        "description": "Description"
     },
     "products": {
         "title": "Product Management",
