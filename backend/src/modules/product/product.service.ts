@@ -4,8 +4,10 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
-import { ProductTypeService } from '../product-type/product-type.service';
-import { QueryProductDto } from './dto/query-product.dto';
+import { QueryHelper } from 'src/common/helpers/query.helper';
+import { BaseQueryDto } from 'src/common/dto/base-query.dto';
+import { CrudHelper } from 'src/common/helpers/crud.helper';
+import { SoftDeleteHelper } from 'src/common/helpers/soft-delete.helper';
 
 @Injectable()
 export class ProductService {
@@ -13,84 +15,26 @@ export class ProductService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
-    private readonly ProductTypeService: ProductTypeService
   ) { }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-
-    const { product_type_id } = createProductDto;
-    const type = await this.ProductTypeService.findOne(product_type_id);
-
-
-
-    if (!type) {
-      throw new Error('type not found');
-    }
-
-    if (type.active == 0 && type.deleted_at != null) {
-      throw new Error('type not active now');
-    }
-
-
     return await this.productRepository.save(createProductDto);
   }
 
-  async findAll(query: QueryProductDto) {
-
-    const { limit, order, sortBy, name, typeId, offset, active } = query;
-    const products = this.productRepository
-      .createQueryBuilder('p')
-      .leftJoinAndSelect('p.product_type', 't')
-      .take(limit)
-      .skip(offset)
-      .orderBy(`p.${sortBy}`, order?.toUpperCase() as 'ASC' | 'DESC');
-
-    if (name) {
-      products.andWhere('p.product_name LIKE :name', { name });
-    }
-
-    if (typeId) {
-      products.andWhere('t.product_type_id = :typeId', { typeId });
-    }
-
-    if (active) {
-      products.andWhere('p.active = :active', { active });
-    }
-
-    return await products.getMany();
-  }
-
-  async findOne(id: number) {
-
-    return await this.productRepository.findOne({
-      where: { product_id: id },
-      relations: ['product_type'],
-      select: {
-        product_type: {
-          product_type_id: true,
-          type_name: true,
-          active: true,
-        },
-      }
-    });
+  async findAll(baseQueryDto: BaseQueryDto) {
+    return QueryHelper.paginate(this.productRepository, baseQueryDto, { sortField: 'product_name' });
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
 
-    const product = await this.productRepository.findOne({ where: { product_id: id } });
-    if (!product) {
-      throw new Error('Product not found');
-
-
-    }
-    return await this.productRepository.update(id, updateProductDto);
+    return CrudHelper.update(this.productRepository, id, 'product_id', updateProductDto, 'ไม่พบข้อมูลที่ต้องการแก้ไข');
   }
 
-  async remove(id: number) {
-    const product = await this.productRepository.findOne({ where: { product_id: id } });
-    if (!product) {
-      throw new Error('Product not found');
-    }
-    return await this.productRepository.softDelete({ product_id: id });
+  async remove(id: number): Promise<void> {
+    await SoftDeleteHelper.remove(this.productRepository, id, 'product_id', 'ไม่พบข้อมูลที่ต้องการลบ');
+  }
+
+  async restore(id: number): Promise<void> {
+    await SoftDeleteHelper.restore(this.productRepository, id, 'product_id', 'ไม่พบข้อมูลที่ต้องการกู้คืน');
   }
 }
