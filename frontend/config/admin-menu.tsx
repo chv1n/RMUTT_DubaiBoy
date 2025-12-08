@@ -16,7 +16,8 @@ import {
     Box,
     Calendar,
     Layers,
-    Truck
+    Truck,
+    Warehouse
 } from "lucide-react";
 
 export interface SubMenuItem {
@@ -82,6 +83,12 @@ export const sidebarItems: MenuItem[] = [
             { key: "dashboard-suppliers", label: "common.dashboard", href: "/super-admin/suppliers" },
             { key: "all-suppliers", label: "suppliers.list", href: "/super-admin/suppliers/all" },
         ],
+    },
+    {
+        key: "warehouses",
+        label: "warehouses.title",
+        icon: <Warehouse className="w-5 h-5" />,
+        href: "/super-admin/warehouse",
     },
     {
         key: "analytics",
