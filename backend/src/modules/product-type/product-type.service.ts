@@ -4,55 +4,39 @@ import { UpdateProductTypeDto } from './dto/update-product-type.dto';
 import { ProductType } from './entities/product-type.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { QueryProductTypeDto } from './dto/query-product-type.dto';
+import { ISoftDeletable } from '../../common/interfaces/soft-deletable.interface';
+import { CrudHelper } from '../../common/helpers/crud.helper';
+import { SoftDeleteHelper } from '../../common/helpers/soft-delete.helper';
+import { BaseQueryDto } from 'src/common/dto/base-query.dto';
+import { QueryHelper } from 'src/common/helpers/query.helper';
 
 @Injectable()
-export class ProductTypeService {
+export class ProductTypeService implements ISoftDeletable {
 
   constructor(
-    @InjectRepository(ProductType) private readonly ProductTypeRepository: Repository<ProductType>
+    @InjectRepository(ProductType) private readonly productTypeRepository: Repository<ProductType>
   ) { }
 
   async create(createProductTypeDto: CreateProductTypeDto): Promise<ProductType> {
-    return await this.ProductTypeRepository.save(createProductTypeDto);
+    return await this.productTypeRepository.save(createProductTypeDto);
   }
 
-  async findAll(query: QueryProductTypeDto): Promise<ProductType[]> {
-    const { limit, order, sortBy, name, offset, active } = query;
-    const products = this.ProductTypeRepository
-      .createQueryBuilder('p')
-      .take(limit)
-      .skip(offset)
-      .orderBy(`p.${sortBy}`, order?.toUpperCase() as 'ASC' | 'DESC');
-
-    if (name) {
-      products.andWhere('p.type_name LIKE :name', { name });
-    }
-
-    if (active) {
-      products.andWhere('p.active = :active', { active });
-    }
-
-    return await products.getMany();
+  async findAll(query: BaseQueryDto) {
+    return QueryHelper.paginate(this.productTypeRepository, query, { sortField: 'type_name' });
   }
 
-  async findOne(id: number) {
-    return await this.ProductTypeRepository.findOne({ where: { product_type_id: id } });
-  }
+
 
   async update(id: number, updateProductTypeDto: UpdateProductTypeDto) {
-    const productType = await this.ProductTypeRepository.findOne({ where: { product_type_id: id } });
-    if (!productType) {
-      throw new Error('Type not found');
-    }
-    return await this.ProductTypeRepository.update(id, updateProductTypeDto);
+    return CrudHelper.update(this.productTypeRepository, id, 'product_type_id', updateProductTypeDto, 'ไม่พบประเภทสินค้าที่ต้องการแก้ไข');
   }
 
-  async remove(id: number) {
-    const productType = await this.ProductTypeRepository.findOne({ where: { product_type_id: id } });
-    if (!productType) {
-      throw new Error('Type not found');
-    }
-    return await this.ProductTypeRepository.softDelete({ product_type_id: id });
+  async remove(id: number): Promise<void> {
+    await SoftDeleteHelper.remove(this.productTypeRepository, id, 'product_type_id', 'ไม่พบข้อมูลที่ต้องการลบ');
+  }
+
+  async restore(id: number): Promise<void> {
+    await SoftDeleteHelper.restore(this.productTypeRepository, id, 'product_type_id', 'ไม่พบข้อมูลที่ต้องการกู้คืน');
   }
 }
+

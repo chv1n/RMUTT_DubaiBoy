@@ -33,7 +33,7 @@ export class BomService {
       throw new Error('Material not found');
     }
 
-    if (product.active == 0) {
+    if (product) {
       throw new Error('Product is not active');
     }
 

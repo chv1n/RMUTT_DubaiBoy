@@ -6,6 +6,11 @@ import { ContainerTypeModule } from "./container-type/container-type.module";
 import { UnitModule } from "./unit/unit.module";
 import { SupplierModule } from "./supplier/supplier.module";
 import { BomModule } from "./bom/bom.module";
+import { InventoryTransactionModule } from "./inventory-transaction/inventory-transaction.module";
+import { WarehouseMasterModule } from "./warehouse-master/warehouse-master.module";
+import { MaterialInventoryModule } from "./material-inventory/material-inventory.module";
+import { ProductModule } from "./product/product.module";
+import { ProductTypeModule } from "./product-type/product-type.module";
 
 
 export const AppModules = [
@@ -17,5 +22,10 @@ export const AppModules = [
     AuthModule,
     UserModule,
     BomModule,
+    InventoryTransactionModule,
+    WarehouseMasterModule,
+    MaterialInventoryModule,
+    ProductModule,
+    ProductTypeModule,
 ]
 
