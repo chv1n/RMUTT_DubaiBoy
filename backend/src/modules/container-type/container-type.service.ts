@@ -27,7 +27,7 @@ export class ContainerTypeService implements ISoftDeletable {
     }
 
     findOne(id: number) {
-        return this.repository.findOne({ where: { type_id: id, is_active: true } });
+        return this.repository.findOne({ where: { type_id: id } });
     }
 
     async update(id: number, updateContainerTypeDto: UpdateContainerTypeDto) {

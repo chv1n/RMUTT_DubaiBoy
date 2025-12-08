@@ -27,7 +27,7 @@ export class UnitService implements ISoftDeletable {
     }
 
     findOne(id: number) {
-        return this.repository.findOneBy({ unit_id: id, is_active: true });
+        return this.repository.findOneBy({ unit_id: id });
     }
 
     async update(id: number, updateUnitDto: UpdateUnitDto) {
