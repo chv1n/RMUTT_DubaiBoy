@@ -11,7 +11,7 @@ export class WarehouseMaster {
     id: number;
 
     @Column({ name: 'warehouse_name', nullable: true })
-    warehosue_name: string;
+    warehouse_name: string;
 
     @OneToMany(() => InventoryTransaction, (inventoryTransaction) => inventoryTransaction.warehouse)
     inventoryTransactions: InventoryTransaction[];
@@ -28,7 +28,10 @@ export class WarehouseMaster {
     @Column({ name: 'warehouse_address', nullable: true })
     warehouse_address: string;
 
-    @Column({ name: 'warehouse_number', nullable: true, default: 1 })
+    @Column({ name: 'warehouse_email', nullable: true })
+    warehouse_email: string;
+
+    @Column({ name: 'is_active', nullable: true, default: true })
     is_active: boolean;
 
     @DeleteDateColumn({ name: 'warehouse_deleted_at' })

@@ -1,22 +1,30 @@
-import { IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateWarehouseMasterDto {
 
     @IsString()
-    @IsOptional()
-    warehosue_name?: string;
+    @IsNotEmpty()
+    warehouse_name: string;
+
+    @IsString()
+    @IsNotEmpty()
+    warehouse_code: string;
 
     @IsString()
     @IsOptional()
-    warehouse_code?: string;
+    warehouse_phone: string;
 
     @IsString()
     @IsOptional()
-    warehouse_phone?: string;
+    warehouse_address: string;
 
     @IsString()
     @IsOptional()
-    warehouse_address?: string;
+    warehouse_email: string;
 
 
+
+    @IsBoolean()
+    @IsOptional()
+    is_active?: boolean;
 }

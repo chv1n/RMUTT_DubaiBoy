@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, ParseIntPipe } from '@nestjs/common';
 import { WarehouseMasterService } from './warehouse-master.service';
 import { CreateWarehouseMasterDto } from './dto/create-warehouse-master.dto';
 import { UpdateWarehouseMasterDto } from './dto/update-warehouse-master.dto';
-import { BaseQueryDto } from 'src/common/dto/base-query.dto';
-import { WarehouseDto } from 'src/common/dto/warehouse-query.dto';
+import { WarehouseMasterQueryDto } from './dto/warehouse-master-query.dto';
 
 @Controller({
   path: 'warehouse',
@@ -18,23 +17,29 @@ export class WarehouseMasterController {
   }
 
   @Get()
-  findAll(@Query() BaseQueryDto: BaseQueryDto,
-    @Query() warehouseDto: WarehouseDto) {
-    return this.warehouseMasterService.findAll(BaseQueryDto, warehouseDto);
+  findAll(
+    @Query() query: WarehouseMasterQueryDto
+  ) {
+    return this.warehouseMasterService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.warehouseMasterService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.warehouseMasterService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateWarehouseMasterDto: UpdateWarehouseMasterDto) {
-    return this.warehouseMasterService.update(+id, updateWarehouseMasterDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateWarehouseMasterDto: UpdateWarehouseMasterDto) {
+    return this.warehouseMasterService.update(id, updateWarehouseMasterDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.warehouseMasterService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.warehouseMasterService.remove(id);
+  }
+
+  @Put(':id/restore')
+  restore(@Param('id', ParseIntPipe) id: number) {
+    return this.warehouseMasterService.restore(id);
   }
 }
