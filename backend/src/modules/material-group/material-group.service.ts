@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { ISoftDeletable } from '../../common/interfaces/soft-deletable.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MaterialGroup } from './entities/material-group.entity';
@@ -7,9 +8,10 @@ import { UpdateMaterialGroupDto } from './dto/update-material-group.dto';
 import { BaseQueryDto } from '../../common/dto/base-query.dto';
 import { QueryHelper } from '../../common/helpers/query.helper';
 import { CrudHelper } from '../../common/helpers/crud.helper';
+import { SoftDeleteHelper } from '../../common/helpers/soft-delete.helper';
 
 @Injectable()
-export class MaterialGroupService {
+export class MaterialGroupService implements ISoftDeletable {
     constructor(
         @InjectRepository(MaterialGroup)
         private readonly repository: Repository<MaterialGroup>,
@@ -32,10 +34,11 @@ export class MaterialGroupService {
         return CrudHelper.update(this.repository, id, 'group_id', updateMaterialGroupDto, 'ไม่พบกลุ่มวัตถุดิบที่ต้องการแก้ไข');
     }
 
-    async remove(id: number) {
-        const entity = await this.findOne(id);
-        if (entity) {
-            await this.repository.update(id, { is_active: false });
-        }
+    async remove(id: number): Promise<void> {
+        await SoftDeleteHelper.remove(this.repository, id, 'group_id', 'ไม่พบข้อมูลที่ต้องการลบ');
+    }
+
+    async restore(id: number): Promise<void> {
+        await SoftDeleteHelper.restore(this.repository, id, 'group_id', 'ไม่พบข้อมูลที่ต้องการกู้คืน');
     }
 }
