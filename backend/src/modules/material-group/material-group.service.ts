@@ -27,7 +27,7 @@ export class MaterialGroupService implements ISoftDeletable {
     }
 
     findOne(id: number) {
-        return this.repository.findOneBy({ group_id: id, is_active: true });
+        return this.repository.findOneBy({ group_id: id });
     }
 
     async update(id: number, updateMaterialGroupDto: UpdateMaterialGroupDto) {

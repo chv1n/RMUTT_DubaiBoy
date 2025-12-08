@@ -27,7 +27,7 @@ export class SupplierService implements ISoftDeletable {
     }
 
     findOne(id: number) {
-        return this.repository.findOneBy({ supplier_id: id, is_active: true });
+        return this.repository.findOneBy({ supplier_id: id });
     }
 
     async update(id: number, updateSupplierDto: UpdateSupplierDto) {
