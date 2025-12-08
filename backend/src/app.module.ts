@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module';
 import { AppModules } from './modules';
 import * as Joi from 'joi';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,7 +26,10 @@ import * as Joi from 'joi';
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test', 'provision')
           .default('development'),
+        synchronize: true,
       }),
+
+
     }),
     DatabaseModule,
     ThrottlerModule.forRoot([{
@@ -33,6 +37,7 @@ import * as Joi from 'joi';
       limit: 100,
     }]),
     ...AppModules,
+
   ],
   controllers: [AppController],
   providers: [

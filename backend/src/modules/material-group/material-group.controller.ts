@@ -1,0 +1,41 @@
+import { Controller, Get, Post, Body, Put, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import { MaterialGroupService } from './material-group.service';
+import { CreateMaterialGroupDto } from './dto/create-material-group.dto';
+import { UpdateMaterialGroupDto } from './dto/update-material-group.dto';
+import { BaseQueryDto } from '../../common/dto/base-query.dto';
+
+@Controller({
+    path: 'material-groups',
+    version: '1'
+})
+export class MaterialGroupController {
+    constructor(private readonly service: MaterialGroupService) { }
+
+    @Post()
+    async create(@Body() createMaterialGroupDto: CreateMaterialGroupDto) {
+        const data = await this.service.create(createMaterialGroupDto);
+        return {
+            message: 'เพิ่มสำเร็จ',
+            data
+        };
+    }
+
+    @Get()
+    findAll(@Query() query: BaseQueryDto) {
+        return this.service.findAll(query);
+    }
+
+    @Get(':id')
+    findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.service.findOne(id);
+    }
+
+    @Put(':id')
+    async update(@Param('id', ParseIntPipe) id: number, @Body() updateMaterialGroupDto: UpdateMaterialGroupDto) {
+        const data = await this.service.update(id, updateMaterialGroupDto);
+        return {
+            message: 'แก้ไขสำเร็จ',
+            data
+        };
+    }
+}
