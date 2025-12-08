@@ -1,16 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
 import { InventoryTransactionService } from './inventory-transaction.service';
 import { CreateInventoryTransactionDto } from './dto/create-inventory-transaction.dto';
 import { UpdateInventoryTransactionDto } from './dto/update-inventory-transaction.dto';
 import { BaseQueryDto } from 'src/common/dto/base-query.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MaterialInventoryService } from '../material-inventory/material-inventory.service';
+import { InventoryTransactionQueryDto } from 'src/common/dto/inventory-transaction-query.dto';
 
 
-@Controller('inventory-transaction')
+@Controller({
+  path: 'inventory-transaction',
+  version: '1'
+})
 export class InventoryTransactionController {
-  constructor(@InjectRepository(InventoryTransactionService) private readonly inventoryTransactionService: InventoryTransactionService,
-    @InjectRepository(MaterialInventoryService) private readonly materialInventoryService: MaterialInventoryService
+  constructor(private readonly inventoryTransactionService: InventoryTransactionService,
   ) { }
 
   @Post()
@@ -20,8 +23,8 @@ export class InventoryTransactionController {
   }
 
   @Get()
-  findAll(@Query() queryBase: BaseQueryDto) {
-    return this.inventoryTransactionService.findAll();
+  findAll(@Query() queryBase: BaseQueryDto, @Query() query: InventoryTransactionQueryDto) {
+    return this.inventoryTransactionService.findAll(queryBase, query);
   }
 
   @Get(':id')
@@ -29,7 +32,7 @@ export class InventoryTransactionController {
     return this.inventoryTransactionService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateInventoryTransactionDto: UpdateInventoryTransactionDto) {
     return this.inventoryTransactionService.update(+id, updateInventoryTransactionDto);
   }

@@ -142,11 +142,7 @@ export class MaterialInventoryService {
     }
 
     // update normal fields
-    Object.assign(inventory, {
-      quantity: dto.quantity ?? inventory.quantity,
-      order_number: dto.order_number ?? inventory.order_number,
-      mfg_date: dto.mfg_date ?? inventory.mfg_date,
-    });
+    Object.assign(inventory, dto);
 
     return await this.materialInventoryRepository.save(inventory);
   }

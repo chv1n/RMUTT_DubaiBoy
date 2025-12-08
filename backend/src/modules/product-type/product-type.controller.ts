@@ -1,38 +1,65 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query, ParseIntPipe } from '@nestjs/common';
 import { ProductTypeService } from './product-type.service';
 import { CreateProductTypeDto } from './dto/create-product-type.dto';
 import { UpdateProductTypeDto } from './dto/update-product-type.dto';
-import { QueryProductTypeDto } from './dto/query-product-type.dto';
+import { BaseQueryDto } from 'src/common/dto/base-query.dto';
+import { ProductType } from './entities/product-type.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Controller({
-  path: 'product-type',
+  path: 'product-types',
   version: '1'
 })
 export class ProductTypeController {
-  constructor(private readonly productTypeService: ProductTypeService) { }
+  constructor(
+    @InjectRepository(ProductType)
+    private readonly productTypeRepository: Repository<ProductType>,
+    private readonly service: ProductTypeService) { }
 
   @Post()
-  create(@Body() createProductTypeDto: CreateProductTypeDto) {
-    return this.productTypeService.create(createProductTypeDto);
+  async create(@Body() createProductTypeDto: CreateProductTypeDto) {
+    const data = await this.service.create(createProductTypeDto);
+    return {
+      message: 'เพิ่มสำเร็จ',
+      data
+    };
   }
 
   @Get()
-  findAll(@Query() query: QueryProductTypeDto) {
-    return this.productTypeService.findAll(query);
+  findAll(@Query() query: BaseQueryDto) {
+    return this.service.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productTypeService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.productTypeRepository.findBy({ product_type_id: id });
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateProductTypeDto: UpdateProductTypeDto) {
-    return this.productTypeService.update(+id, updateProductTypeDto);
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateProductTypeDto: UpdateProductTypeDto) {
+    const data = await this.service.update(id, updateProductTypeDto);
+    return {
+      message: 'แก้ไขสำเร็จ',
+      data
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productTypeService.remove(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.service.remove(id);
+    return {
+      message: 'ลบสำเร็จ'
+    };
   }
+
+  @Put(':id/restore')
+  async restore(@Param('id', ParseIntPipe) id: number) {
+    await this.service.restore(id);
+    return {
+      message: 'กู้คืนสำเร็จ'
+    };
+  }
+
+
 }
