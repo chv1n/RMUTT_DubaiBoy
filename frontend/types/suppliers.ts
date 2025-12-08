@@ -24,7 +24,7 @@ export interface SupplierDTO {
     phone: string | null;
     email: string | null;
     address: string | null;
-    active: number;
+    is_active: boolean;
     update_date: string | null;
 }
 

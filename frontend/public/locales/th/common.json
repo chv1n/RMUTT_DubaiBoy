@@ -75,7 +75,8 @@
             "active": "ใช้งาน",
             "inactive": "ระงับการใช้งาน",
             "discontinued": "เลิกผลิต"
-        }
+        },
+        "expiration_date": "วันหมดอายุ"
     },
     "suppliers": {
         "title": "จัดการซัพพลายเออร์",
@@ -126,6 +127,7 @@
         "addGroup": "เพิ่มกลุ่ม",
         "editGroup": "แก้ไขกลุ่ม",
         "name": "ชื่อกลุ่ม",
+        "abbreviation": "ตัวอักษรย่อ",
         "description": "รายละเอียด"
     },
     "containers": {
@@ -190,6 +192,13 @@
             "rejected": "ปฏิเสธแผนเรียบร้อย",
             "import_success": "นำเข้าสำเร็จ: {{success}} รายการ, ล้มเหลว {{failed}} รายการ"
         }
+    },
+    "units": {
+        "title": "หน่วยนับ",
+        "addUnit": "เพิ่มหน่วยนับ",
+        "editUnit": "แก้ไขหน่วยนับ",
+        "name": "ชื่อหน่วยนับ",
+        "description": "รายละเอียด"
     },
     "products": {
         "title": "จัดการสินค้า",

@@ -38,7 +38,8 @@ const mapMaterialDTOToDomain = (dto: MaterialDTO): Material => {
         minStockLevel: dto.container_min_stock || 0,
         materialGroupId: dto.material_group_id,
         containerTypeId: dto.container_type_id,
-        status: dto.active === 1 ? "active" : "inactive",
+        status: dto.is_active === true ? "active" : "inactive",
+        is_active: dto.is_active,
         imageUrl: "",
         
         orderLeadTime: dto.order_leadtime || 0,
@@ -64,7 +65,7 @@ const mapMaterialDTOToDomain = (dto: MaterialDTO): Material => {
             email: dto.supplier.email || '',
             phone: dto.supplier.phone || '',
             address: dto.supplier.address || '',
-            status: dto.supplier.active === 1 ? "active" : "inactive",
+            status: dto.supplier.is_active ? "active" : "inactive",
         } : undefined
     };
 };
@@ -89,7 +90,8 @@ class MaterialService {
         
         // Backend returns standard pagination structure: { data: [], meta: {} }
         // The DTO from backend is MaterialDTO[]
-        const response = await apiClient.get<ApiResponse<MaterialDTO[]>>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}&is_active=${status}`);
+        const is_active_filter = status === "" || status === "all" ? '' :  `&is_active=${status}` ;
+        const response = await apiClient.get<ApiResponse<MaterialDTO[]>>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}${is_active_filter}`);
         
         return {
             ...response,
@@ -106,7 +108,8 @@ class MaterialService {
         }
         // Backend returns MaterialMaster directly
         const response = await apiClient.get<MaterialDTO>(`${this.endpoint}/${id}`); 
-        return mapMaterialDTOToDomain(response);
+        console.log(response);
+        return mapMaterialDTOToDomain(response.data);
     }
 
     async create(data: CreateMaterialDTO): Promise<Material> {

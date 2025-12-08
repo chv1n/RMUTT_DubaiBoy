@@ -1,106 +1,104 @@
-import { Product, ProductTypeDTO } from "@/types/product";
 
-export const MOCK_PRODUCTS: Product[] = [
-    {
-        id: 1,
-        name: "Eco-Friendly Water Bottle",
-        description: "Reusable water bottle made from recycled materials.",
-        sku: "PRD-001",
-        price: 25.00,
-        quantity: 1500,
-        unit: "Pcs",
-        unitId: 1,
-        minStockLevel: 100,
-        materialGroupId: 1,
-        containerTypeId: 1,
-        status: "active",
-        imageUrl: "https://via.placeholder.com/150",
-        orderLeadTime: 14,
-        containerMaxStock: 5000,
-        lifetime: 3650,
-        lifetimeUnit: "Days",
-        supplierId: 101,
-        updateDate: "2023-10-25T10:00:00Z",
-        expirationDate: null,
-        category: "Consumer Goods",
-        lastUpdated: "2023-10-25T10:00:00Z",
-        versions: ["v1.0", "v1.1"],
-        defaultVersion: "v1.1",
-        isApproved: true
-    },
-    {
-        id: 2,
-        name: "Wireless Headphones",
-        description: "Noise-cancelling wireless headphones with long battery life.",
-        sku: "PRD-002",
-        price: 120.00,
-        quantity: 500,
-        unit: "Set",
-        unitId: 2,
-        minStockLevel: 50,
-        materialGroupId: 2,
-        containerTypeId: 2,
-        status: "active",
-        imageUrl: "https://via.placeholder.com/150",
-        orderLeadTime: 21,
-        containerMaxStock: 1000,
-        lifetime: 1095,
-        lifetimeUnit: "Days",
-        supplierId: 102,
-        updateDate: "2023-10-20T14:30:00Z",
-        expirationDate: null,
-        category: "Electronics",
-        lastUpdated: "2023-10-20T14:30:00Z",
-        versions: ["v1.0"],
-        defaultVersion: "v1.0",
-        isApproved: true
-    },
-    {
-        id: 3,
-        name: "Office Chair Ergonomic",
-        description: "Ergonomic office chair with lumbar support.",
-        sku: "PRD-003",
-        price: 250.00,
-        quantity: 200,
-        unit: "Pcs",
-        unitId: 1,
-        minStockLevel: 20,
-        materialGroupId: 3,
-        containerTypeId: 3,
-        status: "inactive",
-        imageUrl: "https://via.placeholder.com/150",
-        orderLeadTime: 30,
-        containerMaxStock: 500,
-        lifetime: 1825,
-        lifetimeUnit: "Days",
-        supplierId: 103,
-        updateDate: "2023-09-15T09:15:00Z",
-        expirationDate: null,
-        category: "Furniture",
-        lastUpdated: "2023-09-15T09:15:00Z",
-        versions: ["v1.0", "v1.2"],
-        defaultVersion: "v1.2",
-        isApproved: false
-    }
-];
+import { ProductDTO, ProductTypeDTO, BomDTO } from "@/types/product";
 
 export const MOCK_PRODUCT_TYPES: ProductTypeDTO[] = [
     {
-        ProductTypeID: 1,
-        TypeName: "Consumer Goods",
-        Active: 1,
-        UpdateDate: "2023-01-01T00:00:00Z"
+        product_type_id: 1,
+        type_name: "Electronics",
+        active: 1,
+        create_date: "2023-01-01T00:00:00Z",
+        update_date: "2023-01-01T00:00:00Z"
     },
     {
-        ProductTypeID: 2,
-        TypeName: "Electronics",
-        Active: 1,
-        UpdateDate: "2023-02-15T12:00:00Z"
+        product_type_id: 2,
+        type_name: "Furniture",
+        active: 1,
+        create_date: "2023-01-02T00:00:00Z",
+        update_date: "2023-01-02T00:00:00Z"
     },
     {
-        ProductTypeID: 3,
-        TypeName: "Furniture",
-        Active: 0,
-        UpdateDate: "2023-06-10T08:30:00Z"
+        product_type_id: 3,
+        type_name: "Stationery",
+        active: 1,
+        create_date: "2023-01-03T00:00:00Z",
+        update_date: "2023-01-03T00:00:00Z"
+    }
+];
+
+export const MOCK_BOMS: BomDTO[] = [
+    {
+        id: 101,
+        product_id: 1,
+        material_id: 1, // Assumes Material ID 1 exists
+        unit_id: 1,
+        usage_per_piece: 5,
+        version: 1,
+        active: 1,
+        scrap_factor: 0.05,
+        created_at: "2023-01-10T10:00:00Z",
+        updated_at: "2023-01-10T10:00:00Z",
+        material: {
+            material_id: 1,
+            material_name: "Plastic Granules",
+            cost_per_unit: 50
+        },
+        unit: {
+            unit_id: 1,
+            unit_name: "kg"
+        }
+    },
+    {
+        id: 102,
+        product_id: 1,
+        material_id: 2,
+        unit_id: 2,
+        usage_per_piece: 1,
+        version: 1,
+        active: 1,
+        scrap_factor: 0,
+        created_at: "2023-01-10T10:00:00Z",
+        updated_at: "2023-01-10T10:00:00Z",
+        material: {
+            material_id: 2,
+            material_name: "Screw M4",
+            cost_per_unit: 0.5
+        },
+        unit: {
+            unit_id: 2,
+            unit_name: "pcs"
+        }
+    }
+];
+
+export const MOCK_PRODUCTS: ProductDTO[] = [
+    {
+        product_id: 1,
+        product_name: "Ergonomic Chair",
+        product_type_id: 2,
+        active: 1,
+        create_date: "2023-01-15T09:00:00Z",
+        update_date: "2023-01-20T14:30:00Z",
+        product_type: MOCK_PRODUCT_TYPES[1],
+        boms: MOCK_BOMS
+    },
+    {
+        product_id: 2,
+        product_name: "Gaming Mouse",
+        product_type_id: 1,
+        active: 1,
+        create_date: "2023-02-01T11:20:00Z",
+        update_date: "2023-02-05T16:45:00Z",
+        product_type: MOCK_PRODUCT_TYPES[0],
+        boms: []
+    },
+    {
+        product_id: 3,
+        product_name: "Notebook A4",
+        product_type_id: 3,
+        active: 0, // Inactive
+        create_date: "2023-03-10T08:15:00Z",
+        update_date: "2023-03-10T08:15:00Z",
+        product_type: MOCK_PRODUCT_TYPES[2],
+        boms: []
     }
 ];

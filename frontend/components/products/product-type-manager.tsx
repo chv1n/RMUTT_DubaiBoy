@@ -33,16 +33,22 @@ export function ProductTypeManager() {
     const [types, setTypes] = useState<ProductType[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Pagination state (Client-side simulation since API returns all)
+    // Pagination & Filter state
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [meta, setMeta] = useState<Meta>({
+        totalItems: 0,
+        itemCount: 0,
+        itemsPerPage: 10,
+        totalPages: 0,
+        currentPage: 1
+    });
 
     // Edit/Create state
     const [editingType, setEditingType] = useState<ProductType | null>(null);
     const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
     const [isActive, setIsActive] = useState(true);
 
     // Delete state
@@ -52,15 +58,16 @@ export function ProductTypeManager() {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const allData = await productTypeService.getAll();
-            setTypes(allData);
-        } catch (e) {
-            console.error(e);
-            addToast({ title: t("common.error"), color: "danger" });
+            const response = await productTypeService.getAll(page, rowsPerPage, search, statusFilter);
+            console.log(response.data);
+            setTypes(response.data);
+            // setMeta(response.meta);
+        } catch (error) {
+            console.error("Failed to load materials", error);
         } finally {
             setLoading(false);
         }
-    }, [t]);
+    }, [page, rowsPerPage, search, status]);
 
     useEffect(() => {
         loadData();
@@ -69,7 +76,6 @@ export function ProductTypeManager() {
     const handleCreate = () => {
         setEditingType(null);
         setName("");
-        setDescription("");
         setIsActive(true);
         onFormOpen();
     };
@@ -77,7 +83,6 @@ export function ProductTypeManager() {
     const handleEdit = (type: ProductType) => {
         setEditingType(type);
         setName(type.name);
-        setDescription(type.description || "");
         setIsActive(type.isActive);
         onFormOpen();
     };
@@ -107,11 +112,11 @@ export function ProductTypeManager() {
     const handleSubmit = async () => {
         try {
             if (editingType) {
-                const updateDto: UpdateProductTypeDTO = { name, description, isActive };
+                const updateDto: UpdateProductTypeDTO = { name, isActive };
                 await productTypeService.update(editingType.id, updateDto);
                 addToast({ title: t("common.success"), color: "success" });
             } else {
-                const createDto: CreateProductTypeDTO = { name, description };
+                const createDto: CreateProductTypeDTO = { name };
                 await productTypeService.create(createDto);
                 addToast({ title: t("common.success"), color: "success" });
             }
@@ -123,39 +128,9 @@ export function ProductTypeManager() {
         }
     };
 
-    // Derived state for processing data (Search/Filter/Paginate)
-    const processedData = React.useMemo(() => {
-        let filtered = [...types];
-
-        if (search) {
-            filtered = filtered.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
-        }
-
-        if (statusFilter !== "all") {
-            const isActiveFilter = statusFilter === "active";
-            filtered = filtered.filter(t => t.isActive === isActiveFilter);
-        }
-
-        return filtered;
-    }, [types, search, statusFilter]);
-
-    const paginatedData = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        return processedData.slice(start, start + rowsPerPage);
-    }, [processedData, page, rowsPerPage]);
-
-    const meta: Meta = React.useMemo(() => ({
-        totalItems: processedData.length,
-        itemCount: paginatedData.length,
-        itemsPerPage: rowsPerPage,
-        totalPages: Math.ceil(processedData.length / rowsPerPage),
-        currentPage: page
-    }), [processedData.length, paginatedData.length, rowsPerPage, page]);
-
     const columns: Column[] = [
         { name: "ID", uid: "id", sortable: true },
         { name: t("products.category"), uid: "name", sortable: true },
-        { name: t("products.description"), uid: "description" },
         { name: t("common.status"), uid: "isActive" },
         { name: t("common.actions"), uid: "actions", align: "center" },
     ];
@@ -166,8 +141,6 @@ export function ProductTypeManager() {
                 return <span>{item.id}</span>;
             case "name":
                 return <span className="font-medium">{item.name}</span>;
-            case "description":
-                return <span className="text-default-500 text-sm">{item.description || "-"}</span>;
             case "isActive":
                 return (
                     <Chip className="capitalize" color={item.isActive ? "success" : "default"} size="sm" variant="flat">
@@ -197,14 +170,23 @@ export function ProductTypeManager() {
     return (
         <>
             <DataTable
-                data={paginatedData}
+                data={types}
                 columns={columns}
                 meta={meta}
                 isLoading={loading}
                 onPageChange={setPage}
-                onRowsPerPageChange={setRowsPerPage}
-                onSearch={setSearch}
-                onFilterStatus={setStatusFilter}
+                onRowsPerPageChange={(rows) => {
+                    setRowsPerPage(rows);
+                    setPage(1);
+                }}
+                onSearch={(val) => {
+                    setSearch(val);
+                    setPage(1);
+                }}
+                onFilterStatus={(val) => {
+                    setStatusFilter(val);
+                    setPage(1);
+                }}
                 onAddNew={handleCreate}
                 renderCell={renderCell}
                 statusOptions={[
@@ -228,16 +210,15 @@ export function ProductTypeManager() {
                                     onValueChange={setName}
                                     isRequired
                                 />
-                                <Input
-                                    label={t("products.description")}
-                                    placeholder="Enter description"
-                                    value={description}
-                                    onValueChange={setDescription}
-                                />
-                                <div className="flex items-center gap-2">
-                                    <Switch isSelected={isActive} onValueChange={setIsActive} />
-                                    <span>{isActive ? t("common.active") : t("common.inactive")}</span>
-                                </div>
+                                {
+                                    editingType && (
+                                        <div className="flex items-center gap-2">
+                                            <Switch isSelected={isActive} onValueChange={setIsActive} />
+                                            <span>{isActive ? t("common.active") : t("common.inactive")}</span>
+                                        </div>
+                                    )
+                                }
+
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="danger" variant="light" onPress={onFormClose}>

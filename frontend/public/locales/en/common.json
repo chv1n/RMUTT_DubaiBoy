@@ -30,7 +30,12 @@
         "analytics": "Analytics",
         "reports": "Reports",
         "help": "Help & Support",
-        "customize": "Customize"
+        "customize": "Customize",
+        "back": "Back",
+        "date": "Date",
+        "user": "User",
+        "action": "Action",
+        "details": "Details"
     },
     "materials": {
         "title": "Material Management",
@@ -75,7 +80,8 @@
             "active": "Active",
             "inactive": "Inactive",
             "discontinued": "Discontinued"
-        }
+        },
+        "expiration_date": "Expiration Date"
     },
     "suppliers": {
         "title": "Supplier Management",
@@ -126,6 +132,7 @@
         "addGroup": "Add Group",
         "editGroup": "Edit Group",
         "name": "Group Name",
+        "abbreviation": "Abbreviation",
         "description": "Description"
     },
     "containers": {
@@ -191,9 +198,67 @@
             "import_success": "Import completed: {{success}} success, {{failed}} failed"
         }
     },
+    "units": {
+        "title": "Material Units",
+        "addUnit": "Add Unit",
+        "editUnit": "Edit Unit",
+        "name": "Unit Name",
+        "description": "Description"
+    },
     "products": {
         "title": "Product Management",
         "list": "Product List",
-        "productTypes": "Product Types"
+        "productTypes": "Product Types",
+        "detail": "Product Detail",
+        "addProduct": "Add Product",
+        "editProduct": "Edit Product",
+        "name": "Product Name",
+        "code": "Product ID",
+        "type": "Product Type",
+        "price": "Price",
+        "status": "Status",
+        "lastUpdated": "Last Updated",
+        "description": "Description",
+        "bom": "Bill of Materials",
+        "bomList": "Materials List",
+        "addBom": "Add Material",
+        "tabs": {
+            "info": "Information",
+            "bom": "BOM (Formula)"
+        },
+        "fields": {
+             "name": "Name",
+             "type": "Type",
+             "active": "Active",
+             "material": "Material",
+             "unit": "Unit",
+             "quantity": "Quantity",
+             "waste": "Waste (%)",
+             "cost": "Cost"
+        },
+        "overview": "Overview",
+        "routing": "Routing",
+        "specs": "Specifications",
+        "documents": "Documents",
+        "auditLog": "Audit Log",
+        "version": "Version",
+        "approve": "Approve",
+        "export": "Export",
+        "category": "Category",
+        "component": "Component",
+        "addComponent": "Add Component",
+        "approved": "Approved",
+        "draft": "Draft",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "archived": "Archived",
+        "saveVersion": "Save Version",
+        "createVersion": "Create New Version",
+        "parameter": "Parameter",
+        "target": "Target",
+        "tolerance": "Tolerance",
+        "workCenter": "Work Center",
+        "setupTime": "Setup Time (min)",
+        "runTime": "Run Time (min)"
     }
 }

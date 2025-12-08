@@ -127,6 +127,7 @@ export function BOMEditor({ productId }: BOMEditorProps) {
         try {
             await productService.saveBOM(productId, activeBOM);
             alert(t("common.success"));
+            loadVersions(); // Reload data from server to ensure sync
         } catch (e) {
             alert(t("common.error"));
         }
