@@ -5,6 +5,7 @@ import { SidebarProvider, useSidebar } from "@/components/providers/sidebar-prov
 import { LanguageProvider } from "@/components/providers/language-provider";
 import { AdminSidebar } from "./admin-sidebar";
 import { AdminHeader } from "./admin-header";
+import { AdminBreadcrumbs } from "@/components/common/admin-breadcrumbs";
 
 // This component consumes the context to handle layout classes
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                 <AdminHeader toggleMobileSidebar={toggleMobileSidebar} />
                 <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+                    <AdminBreadcrumbs />
                     {children}
                 </main>
             </div>
