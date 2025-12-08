@@ -39,4 +39,20 @@ export class ContainerTypeController {
         };
     }
 
+
+    @Delete(':id')
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        await this.service.remove(id);
+        return {
+            message: 'ลบประเภทบรรจุภัณฑ์สำเร็จ'
+        };
+    }
+
+    @Put(':id/restore')
+    async restore(@Param('id', ParseIntPipe) id: number) {
+        await this.service.restore(id);
+        return {
+            message: 'กู้คืนประเภทบรรจุภัณฑ์สำเร็จ'
+        };
+    }
 }

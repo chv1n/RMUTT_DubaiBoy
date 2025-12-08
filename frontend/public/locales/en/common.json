@@ -1,0 +1,199 @@
+{
+    "common": {
+        "dashboard": "Dashboard",
+        "home": "Home",
+        "materials": "Materials",
+        "settings": "Settings",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "add": "Add",
+        "all": "All",
+        "search": "Search...",
+        "actions": "Actions",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "loading": "Loading...",
+        "success": "Success",
+        "error": "Error",
+        "confirmDelete": "Confirm Action",
+        "confirmDeleteMessage": "Are you sure you want to proceed with this action? This cannot be undone.",
+        "confirm": "Confirm",
+        "export": "Export",
+        "exportExcel": "Export to Excel",
+        "exportCSV": "Export to CSV",
+        "filter": "Filter",
+        "clearFilters": "Clear Filters",
+        "sortBy": "Sort By",
+        "analytics": "Analytics",
+        "reports": "Reports",
+        "help": "Help & Support",
+        "customize": "Customize"
+    },
+    "materials": {
+        "title": "Material Management",
+        "list": "Material List",
+        "detail": "Material Detail",
+        "groups": "Material Groups",
+        "containerTypes": "Container Types",
+        "addMaterial": "Add Material",
+        "editMaterial": "Edit Material",
+        "name": "Name",
+        "sku": "SKU",
+        "price": "Price",
+        "quantity": "Quantity",
+        "unit": "Unit",
+        "minStock": "Min Stock",
+        "group": "Group",
+        "container": "Container Type",
+        "description": "Description",
+        "image": "Image",
+        "inventoryLevel": "Inventory Levels",
+        "distribution": "Material Distribution",
+        "recentActivity": "Recent Activity",
+        "lowStock": "Low Stock Items",
+        "totalMaterials": "Total Materials",
+        "totalValue": "Total Value",
+        "subMaterials": "Sub Materials",
+        "tab": {
+            "overview": "Overview",
+            "history": "History",
+            "linkedSuppliers": "Linked Suppliers",
+            "documents": "Documents"
+        },
+        "field": {
+            "created": "Created At",
+            "updated": "Last Updated",
+            "leadTime": "Lead Time",
+            "lifetime": "Shelf Life",
+            "maxStock": "Max Stock",
+            "supplier": "Default Supplier"
+        },
+        "status": {
+            "active": "Active",
+            "inactive": "Inactive",
+            "discontinued": "Discontinued"
+        }
+    },
+    "suppliers": {
+        "title": "Supplier Management",
+        "list": "Supplier List",
+        "detail": "Supplier Detail",
+        "addSupplier": "Add Supplier",
+        "editSupplier": "Edit Supplier",
+        "name": "Company Name",
+        "contact": "Contact Person",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "rating": "Rating",
+        "category": "Category",
+        "totalOrders": "Total Orders",
+        "totalSpent": "Total Spent",
+        "lastOrder": "Last Order",
+        "paymentTerms": "Payment Terms",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "blacklisted": "Blacklisted",
+        "spendingAnalysis": "Spending Analysis",
+        "topSuppliers": "Top Suppliers",
+        "spendingByCategory": "Spending by Category",
+        "monthlySpending": "Monthly Spending",
+        "tab": {
+            "overview": "Overview",
+            "products": "Products",
+            "performance": "Performance",
+            "documents": "Documents"
+        },
+        "actions": {
+            "call": "Call",
+            "email": "Email",
+            "blacklist": "Blacklist",
+            "activate": "Activate"
+        }
+    },
+    "ecommerce": {
+        "title": "E-Commerce",
+        "products": "Products",
+        "orders": "Orders",
+        "customers": "Customers"
+    },
+    "groups": {
+        "title": "Material Groups",
+        "addGroup": "Add Group",
+        "editGroup": "Edit Group",
+        "name": "Group Name",
+        "description": "Description"
+    },
+    "containers": {
+        "title": "Container Types",
+        "addContainer": "Add Container Type",
+        "editContainer": "Edit Container Type",
+        "name": "Type Name",
+        "description": "Description"
+    },
+    "plan": {
+        "title": "Plan Management",
+        "create": "Create Plan",
+        "edit": "Edit Plan",
+        "delete": "Delete Plan",
+        "duplicate": "Duplicate",
+        "approve": "Approve",
+        "reject": "Reject",
+        "status": {
+            "draft": "Draft",
+            "submitted": "Submitted",
+            "approved": "Approved",
+            "rejected": "Rejected",
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "field": {
+            "plan_code": "Plan Code",
+            "name": "Name",
+            "description": "Description",
+            "type": "Type",
+            "owner": "Owner",
+            "start_date": "Start Date",
+            "end_date": "End Date",
+            "items": "Items",
+            "actions": "Actions",
+            "search": "Search Plans",
+            "view_list": "List View",
+            "view_board": "Board View",
+            "sort": {
+                "date": "Date",
+                "name": "Name",
+                "status": "Status"
+            },
+            "filter": {
+                "all": "All Status",
+                "draft": "Draft",
+                "submitted": "Submitted",
+                "approved": "Approved",
+                "rejected": "Rejected",
+                "active": "Active"
+            }
+        },
+        "validation": {
+            "required": "{{field}} is required",
+            "date_invalid": "End date must be the same or after start date",
+            "min_items": "At least one item is required"
+        },
+        "messages": {
+            "saved": "Plan saved",
+            "deleted": "Plan deleted",
+            "approved": "Plan approved",
+            "rejected": "Plan rejected",
+            "import_success": "Import completed: {{success}} success, {{failed}} failed"
+        }
+    },
+    "products": {
+        "title": "Product Management",
+        "list": "Product List",
+        "productTypes": "Product Types"
+    }
+}

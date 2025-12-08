@@ -1,70 +1,116 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue } from "@heroui/table";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
+import React, { useEffect, useState, useCallback } from "react";
 import { Chip } from "@heroui/chip";
 import { Tooltip } from "@heroui/tooltip";
-import { Search, Plus, Edit, Trash, Eye } from "lucide-react";
+import { Edit, Trash, Eye } from "lucide-react";
 import { useTranslation } from "@/components/providers/language-provider";
 import { materialService } from "@/services/material.service";
 import { Material } from "@/types/materials";
-import { Spinner } from "@heroui/spinner";
+import { Meta } from "@/types/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ConfirmModal } from "@/components/common/confirm-modal";
+import { exportToCSV, exportToExcel } from "@/lib/utils/export";
+import { DataTable, Column } from "@/components/common/data-table";
 
 export function MaterialList() {
     const { t } = useTranslation();
     const router = useRouter();
     const [materials, setMaterials] = useState<Material[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterValue, setFilterValue] = useState("");
+    const [meta, setMeta] = useState<Meta>({
+        totalItems: 0,
+        itemCount: 0,
+        itemsPerPage: 10,
+        totalPages: 0,
+        currentPage: 1
+    });
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    // Filter states
+    const [search, setSearch] = useState("");
+    const [status, setStatus] = useState("");
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const loadData = async () => {
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const loadData = useCallback(async () => {
+        setLoading(true);
         try {
-            const data = await materialService.getAll();
-            setMaterials(data);
+            const response = await materialService.getAll(page, rowsPerPage, search, status);
+            setMaterials(response.data);
+            setMeta(response.meta);
         } catch (error) {
             console.error("Failed to load materials", error);
         } finally {
             setLoading(false);
         }
+    }, [page, rowsPerPage, search, status]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const confirmDelete = (id: number) => {
+        setDeleteId(id);
+        setIsDeleteModalOpen(true);
     };
 
-    const handleDelete = async (id: number) => {
-        if (confirm(t("common.confirmDelete"))) {
+    const handleDelete = async () => {
+        if (deleteId) {
             try {
-                await materialService.delete(id);
+                await materialService.delete(deleteId);
                 loadData();
             } catch (error) {
                 console.error("Failed to delete material", error);
+            } finally {
+                setIsDeleteModalOpen(false);
+                setDeleteId(null);
             }
         }
     };
 
-    const filteredItems = React.useMemo(() => {
-        return materials.filter((item) =>
-            item.name.toLowerCase().includes(filterValue.toLowerCase()) ||
-            item.sku.toLowerCase().includes(filterValue.toLowerCase())
-        );
-    }, [materials, filterValue]);
+    const handleExportExcel = () => {
+        const dataToExport = materials.map(item => ({
+            ID: item.id,
+            Name: item.name,
+            SKU: item.sku,
+            Group: item.materialGroup?.name,
+            Price: item.price,
+            Quantity: item.quantity,
+            Unit: item.unit,
+            Status: item.status
+        }));
+        exportToExcel(dataToExport, "Materials");
+    };
 
-    const columns = [
-        { name: t("materials.name"), uid: "name" },
+    const handleExportCSV = () => {
+        const dataToExport = materials.map(item => ({
+            ID: item.id,
+            Name: item.name,
+            SKU: item.sku,
+            Group: item.materialGroup?.name,
+            Price: item.price,
+            Quantity: item.quantity,
+            Unit: item.unit,
+            Status: item.status
+        }));
+        exportToCSV(dataToExport, "Materials");
+    };
+
+    const columns: Column[] = [
+        { name: t("materials.name"), uid: "name", sortable: true },
         { name: t("materials.sku"), uid: "sku" },
         { name: t("materials.group"), uid: "group" },
-        { name: t("materials.price"), uid: "price" },
-        { name: t("materials.quantity"), uid: "quantity" },
+        { name: t("materials.price"), uid: "price", sortable: true },
+        { name: t("materials.quantity"), uid: "quantity", sortable: true },
         { name: t("common.status"), uid: "status" },
-        { name: t("common.actions"), uid: "actions" },
+        { name: t("common.actions"), uid: "actions", align: "center" },
     ];
 
-    const renderCell = React.useCallback((item: Material, columnKey: React.Key) => {
+    const renderCell = useCallback((item: Material, columnKey: React.Key) => {
         const cellValue = item[columnKey as keyof Material];
 
         switch (columnKey) {
@@ -95,7 +141,7 @@ export function MaterialList() {
                 );
             case "actions":
                 return (
-                    <div className="relative flex items-center gap-2">
+                    <div className="relative flex items-center justify-center gap-2">
                         <Tooltip content={t("materials.detail")}>
                             <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                                 <Link href={`/super-admin/materials/${item.id}`}>
@@ -111,7 +157,7 @@ export function MaterialList() {
                             </span>
                         </Tooltip>
                         <Tooltip color="danger" content={t("common.delete")}>
-                            <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => handleDelete(item.id)}>
+                            <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => confirmDelete(item.id)}>
                                 <Trash size={20} />
                             </span>
                         </Tooltip>
@@ -124,36 +170,39 @@ export function MaterialList() {
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <Input
-                    isClearable
-                    className="w-full sm:max-w-[44%]"
-                    placeholder={t("common.search")}
-                    startContent={<Search className="text-default-300" />}
-                    value={filterValue}
-                    onClear={() => setFilterValue("")}
-                    onValueChange={setFilterValue}
-                />
-                <Button color="primary" endContent={<Plus />} as={Link} href="/super-admin/materials/new">
-                    {t("materials.addMaterial")}
-                </Button>
-            </div>
-            <Table aria-label="Material List">
-                <TableHeader columns={columns}>
-                    {(column) => (
-                        <TableColumn key={column.uid} align={column.uid === "actions" ? "center" : "start"}>
-                            {column.name}
-                        </TableColumn>
-                    )}
-                </TableHeader>
-                <TableBody items={filteredItems} emptyContent={"No materials found"} isLoading={loading} loadingContent={<Spinner />}>
-                    {(item) => (
-                        <TableRow key={item.id}>
-                            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+            <DataTable
+                data={materials}
+                columns={columns}
+                meta={meta}
+                isLoading={loading}
+                onPageChange={setPage}
+                onRowsPerPageChange={(rows) => {
+                    setRowsPerPage(rows);
+                    setPage(1); // Reset to first page
+                }}
+                onSearch={(val) => {
+                    setSearch(val);
+                    setPage(1);
+                }}
+                onFilterStatus={(val) => {
+                    setStatus(val);
+                    setPage(1);
+                }}
+                onExportExcel={handleExportExcel}
+                onExportCSV={handleExportCSV}
+                onAddNew={() => router.push("/super-admin/materials/new")}
+                renderCell={renderCell}
+                statusOptions={[
+                    { name: t("common.active"), uid: "true" },
+                    { name: t("common.inactive"), uid: "false" }
+                ]}
+            />
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+            />
         </div>
     );
 }

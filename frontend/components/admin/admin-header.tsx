@@ -19,7 +19,7 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
     const { locale, setLocale } = useTranslation();
 
     return (
-        <header className="h-16 border-b border-divider  bg-background  backdrop-blur-lg flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+        <header className="h-16    bg-background  backdrop-blur-lg flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
             <div className="flex items-center gap-4 w-full sm:w-1/3">
                 <Button
                     isIconOnly
@@ -55,12 +55,13 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
                 <Dropdown>
                     <DropdownTrigger>
                         <Button variant="light" size="sm" className="min-w-0 px-2 uppercase font-bold">
-                            {locale}
+                            {locale || 'en'}
                         </Button>
                     </DropdownTrigger>
-                    <DropdownMenu aria-label="Language Actions" onAction={(key) => setLocale(key as "en" | "th")}>
+                    <DropdownMenu aria-label="Language Actions" onAction={(key) => setLocale(key as "en" | "th" | "ja")}>
                         <DropdownItem key="en">English</DropdownItem>
                         <DropdownItem key="th">ไทย</DropdownItem>
+                        <DropdownItem key="ja">日本語</DropdownItem>
                     </DropdownMenu>
                 </Dropdown>
                 <ThemeSwitch />

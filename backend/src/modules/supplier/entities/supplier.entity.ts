@@ -1,5 +1,5 @@
 import { MaterialInventory } from '../../material-inventory/entities/material-inventory.entity';
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, OneToMany, , DeleteDateColumn } from 'typeorm';
 
 @Entity('supplier')
 export class Supplier {
@@ -26,4 +26,7 @@ export class Supplier {
 
     @UpdateDateColumn({ name: 'update_date', nullable: true })
     update_date: Date;
+
+    @DeleteDateColumn({ name: 'deleted_at' })
+    deleted_at: Date;
 }

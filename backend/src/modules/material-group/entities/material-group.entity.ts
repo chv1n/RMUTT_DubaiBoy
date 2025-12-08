@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn } from 'typeorm';
 
 @Entity('material_group')
 export class MaterialGroup {
@@ -17,4 +17,6 @@ export class MaterialGroup {
     @CreateDateColumn({ name: 'create_at' })
     create_at: Date;
 
+    @DeleteDateColumn({ name: 'deleted_at' })
+    deleted_at: Date;
 }
