@@ -38,4 +38,20 @@ export class MaterialGroupController {
             data
         };
     }
+
+    @Delete(':id')
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        await this.service.remove(id);
+        return {
+            message: 'ลบสำเร็จ'
+        };
+    }
+
+    @Put(':id/restore')
+    async restore(@Param('id', ParseIntPipe) id: number) {
+        await this.service.restore(id);
+        return {
+            message: 'กู้คืนสำเร็จ'
+        };
+    }
 }

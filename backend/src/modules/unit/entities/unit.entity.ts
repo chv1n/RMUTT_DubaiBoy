@@ -1,5 +1,5 @@
 import { Bom } from 'src/modules/bom/entities/bom.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, DeleteDateColumn } from 'typeorm';
 
 @Entity('material_units')
 export class MaterialUnits {
@@ -18,4 +18,7 @@ export class MaterialUnits {
 
     @Column({ name: 'is_active', type: 'boolean', default: true })
     is_active: boolean;
+
+    @DeleteDateColumn({ name: 'deleted_at' })
+    deleted_at: Date;
 }

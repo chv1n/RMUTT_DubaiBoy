@@ -42,4 +42,20 @@ export class MaterialController {
     };
   }
 
+  @Delete(':id')
+  async remove(@Param('id') id: number) {
+    await this.materialService.remove(+id);
+    return {
+      message: 'ลบวัสดุสำเร็จ',
+    };
+  }
+
+  @Put(':id/restore')
+  async restore(@Param('id') id: number) {
+    await this.materialService.restore(+id);
+    return {
+      message: 'กู้คืนวัสดุสำเร็จ',
+    };
+  }
+
 }

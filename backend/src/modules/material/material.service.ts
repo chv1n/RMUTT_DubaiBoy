@@ -1,13 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ISoftDeletable } from '../../common/interfaces/soft-deletable.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, LessThan, MoreThan } from 'typeorm';
 import { MaterialMaster } from './entities/material-master.entity';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { MaterialQueryDto } from './dto/material-query.dto';
+import { SoftDeleteHelper } from '../../common/helpers/soft-delete.helper';
 
 @Injectable()
-export class MaterialService {
+export class MaterialService implements ISoftDeletable {
   constructor(
     @InjectRepository(MaterialMaster)
     private readonly materialRepository: Repository<MaterialMaster>,
@@ -53,9 +55,13 @@ export class MaterialService {
     return result;
   }
 
+  async remove(id: number): Promise<void> {
+    await SoftDeleteHelper.remove(this.materialRepository, id, 'material_id', 'ไม่พบวัสดุที่ต้องการลบ');
+  }
 
-
-
+  async restore(id: number): Promise<void> {
+    await SoftDeleteHelper.restore(this.materialRepository, id, 'material_id', 'ไม่พบวัสดุที่ต้องการกู้คืน');
+  }
 
   private createBaseQuery(): SelectQueryBuilder<MaterialMaster> {
     return this.materialRepository.createQueryBuilder('material')

@@ -39,4 +39,20 @@ export class UnitController {
         };
     }
 
+
+    @Delete(':id')
+    async remove(@Param('id', ParseIntPipe) id: number) {
+        await this.service.remove(id);
+        return {
+            message: 'ลบหน่วยนับสำเร็จ'
+        };
+    }
+
+    @Put(':id/restore')
+    async restore(@Param('id', ParseIntPipe) id: number) {
+        await this.service.restore(id);
+        return {
+            message: 'กู้คืนหน่วยนับสำเร็จ'
+        };
+    }
 }
