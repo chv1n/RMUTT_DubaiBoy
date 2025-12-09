@@ -11,6 +11,8 @@ import { WarehouseMasterModule } from "./warehouse-master/warehouse-master.modul
 import { MaterialInventoryModule } from "./material-inventory/material-inventory.module";
 import { ProductModule } from "./product/product.module";
 import { ProductTypeModule } from "./product-type/product-type.module";
+import { ProductPlanModule } from "./product-plan/product-plan.module";
+import { PlanListModule } from "./plan-list/plan-list.module";
 
 
 export const AppModules = [
@@ -27,5 +29,7 @@ export const AppModules = [
     MaterialInventoryModule,
     ProductModule,
     ProductTypeModule,
+    ProductPlanModule,
+    PlanListModule,
 ]
 

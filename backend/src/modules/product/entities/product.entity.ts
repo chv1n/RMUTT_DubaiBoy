@@ -2,6 +2,7 @@
 import { Bom } from 'src/modules/bom/entities/bom.entity';
 import { ProductType } from '../../product-type/entities/product-type.entity';
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, DeleteDateColumn, ManyToOne, JoinColumn, Unique, CreateDateColumn, OneToMany } from 'typeorm';
+import { ProductPlan } from 'src/modules/product-plan/entities/product-plan.entity';
 
 
 @Entity('product')
@@ -22,6 +23,10 @@ export class Product {
     @ManyToOne(() => ProductType, (product_type) => product_type.products)
     @JoinColumn({ name: 'product_type_id' })
     product_type: ProductType;
+
+    @ManyToOne(() => ProductPlan, (product_plan) => product_plan.product)
+    @JoinColumn({ name: 'product_plan_id' })
+    product_plan: ProductPlan;
 
     @Column({ name: 'is_active', type: 'boolean', nullable: true, default: true })
     is_active: boolean;
