@@ -5,7 +5,7 @@ export class QueryHelper {
     static async paginate<T extends ObjectLiteral>(
         repository: Repository<T>,
         query: BaseQueryDto,
-        options: { sortField: string }
+        options: { sortField: string, relations?: string[] }
     ) {
         const { is_active, sort_order } = query;
         const page = query.page || 1;
@@ -23,6 +23,7 @@ export class QueryHelper {
         const [items, total] = await repository.findAndCount({
             where,
             order,
+            relations: options.relations,
             skip: (page - 1) * limit,
             take: limit,
         });
