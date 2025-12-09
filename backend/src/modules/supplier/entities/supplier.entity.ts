@@ -1,5 +1,4 @@
-import { MaterialInventory } from '../../material-inventory/entities/material-inventory.entity';
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, OneToMany, , DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, OneToMany, DeleteDateColumn } from 'typeorm';
 
 @Entity('supplier')
 export class Supplier {
@@ -12,8 +11,6 @@ export class Supplier {
     @Column({ name: 'phone', type: 'varchar', nullable: true })
     phone: string;
 
-    @OneToMany(() => MaterialInventory, (inventory) => inventory.supplier)
-    materialInventory: MaterialInventory[];
 
     @Column({ name: 'email', type: 'varchar', nullable: true })
     email: string;

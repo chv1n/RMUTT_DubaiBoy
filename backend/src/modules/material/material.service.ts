@@ -8,16 +8,35 @@ import { UpdateMaterialDto } from './dto/update-material.dto';
 import { MaterialQueryDto } from './dto/material-query.dto';
 import { SoftDeleteHelper } from '../../common/helpers/soft-delete.helper';
 
+import { MaterialInventory } from '../material-inventory/entities/material-inventory.entity';
+import { WarehouseMaster } from '../warehouse-master/entities/warehouse-master.entity';
+
 @Injectable()
 export class MaterialService implements ISoftDeletable {
   constructor(
     @InjectRepository(MaterialMaster)
     private readonly materialRepository: Repository<MaterialMaster>,
+    @InjectRepository(MaterialInventory)
+    private readonly materialInventoryRepository: Repository<MaterialInventory>,
+    @InjectRepository(WarehouseMaster)
+    private readonly warehouseRepository: Repository<WarehouseMaster>,
   ) { }
 
   async create(createMaterialDto: CreateMaterialDto) {
     const material = this.materialRepository.create(createMaterialDto);
     const savedMaterial = await this.materialRepository.save(material);
+
+    // Create default inventory
+    const warehouse = await this.warehouseRepository.findOne({ where: { is_active: true } });
+    if (warehouse) {
+      const inventory = this.materialInventoryRepository.create({
+        material: savedMaterial,
+        warehouse: warehouse,
+        quantity: 0,
+      });
+      await this.materialInventoryRepository.save(inventory);
+    }
+
     return savedMaterial;
   }
 
