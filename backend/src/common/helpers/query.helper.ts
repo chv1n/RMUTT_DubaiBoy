@@ -5,13 +5,13 @@ export class QueryHelper {
     static async paginate<T extends ObjectLiteral>(
         repository: Repository<T>,
         query: BaseQueryDto,
-        options: { sortField: string, relations?: string[] }
+        options: { sortField: string, relations?: string[], where?: any }
     ) {
         const { is_active, sort_order } = query;
         const page = query.page || 1;
         const limit = query.limit || 20;
 
-        const where: any = {};
+        let where: any = options.where || {};
 
         if (is_active !== undefined) {
             where.is_active = is_active;

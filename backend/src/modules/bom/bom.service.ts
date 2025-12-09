@@ -1,129 +1,59 @@
-import { Injectable, Query } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateBomDto } from './dto/create-bom.dto';
 import { UpdateBomDto } from './dto/update-bom.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Bom } from './entities/bom.entity';
 import { Repository } from 'typeorm';
-import { QureyBomDto } from './dto/qurey-bom.dto';
+import { GetBomDto } from './dto/get-bom.dto';
 import { Product } from '../product/entities/product.entity';
 import { MaterialMaster } from '../material/entities/material-master.entity';
-
+import { CrudHelper } from 'src/common/helpers/crud.helper';
+import { ISoftDeletable } from 'src/common/interfaces/soft-deletable.interface';
+import { QueryHelper } from 'src/common/helpers/query.helper';
+import { SoftDeleteHelper } from 'src/common/helpers/soft-delete.helper';
 
 @Injectable()
-export class BomService {
-
+export class BomService implements ISoftDeletable {
 
   constructor(
     @InjectRepository(Bom) private readonly bomRepository: Repository<Bom>,
-    @InjectRepository(Product) private readonly productRepository: Repository<Product>,
-    @InjectRepository(MaterialMaster) private readonly materialRepository: Repository<MaterialMaster>,
   ) { }
+
   async create(createBomDto: CreateBomDto) {
-    const { product_id, material_id, version, active } = createBomDto;
-
-
-    const product = await this.productRepository.findOne({ where: { product_id } })
-    const material = await this.materialRepository.findOne({ where: { material_id } })
-
-    if (!product) {
-      throw new Error('Product not found');
-    }
-
-    if (!material) {
-      throw new Error('Material not found');
-    }
-
-    if (product) {
-      throw new Error('Product is not active');
-    }
-
-    if (material.is_active) {
-      throw new Error('Material is not active');
-    }
-
-
-
-    return await this.bomRepository.save(createBomDto);
+    const entity = await this.bomRepository.create(createBomDto)
+    return await this.bomRepository.save(entity);
   }
 
-  async findAll(qurey: QureyBomDto) {
+  async findAll(query: GetBomDto) {
+    const where: any = {};
+    if (query.product_id) where.product_id = query.product_id;
+    if (query.material_id) where.material_id = query.material_id;
+    if (query.unit_id) where.unit_id = query.unit_id;
+    if (query.active !== undefined) where.active = query.active;
 
-
-    let { limit, order, sort, offset, active, product_id, material_id, unit_id } = qurey;
-
-
-    const sortOrder =
-      order?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
-
-
-    if (!sort) {
-      sort = 'created_at';
-    }
-
-    const products = this.bomRepository
-      .createQueryBuilder('p')
-      .leftJoinAndSelect('p.product', 'product')
-      .leftJoinAndSelect('p.material', 'material')
-      .leftJoinAndSelect('material.unit', 'unit')
-      .take(limit)
-      .skip(offset)
-      .orderBy(`p.${sort}`, sortOrder);
-
-    if (product_id) {
-      products.andWhere('product.product_id = :product_id', { product_id });
-    }
-
-    if (material_id) {
-      products.andWhere('material.material_id = :material_id', { material_id });
-    }
-
-    if (active) {
-      products.andWhere('p.active = :active', { active });
-    }
-
-    if (unit_id) {
-      products.andWhere('unit.unit_id = :unit_id', { unit_id });
-    }
-
-    return await products.getMany();
+    return QueryHelper.paginate(this.bomRepository, query, {
+      relations: ['product', 'material', 'unit'],
+      sortField: 'id',
+      where
+    });
   }
 
   async findOne(id: number) {
-    const bom = await this.bomRepository
-      .createQueryBuilder('bom')
-      .leftJoinAndSelect('bom.product', 'product')
-      .leftJoinAndSelect('bom.material', 'material')
-      .leftJoinAndSelect('material.unit', 'unit')
-      .where('bom.id = :id', { id })
-      .getOne();
-
-    if (!bom) {
-      throw new Error('BOM not found');
-    }
-
-    return bom;
+    return await this.bomRepository.findOne({
+      where: { id },
+      relations: ['product', 'material', 'unit']
+    });
   }
 
   async update(id: number, updateBomDto: UpdateBomDto) {
-
-    const bom = await this.bomRepository
-      .createQueryBuilder('bom')
-      .leftJoinAndSelect('bom.product', 'product')
-      .leftJoinAndSelect('bom.material', 'material')
-      .leftJoinAndSelect('material.unit', 'unit')
-      .where('bom.id = :id', { id })
-      .getOne();
-
-    if (!bom) {
-      throw new Error('Bom not found');
-    }
-
-
-    Object.assign(bom, updateBomDto);
-    return await this.bomRepository.save(bom);
+    return CrudHelper.update(this.bomRepository, id, 'id', updateBomDto, 'Bom not found');
   }
 
   async remove(id: number) {
-    return await this.bomRepository.softDelete(id);
+    await SoftDeleteHelper.remove(this.bomRepository, id, 'id', 'Bom not found');
+  }
+
+  async restore(id: number) {
+    await SoftDeleteHelper.restore(this.bomRepository, id, 'id', 'Bom not found');
   }
 }
