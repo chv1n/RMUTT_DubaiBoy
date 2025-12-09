@@ -3,10 +3,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { BaseQueryDto } from 'src/common/dto/base-query.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Product } from './entities/product.entity';
-import { Repository } from 'typeorm';
-import { QueryHelper } from 'src/common/helpers/query.helper';
+
 
 @Controller({
   path: 'products',
@@ -14,8 +11,6 @@ import { QueryHelper } from 'src/common/helpers/query.helper';
 })
 export class ProductController {
   constructor(
-    @InjectRepository(Product)
-    private readonly repository: Repository<Product>,
     private readonly service: ProductService
   ) { }
 
@@ -31,12 +26,12 @@ export class ProductController {
 
   @Get()
   findProduct(@Query() baseQueryDto: BaseQueryDto) {
-    return QueryHelper.paginate(this.repository, baseQueryDto, { sortField: 'product_name' });
+    return this.service.findAll(baseQueryDto);
   }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.repository.findOneBy({ product_id: id });
+    return this.service.findOne(id);
   }
 
   @Put(':id')
