@@ -16,19 +16,14 @@ export class ProductPlanService implements ISoftDeletable {
   constructor(@InjectRepository(ProductPlan) private readonly repository: Repository<ProductPlan>) { }
 
   async create(createProductPlanDto: CreateProductPlanDto) {
-    const { product_id, ...rest } = createProductPlanDto;
-    // Map product_id to relation, ensuring correct structure if DTO has raw ID
-    const entity = this.repository.create({
-      ...rest,
-      product: { product_id: product_id } as any // Handle relation mapping
-    });
+    const entity = this.repository.create(createProductPlanDto);
     return this.repository.save(entity);
   }
 
   async findAll(query: BaseQueryDto) {
     return QueryHelper.paginate(this.repository, query, {
       relations: ['product'],
-      sortField: 'plan_id', // PK is plan_id
+      sortField: 'id',
     });
   }
 
@@ -45,11 +40,7 @@ export class ProductPlanService implements ISoftDeletable {
     if (product_id) {
       updateData.product = { product_id };
     }
-    return CrudHelper.update(this.repository, id, 'id', updateData, 'ProductPlan not found'); // PK is plan_id? Wait, entity says id: number with @PrimaryGeneratedColumn({ name: 'plan_id' }). Property name is 'id'. Column name is 'plan_id'.
-    // CrudHelper.update takes 'idField' which is the PROPERTY name in Entity to query by? No, usually it builds a where clause.
-    // CrudHelper signature: update(repo, id, idField, data, msg).
-    // Let's check CrudHelper.update implementation in 'src/common/helpers/crud.helper.ts' later or assume 'id'.
-    // Entity: id: number. So use 'id'.
+    return CrudHelper.update(this.repository, id, 'id', updateData, 'ProductPlan not found');
   }
 
   async remove(id: number) {

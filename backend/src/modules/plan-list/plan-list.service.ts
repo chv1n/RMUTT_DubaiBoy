@@ -23,7 +23,7 @@ export class PlanListService implements ISoftDeletable {
   async findAll(query: BaseQueryDto) {
     return QueryHelper.paginate(this.repository, query, {
       relations: ['plan'],
-      sortField: 'id',
+      sortField: 'plan_id',
     });
   }
 

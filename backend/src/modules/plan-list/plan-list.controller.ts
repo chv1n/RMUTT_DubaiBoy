@@ -5,7 +5,7 @@ import { UpdatePlanListDto } from './dto/update-plan-list.dto';
 import { BaseQueryDto } from 'src/common/dto/base-query.dto';
 
 @Controller({
-  path: 'plan-list',
+  path: 'plan-lists',
   version: '1'
 })
 export class PlanListController {
