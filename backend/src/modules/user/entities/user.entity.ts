@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import { Exclude } from 'class-transformer';
 
 import {
     Column,
@@ -8,6 +9,7 @@ import {
     BeforeUpdate,
     CreateDateColumn,
     UpdateDateColumn,
+    DeleteDateColumn,
 } from 'typeorm';
 
 
@@ -26,6 +28,7 @@ export class User {
     fullname: string;
 
     @Column({ type: 'text' })
+    @Exclude()
     password: string;
 
     @Column({ default: 'user' })
@@ -34,9 +37,10 @@ export class User {
 
 
     @Column({ default: true })
-    active: boolean;
+    is_active: boolean;
 
     @Column({ type: 'text', nullable: true })
+    @Exclude()
     refresh_token: string | null;
 
     @BeforeInsert()
@@ -46,9 +50,21 @@ export class User {
         }
     }
 
+    @BeforeUpdate()
+    async hashPasswordBeforeUpdate() {
+
+        if (this.password && !this.password.startsWith('$2b$')) {
+            this.password = await bcrypt.hash(this.password, 10);
+        }
+    }
+
     @CreateDateColumn({ type: 'timestamp' })
     created_at: Date;
 
     @UpdateDateColumn({ type: 'timestamp' })
+    @Exclude()
     updated_at: Date;
+
+    @DeleteDateColumn({ type: 'timestamp', nullable: true })
+    deleted_at: Date;
 }

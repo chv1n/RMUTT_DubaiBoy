@@ -25,6 +25,10 @@ export class ProductService {
     return QueryHelper.paginate(this.productRepository, baseQueryDto, { sortField: 'product_name' });
   }
 
+  async findOne(id: number) {
+    return this.productRepository.findOneBy({ product_id: id });
+  }
+
   async update(id: number, updateProductDto: UpdateProductDto) {
 
     return CrudHelper.update(this.productRepository, id, 'product_id', updateProductDto, 'ไม่พบข้อมูลที่ต้องการแก้ไข');
