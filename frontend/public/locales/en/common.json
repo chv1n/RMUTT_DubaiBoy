@@ -35,7 +35,7 @@
         "date": "Date",
         "user": "User",
         "action": "Action",
-        "details": "Details"
+        "detail": "Details"
     },
     "materials": {
         "title": "Material Management",
@@ -292,5 +292,36 @@
         "out": "OUT",
         "adjust": "ADJUST",
         "transfer": "TRANSFER"
+    },
+    "users": {
+        "title": "User Management",
+        "list": "User List",
+        "addUser": "Add User",
+        "editUser": "Edit User",
+        "fullname": "Full Name",
+        "username": "Username",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "lastLogin": "Last Login",
+        "active": "Active",
+        "inactive": "Inactive",
+        "delete": "Delete",
+        "restore": "Restore",
+        "search": "Search Users...",
+        "messages": {
+            "created": "User created successfully",
+            "updated": "User updated successfully",
+            "deleted": "User deleted successfully",
+            "restored": "User restored successfully"
+        },
+        "profile": "User Profile",
+        "auditLog": "Audit Log",
+        "audit": {
+            "date": "Date",
+            "action": "Action",
+            "details": "Details",
+            "ip": "IP Address"
+        }
     }
 }

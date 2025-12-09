@@ -30,7 +30,8 @@
         "analytics": "分析",
         "reports": "レポート",
         "help": "ヘルプとサポート",
-        "customize": "カスタマイズ"
+        "customize": "カスタマイズ",
+        "detail": "詳細"
     },
     "materials": {
         "title": "資材管理",
@@ -230,6 +231,37 @@
              "quantity": "数量",
              "waste": "廃棄率 (%)",
              "cost": "原価"
+        }
+    },
+    "users": {
+        "title": "ユーザー管理",
+        "list": "ユーザー一覧",
+        "addUser": "ユーザー追加",
+        "editUser": "ユーザー編集",
+        "fullname": "氏名",
+        "username": "ユーザー名",
+        "email": "メールアドレス",
+        "role": "役割",
+        "status": "ステータス",
+        "lastLogin": "最終ログイン",
+        "active": "有効",
+        "inactive": "無効",
+        "delete": "削除",
+        "restore": "復元",
+        "search": "ユーザーを検索...",
+        "messages": {
+            "created": "ユーザーを作成しました",
+            "updated": "ユーザーを更新しました",
+            "deleted": "ユーザーを削除しました",
+            "restored": "ユーザーを復元しました"
+        },
+        "profile": "ユーザープロファイル",
+        "auditLog": "監査ログ",
+        "audit": {
+            "date": "日付",
+            "action": "アクション",
+            "details": "詳細",
+            "ip": "IPアドレス"
         }
     }
 }
