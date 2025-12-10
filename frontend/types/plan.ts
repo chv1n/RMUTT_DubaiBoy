@@ -1,81 +1,108 @@
-export type PlanStatus = 'draft' | 'submitted' | 'approved' | 'rejected' | 'active' | 'inactive';
+export type PlanPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+export type PlanStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
-export interface LocalizedString {
-    en: string;
-    th: string;
-    ja: string;
+// Backend DTOs
+export interface ProductPlanDTO {
+    id: number;
+    product_id: number;
+    input_quantity: number;
+    plan_name: string;
+    plan_description: string;
+    start_date: string; // ISO Date
+    end_date: string; // ISO Date
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    product?: {
+        product_id: number;
+        product_name: string;
+        product_type_id: number | null;
+        is_active: boolean;
+    };
 }
 
-export interface PlanUser {
-    id: string;
-    name: string;
-    avatar?: string;
-    email?: string;
-}
-
-export interface PlanItem {
-    id: string;
-    material_code: string;
-    material_name: string;
-    qty: number;
-    uom: string;
-    remarks?: string;
-}
-
-export interface Plan {
-    id: string;
-    plan_code: string;
-    name: LocalizedString;
-    description?: LocalizedString;
-    type: string;
-    owner: PlanUser;
-    start_date: string; // ISO Date "YYYY-MM-DD"
-    end_date: string;   // ISO Date "YYYY-MM-DD"
+export interface PlanListDTO {
+    id: number;
+    plan_id: number;
+    priority: PlanPriority;
     status: PlanStatus;
-    items: PlanItem[];
-    items_count: number;
-    notes?: string;
-    last_updated: string; // ISO DateTime
-    history?: PlanHistory[];
-    documents?: PlanDocument[];
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    plan?: ProductPlanDTO;
 }
 
-export interface PlanHistory {
-    id: string;
-    action: string;
-    user: PlanUser;
-    timestamp: string;
-    comment?: string;
-}
+// Domain Model (Unified for UI)
+export interface Plan {
+    id: string; // plan_list_id (string for frontend consistency, convert to number for API)
+    planListId: number;
+    productPlanId: number;
 
-export interface PlanDocument {
-    id: string;
+    // Product Plan Details
+    planCode: string; // Generated or ID-based
     name: string;
-    url: string; // Mocked signed URL or local path
-    type: string;
-    size: number;
-    uploaded_at: string;
+    description: string;
+
+    productId: number;
+    productName: string;
+
+    quantity: number;
+    startDate: string;
+    endDate: string;
+
+    // Plan List Details
+    priority: PlanPriority;
+    status: PlanStatus;
+
+    lastUpdated: string;
+}
+
+export interface CreatePlanRequest {
+    // Product Plan Data
+    product_id: number;
+    plan_name: string;
+    plan_description?: string;
+    input_quantity: number;
+    start_date: string;
+    end_date: string;
+
+    // Plan List Data
+    priority: PlanPriority;
+    status: PlanStatus;
+}
+
+export interface UpdatePlanRequest {
+    // Product Plan Fields
+    plan_name?: string;
+    plan_description?: string;
+    input_quantity?: number;
+    start_date?: string;
+    end_date?: string;
+
+    // Plan List Fields
+    priority?: PlanPriority;
+    status?: PlanStatus;
 }
 
 export interface PlanFilter {
-    search?: string;
-    status?: PlanStatus | 'all';
-    type?: string;
-    owner_id?: string;
-    start_date_from?: string;
-    start_date_to?: string;
     page?: number;
     limit?: number;
-    sort_by?: keyof Plan;
-    sort_desc?: boolean;
+    sort_field?: string;
+    sort_order?: 'ASC' | 'DESC';
+    search?: string; // Not directly supported by API yet for searching specific fields, but kept for UI
+    status?: PlanStatus | 'all';
 }
 
 export interface PaginatedResponse<T> {
+    success: boolean;
+    message: string;
     data: T[];
     meta: {
-        total: number;
-        page: number;
-        limit: number;
-        total_pages: number;
+        totalItems: number;
+        itemCount: number;
+        itemsPerPage: number;
+        totalPages: number;
+        currentPage: number;
     };
 }
+

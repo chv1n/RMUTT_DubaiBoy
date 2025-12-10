@@ -7,9 +7,9 @@ import { Pagination } from '@heroui/pagination';
 import { Spinner } from '@heroui/spinner';
 import { Chip } from '@heroui/chip';
 import { useTranslation } from '@/components/providers/language-provider';
-import { Plan } from '@/types/plan';
-import { usePlans, useDeletePlan, useUpdatePlanStatus, useDuplicatePlan } from '@/hooks/usePlans';
-import { Search, Plus, Filter, ArrowUpDown, LayoutGrid, List, Flame, Plane, Eye, CheckCircle } from 'lucide-react';
+import { Plan, PlanStatus } from '@/types/plan';
+import { usePlans, useDeletePlan, useUpdatePlan } from '@/hooks/usePlans';
+import { Search, Filter, ArrowUpDown, LayoutGrid, List, Flame, Plane, Eye, CheckCircle, Clock, Ban } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/dropdown';
 import { Selection, SortDescriptor } from '@heroui/table';
@@ -17,7 +17,7 @@ import PlanForm from './plan-form';
 import PlanCard from './plan-card';
 
 export default function PlanTable() {
-    const { t, locale } = useTranslation();
+    const { t } = useTranslation();
     const router = useRouter();
     const [filterValue, setFilterValue] = React.useState("");
     const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
@@ -25,21 +25,20 @@ export default function PlanTable() {
     const [isFormOpen, setIsFormOpen] = React.useState(false);
     const [planToEdit, setPlanToEdit] = React.useState<Plan | null>(null);
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-        column: "last_updated",
+        column: "lastUpdated",
         direction: "descending",
     });
 
     // Hooks
     const deletePlanMutation = useDeletePlan();
-    const updateStatusMutation = useUpdatePlanStatus();
-    const duplicateMutation = useDuplicatePlan();
+    const updatePlanMutation = useUpdatePlan();
 
     // Data Fetching
     const { data, isLoading } = usePlans({
         search: filterValue,
         status: statusFilter !== "all" && statusFilter.size > 0 ? Array.from(statusFilter)[0] as any : undefined,
-        sort_by: sortDescriptor.column as any,
-        sort_desc: sortDescriptor.direction === "descending"
+        sort_field: sortDescriptor.column as string,
+        sort_order: sortDescriptor.direction === "descending" ? 'DESC' : 'ASC'
     });
 
     // Handlers
@@ -69,22 +68,13 @@ export default function PlanTable() {
             case 'edit':
                 handleEdit(plan);
                 break;
-            case 'duplicate':
-                duplicateMutation.mutate(plan.id);
-                break;
             case 'delete':
                 if (confirm(t('common.confirmDeleteMessage'))) {
                     deletePlanMutation.mutate(plan.id);
                 }
                 break;
-            case 'approve':
-                updateStatusMutation.mutate({ id: plan.id, status: 'approved' });
-                break;
-            case 'reject':
-                updateStatusMutation.mutate({ id: plan.id, status: 'rejected', comment: 'Rejected by admin' });
-                break;
         }
-    }, [deletePlanMutation, duplicateMutation, router, t, updateStatusMutation]);
+    }, [deletePlanMutation, router, t]);
 
     // Drag and Drop Logic
     const [draggedPlan, setDraggedPlan] = React.useState<Plan | null>(null);
@@ -92,7 +82,6 @@ export default function PlanTable() {
     const handleDragStart = (e: React.DragEvent, plan: Plan) => {
         setDraggedPlan(plan);
         e.dataTransfer.effectAllowed = "move";
-        // Optional: Set drag image
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -100,28 +89,19 @@ export default function PlanTable() {
         e.dataTransfer.dropEffect = "move";
     };
 
-    const handleDrop = (e: React.DragEvent, targetStatusGroup: string) => {
+    const handleDrop = (e: React.DragEvent, targetStatusGroup: PlanStatus) => {
         e.preventDefault();
 
         if (!draggedPlan) return;
 
-        const groupToStatus: Record<string, string> = {
-            "Action Required": "submitted",
-            "Active": "active",
-            "Drafts": "draft",
-            "Finished": "approved"
-        };
-
-        const newStatus = groupToStatus[targetStatusGroup];
-
-        if (!newStatus || draggedPlan.status === newStatus) {
+        if (draggedPlan.status === targetStatusGroup) {
             setDraggedPlan(null);
             return;
         }
 
-        updateStatusMutation.mutate({
+        updatePlanMutation.mutate({
             id: draggedPlan.id,
-            status: newStatus as any
+            data: { status: targetStatusGroup }
         });
 
         setDraggedPlan(null);
@@ -131,44 +111,55 @@ export default function PlanTable() {
     const groupedPlans = React.useMemo(() => {
         if (!data?.data) return {};
 
-        const groups: Record<string, Plan[]> = {
-            "Action Required": [],
-            "Active": [],
-            "Drafts": [],
-            "Finished": []
+        const groups: Record<PlanStatus, Plan[]> = {
+            "PENDING": [],
+            "IN_PROGRESS": [],
+            "COMPLETED": [],
+            "CANCELLED": []
         };
 
         data.data.forEach(plan => {
-            if (plan.status === 'submitted') groups["Action Required"].push(plan);
-            else if (plan.status === 'active') groups["Active"].push(plan);
-            else if (plan.status === 'draft') groups["Drafts"].push(plan);
-            else groups["Finished"].push(plan);
+            if (groups[plan.status]) {
+                groups[plan.status].push(plan);
+            }
         });
 
-        // For board view, keep all keys to maintain structure, for list view clean up
+        // For list view, filter out empty
         if (view === 'list') {
+            const filteredGroups: Record<string, Plan[]> = {};
             Object.keys(groups).forEach(key => {
-                if (groups[key].length === 0) delete groups[key];
+                const statusKey = key as PlanStatus;
+                if (groups[statusKey].length > 0) {
+                    filteredGroups[statusKey] = groups[statusKey];
+                }
             });
+            return filteredGroups;
         }
 
         return groups;
     }, [data, view]);
 
+    const getStatusIcon = (status: string) => {
+        switch (status) {
+            case 'PENDING': return <Clock size={18} className="text-default-400" />;
+            case 'IN_PROGRESS': return <Flame size={18} className="text-primary" />;
+            case 'COMPLETED': return <CheckCircle size={18} className="text-success" />;
+            case 'CANCELLED': return <Ban size={18} className="text-danger" />;
+            default: return <Eye size={18} className="text-default-400" />;
+        }
+    };
+
     const renderBoardView = () => (
         <div className="flex gap-4 overflow-x-auto pb-4 h-full min-h-[500px]">
-            {Object.entries(groupedPlans).map(([groupName, plans]) => (
+            {(Object.entries(groupedPlans) as [string, Plan[]][]).map(([groupName, plans]) => (
                 <div
                     key={groupName}
                     className={`min-w-[300px] w-full bg-default-50 rounded-xl p-3 flex flex-col gap-3 transition-colors duration-200 ${draggedPlan ? 'border-2 border-dashed border-primary-200 hover:bg-primary-50' : 'border-2 border-transparent'}`}
                     onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, groupName)}
+                    onDrop={(e) => handleDrop(e, groupName as PlanStatus)}
                 >
                     <div className="flex items-center gap-2 mb-2 px-1">
-                        {groupName === 'Action Required' && <Flame size={18} className="text-warning" />}
-                        {groupName === 'Active' && <Plane size={18} className="text-primary" />}
-                        {groupName === 'Drafts' && <Eye size={18} className="text-default-400" />}
-                        {groupName === 'Finished' && <CheckCircle size={18} className="text-success" />}
+                        {getStatusIcon(groupName)}
                         <h3 className="font-semibold text-default-700">{groupName}</h3>
                         <Chip size="sm" variant="flat" className="ml-auto">{plans.length}</Chip>
                     </div>
@@ -192,7 +183,7 @@ export default function PlanTable() {
         </div>
     );
 
-    if (isLoading) {
+    if (isLoading && !data) {
         return <div className="w-full h-96 flex items-center justify-center"><Spinner size="lg" /></div>;
     }
 
@@ -219,7 +210,7 @@ export default function PlanTable() {
                         <DropdownTrigger>
                             <Button variant="flat" startContent={<Filter size={18} />}>
                                 {statusFilter !== "all" && statusFilter.size > 0
-                                    ? t(`plan.filter.${Array.from(statusFilter)[0]}`)
+                                    ? Array.from(statusFilter)[0]
                                     : t('common.filter')}
                             </Button>
                         </DropdownTrigger>
@@ -232,28 +223,23 @@ export default function PlanTable() {
                             onSelectionChange={setStatusFilter}
                         >
                             <DropdownItem key="all">{t('plan.filter.all')}</DropdownItem>
-                            <DropdownItem key="draft">{t('plan.filter.draft')}</DropdownItem>
-                            <DropdownItem key="submitted">{t('plan.filter.submitted')}</DropdownItem>
-                            <DropdownItem key="active">{t('plan.filter.active')}</DropdownItem>
-                            <DropdownItem key="approved">{t('plan.filter.approved')}</DropdownItem>
-                            <DropdownItem key="rejected">{t('plan.filter.rejected')}</DropdownItem>
+                            <DropdownItem key="PENDING">Pending</DropdownItem>
+                            <DropdownItem key="IN_PROGRESS">In Progress</DropdownItem>
+                            <DropdownItem key="COMPLETED">Completed</DropdownItem>
+                            <DropdownItem key="CANCELLED">Cancelled</DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
 
                     <Dropdown>
                         <DropdownTrigger>
                             <Button variant="flat" startContent={<ArrowUpDown size={18} />}>
-                                {sortDescriptor.column === 'last_updated'
-                                    ? t('plan.sort.date')
-                                    : sortDescriptor.column === 'name'
-                                        ? t('plan.sort.name')
-                                        : t('plan.sort.status')}
+                                {sortDescriptor.column === 'lastUpdated' ? 'Date' : 'Name'}
                             </Button>
                         </DropdownTrigger>
                         <DropdownMenu aria-label="Sort Actions">
-                            <DropdownItem key="date_desc" onPress={() => setSortDescriptor({ column: 'last_updated', direction: 'descending' })}>{t('plan.sort.date')} (Newest)</DropdownItem>
-                            <DropdownItem key="date_asc" onPress={() => setSortDescriptor({ column: 'last_updated', direction: 'ascending' })}>{t('plan.sort.date')} (Oldest)</DropdownItem>
-                            <DropdownItem key="name_asc" onPress={() => setSortDescriptor({ column: 'name', direction: 'ascending' })}>{t('plan.sort.name')} (A-Z)</DropdownItem>
+                            <DropdownItem key="date_desc" onPress={() => setSortDescriptor({ column: 'lastUpdated', direction: 'descending' })}>Date (Newest)</DropdownItem>
+                            <DropdownItem key="date_asc" onPress={() => setSortDescriptor({ column: 'lastUpdated', direction: 'ascending' })}>Date (Oldest)</DropdownItem>
+                            <DropdownItem key="name_asc" onPress={() => setSortDescriptor({ column: 'name', direction: 'ascending' })}>Name (A-Z)</DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
                 </div>
@@ -286,14 +272,10 @@ export default function PlanTable() {
             {/* Content Switcher */}
             {view === 'board' ? renderBoardView() : (
                 <div className="flex flex-col gap-8">
-                    {Object.entries(groupedPlans).map(([groupName, plans]) => (
+                    {(Object.entries(groupedPlans) as [string, Plan[]][]).map(([groupName, plans]) => (
                         <div key={groupName} className="flex flex-col gap-3">
                             <div className="flex items-center gap-2 mb-1 pl-1">
-                                {groupName === 'Action Required' && <Flame size={20} className="text-warning" />}
-                                {groupName === 'Active' && <Plane size={20} className="text-primary" />}
-                                {groupName === 'Drafts' && <Eye size={20} className="text-default-400" />}
-                                {groupName === 'Finished' && <CheckCircle size={20} className="text-success" />}
-
+                                {getStatusIcon(groupName)}
                                 <h2 className="text-lg font-semibold text-default-700">{groupName}</h2>
                                 <Chip size="sm" variant="flat" color="default">{plans.length}</Chip>
                             </div>
@@ -310,7 +292,7 @@ export default function PlanTable() {
                         </div>
                     )}
                     <div className="flex justify-center mt-4">
-                        <Pagination total={data?.meta.total_pages || 1} initialPage={1} color="primary" />
+                        <Pagination total={data?.meta.totalPages || 1} initialPage={1} color="primary" />
                     </div>
                 </div>
             )}

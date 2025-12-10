@@ -34,7 +34,7 @@ export interface CreateWarehouseDTO {
     is_active?: boolean;
 }
 
-export interface UpdateWarehouseDTO extends Partial<CreateWarehouseDTO> {}
+export interface UpdateWarehouseDTO extends Partial<CreateWarehouseDTO> { }
 
 export interface MaterialInventory {
     id: number;
@@ -85,4 +85,51 @@ export interface InventoryTransactionDTO {
     reason?: string;
     created_at: string;
     created_by?: string; // or relation
+}
+
+// --- Reporting API Types ---
+
+export interface MovementHistoryResult {
+    data: {
+        transaction_id: number;
+        material_id: number;
+        material_name: string;
+        warehouse_id: number;
+        warehouse_name: string;
+        transaction_type: string; // IN, OUT, etc.
+        quantity_change: number;
+        reference_number: string;
+        reason_remarks: string;
+        transaction_date: string;
+        created_at: string;
+    }[];
+    meta: {
+        totalItems: number;
+        itemCount: number;
+        itemsPerPage: number;
+        totalPages: number;
+        currentPage: number;
+    };
+    summary: {
+        total_in: number;
+        total_out: number;
+        net_change: number;
+    };
+}
+
+export interface StockLocationItem {
+    material_id: number;
+    material_name: string;
+    quantity: number;
+    mfg_date?: string;
+    exp_date?: string;
+    order_number?: string;
+}
+
+export interface StockLocationResult {
+    warehouse_id: number;
+    warehouse_name: string;
+    warehouse_code: string;
+    materials: StockLocationItem[];
+    total_items: number;
 }
