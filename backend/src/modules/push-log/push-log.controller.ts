@@ -3,32 +3,30 @@ import { PushLogService } from './push-log.service';
 import { CreatePushLogDto } from './dto/create-push-log.dto';
 import { UpdatePushLogDto } from './dto/update-push-log.dto';
 
-@Controller('push-log')
+@Controller({
+  path: 'push-logs',
+  version: '1',
+})
 export class PushLogController {
-  constructor(private readonly pushLogService: PushLogService) {}
-
-  @Post()
-  create(@Body() createPushLogDto: CreatePushLogDto) {
-    return this.pushLogService.create(createPushLogDto);
-  }
+  constructor(private service: PushLogService) { }
 
   @Get()
   findAll() {
-    return this.pushLogService.findAll();
+    return this.service.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.pushLogService.findOne(+id);
+    return this.service.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePushLogDto: UpdatePushLogDto) {
-    return this.pushLogService.update(+id, updatePushLogDto);
+  @Post()
+  create(@Body() dto: any) {
+    return this.service.create(dto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.pushLogService.remove(+id);
+    return this.service.remove(+id);
   }
 }

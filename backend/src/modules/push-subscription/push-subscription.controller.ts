@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, Query, Put } from '@nestjs/common';
 import { PushSubscriptionService } from './push-subscription.service';
 import { CreatePushSubscriptionDto } from './dto/create-push-subscription.dto';
-import { PushSubscriptionQueryDto } from './dto/push-subscription-query.dto';
 import { AtGuard } from 'src/common/guards/at.guard';
 import { BaseQueryDto } from 'src/common/dto/base-query.dto';
 
@@ -36,7 +35,8 @@ export class PushSubscriptionController {
     return { message: 'Push subscription deleted successfully' };
   }
 
-  @Patch(':id/restore')
+
+  @Put(':id/restore')
   async restore(@Param('id') id: string) {
     await this.service.restore(+id);
     return { message: 'Push subscription restored successfully' };
