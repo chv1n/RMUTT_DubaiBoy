@@ -170,6 +170,52 @@ class UserService {
         const response = await apiClient.get<ApiResponse<any[]>>(`${this.endpoint}/${id}`);
         return response.data;
     }
+    async getStats(): Promise<any> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return {
+                totalUsers: 1254,
+                activeUsers: 980,
+                inactiveUsers: 240,
+                newUsersThisMonth: 120,
+                roleDistribution: [
+                    { name: 'User', value: 1000, color: '#0088FE' },
+                    { name: 'Admin', value: 150, color: '#00C49F' },
+                    { name: 'Super Admin', value: 104, color: '#FFBB28' },
+                ],
+                userGrowth: [
+                    { month: 'Jan', count: 400 },
+                    { month: 'Feb', count: 600 },
+                    { month: 'Mar', count: 800 },
+                    { month: 'Apr', count: 850 },
+                    { month: 'May', count: 1100 },
+                    { month: 'Jun', count: 1254 },
+                ],
+                recentActivity: [
+                    { id: 1, user: "Alice", action: "Login", time: "2 mins ago" },
+                    { id: 2, user: "Bob", action: "Purchase", time: "1 hour ago" },
+                    { id: 3, user: "Charlie", action: "Update Profile", time: "3 hours ago" },
+                    { id: 4, user: "David", action: "Logout", time: "5 hours ago" },
+                ]
+            };
+        }
+
+        try {
+            const response = await apiClient.get<ApiResponse<any>>(`${this.endpoint}/dashboard/stats`);
+            return response.data;
+        } catch (error) {
+            console.warn("API user stats failed", error);
+            return {
+                totalUsers: 0,
+                activeUsers: 0,
+                inactiveUsers: 0,
+                newUsersThisMonth: 0,
+                roleDistribution: [],
+                userGrowth: [],
+                recentActivity: []
+            };
+        }
+    }
 }
 
 export const userService = new UserService();

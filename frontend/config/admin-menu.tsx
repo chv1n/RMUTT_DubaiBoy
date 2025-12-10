@@ -47,7 +47,8 @@ export const sidebarItems: MenuItem[] = [
         label: "users.title",
         icon: <Users className="w-5 h-5" />,
         children: [
-            { key: "all-users", label: "users.list", href: "/super-admin/users" },
+            { key: "dashboard-users", label: "common.dashboard", href: "/super-admin/users" },
+            { key: "all-users", label: "users.list", href: "/super-admin/users/all" },
             // In a real app, this might go to a separate audit page, but here we can reuse the page with a query param or just a placeholder for now
             // The user asked for "wording in sidebar".
             { key: "audit-logs", label: "users.auditLog", href: "/super-admin/users?view=audit" },
@@ -57,14 +58,18 @@ export const sidebarItems: MenuItem[] = [
         key: "plans",
         label: "plan.title",
         icon: <Calendar className="w-5 h-5" />,
-        href: "/super-admin/plans",
+        children: [
+            { key: "dashboard-plans", label: "common.dashboard", href: "/super-admin/plans" },
+            { key: "all-plans", label: "plan.list", href: "/super-admin/plans/management" },
+        ],
     },
     {
         key: "products",
         label: "products.title",
         icon: <Package className="w-5 h-5" />,
         children: [
-            { key: "all-products", label: "products.list", href: "/super-admin/products" },
+            { key: "dashboard-products", label: "common.dashboard", href: "/super-admin/products" },
+            { key: "all-products", label: "products.list", href: "/super-admin/products/all" },
             { key: "product-types", label: "products.productTypes", href: "/super-admin/products/types" },
         ],
     },
@@ -94,13 +99,17 @@ export const sidebarItems: MenuItem[] = [
         key: "warehouses",
         label: "warehouses.title",
         icon: <Warehouse className="w-5 h-5" />,
-        href: "/super-admin/warehouse",
+        children: [
+            { key: "dashboard-warehouses", label: "common.dashboard", href: "/super-admin/warehouse" },
+            { key: "all-warehouses", label: "warehouses.list", href: "/super-admin/warehouse/all" },
+        ],
     },
     {
         key: "inventory",
         label: "inventory.title",
         icon: <ClipboardList className="w-5 h-5" />,
         children: [
+            { key: "dashboard-inventory", label: "common.dashboard", href: "/super-admin/inventory" },
             { key: "inv-balance", label: "inventory.balance", href: "/super-admin/inventory/balance" },
             { key: "inv-transactions", label: "inventory.transactions", href: "/super-admin/inventory/transactions" },
         ]

@@ -133,3 +133,14 @@ export interface StockLocationResult {
     materials: StockLocationItem[];
     total_items: number;
 }
+
+export interface WarehouseStats {
+    totalWarehouses: number;
+    activeWarehouses: number;
+    totalValue: number;
+    totalItems: number;
+    lowStockAlerts: number;
+    utilizationRate: number;
+    distribution: { name: string; value: number; count: number; color?: string }[];
+    capacity?: { name: string; capacity: number; used: number; percentage: number }[];
+}

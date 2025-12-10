@@ -164,6 +164,48 @@ class PlanService {
     async restore(id: string): Promise<void> {
         await apiClient.put(`${this.planListEndpoint}/${id}/restore`, {});
     }
+
+    // --- Dashboard Stats ---
+    async getStats(): Promise<import('@/types/plan').PlanStats> {
+        // Mocking for now as endpoint needs to be created on backend
+        const useMock = true;
+
+        if (useMock) {
+            // await new Promise(resolve => setTimeout(resolve, 500));
+            return {
+                totalPlans: 15,
+                activePlans: 8,
+                completedPlans: 4,
+                pendingPlans: 3,
+                totalProductionTarget: 150000,
+                onTimeRate: 94,
+                progress: [
+                    { plan_name: "Q1 Production", target: 50000, produced: 35000, status: "IN_PROGRESS" },
+                    { plan_name: "Special Order X", target: 10000, produced: 10000, status: "COMPLETED" },
+                    { plan_name: "Launch Batch", target: 5000, produced: 1200, status: "IN_PROGRESS" },
+                    { plan_name: "Restock Main", target: 20000, produced: 500, status: "PENDING" }
+                ],
+                statusDistribution: [
+                    { name: "Pending", value: 3, color: "#f59e0b" },
+                    { name: "In Progress", value: 8, color: "#10b981" },
+                    { name: "Completed", value: 4, color: "#6366f1" },
+                    { name: "Cancelled", value: 0, color: "#ef4444" }
+                ]
+            };
+        }
+
+        try {
+            const response = await apiClient.get<import('@/types/api').ApiResponse<import('@/types/plan').PlanStats>>('/product-plans/dashboard/stats');
+            return response.data;
+        } catch (error) {
+            console.warn("API plan stats failed", error);
+            // Return empty fallback
+            return {
+                totalPlans: 0, activePlans: 0, completedPlans: 0, pendingPlans: 0,
+                totalProductionTarget: 0, onTimeRate: 0, progress: [], statusDistribution: []
+            };
+        }
+    }
 }
 
 export const planService = new PlanService();

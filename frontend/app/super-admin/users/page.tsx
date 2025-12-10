@@ -1,6 +1,6 @@
 
-import { UsersManagement } from '@/components/users/users-management';
+import { UserDashboard } from "@/components/users/user-dashboard";
 
-export default function UsersPage() {
-    return <UsersManagement />;
+export default function UserDashboardPage() {
+    return <UserDashboard />;
 }

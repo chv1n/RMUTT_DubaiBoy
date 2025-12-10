@@ -66,17 +66,21 @@ export default function LoginPage() {
                 <ThemeSwitch />
               </div>
               {/* Logo & Header */}
-              <div className="flex items-start gap-4 mb-8">
-                <div className="w-15 h-15 text-white rounded-full bg-primary flex items-center justify-center  font-bold text-xl shrink-0">
-                  MC
+              <div className="flex flex-col items-center mb-8 gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center shadow-lg shadow-primary-500/30">
+                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <h1 className="text-4xl font-black tracking-tight">
+                    <span className="text-default-900">Material</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600">Core</span>
+                  </h1>
                 </div>
-                <div>
-
-                  <h2 className="text-2xl font-bold ">เข้าสู่ระบบบัญชีของคุณ</h2>
-                  <p className="text-default-500 text-sm mt-1">
-                    ยินดีต้อนรับเข้าสู่ระบบจัดการวัตถุดิบ
-                  </p>
-                </div>
+                <p className="text-default-500 text-sm mt-1 text-center max-w-xs">
+                  ระบบจัดการทรัพยากรการผลิตอัจฉริยะ <br /> เพื่อประสิทธิภาพสูงสุดของโรงงาน
+                </p>
               </div>
 
               <div className="mb-6">

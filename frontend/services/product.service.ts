@@ -43,8 +43,8 @@ const mapProductDTOToDomain = (dto: ProductDTO): Product => ({
     id: dto.product_id,
     name: dto.product_name,
     typeId: dto.product_type_id,
-    typeName: dto.product_type?.type_name || "Unknown",
-    isActive: Boolean(dto.active),
+    typeName: dto.product_type?.type_name || dto.type_name || "Unknown",
+    isActive: dto.is_active !== undefined ? Boolean(dto.is_active) : Boolean(dto.active),
     lastUpdated: dto.update_date || dto.create_date,
     bom: (dto.boms || []).map(mapBomDTOToDomain)
 });
@@ -355,6 +355,60 @@ class ProductService {
         }
         const response = await apiClient.get<ApiResponse<import('@/types/product').AuditLogEntry[]>>(`${this.endpoint}/${productId}/audit-log`);
         return response.data;
+    }
+
+    // --- Dashboard Stats ---
+    async getStats(): Promise<import('@/types/product').ProductStats> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            // Count from mock data
+            const total = MOCK_PRODUCTS.length;
+            const active = MOCK_PRODUCTS.filter(p => p.active).length;
+
+            // Mock distribution
+            const typeCounts: Record<string, number> = {};
+            MOCK_PRODUCTS.forEach(p => {
+                const typeName = p.product_type?.type_name || "Unknown";
+                typeCounts[typeName] = (typeCounts[typeName] || 0) + 1;
+            });
+            const distribution = Object.entries(typeCounts).map(([name, count]) => ({
+                name,
+                value: count,
+                color: '#' + Math.floor(Math.random() * 16777215).toString(16) // Random color for mock
+            }));
+
+            return {
+                totalProducts: total,
+                activeProducts: active,
+                newThisMonth: 5, // mock
+                avgCost: 1500, // mock
+                distribution,
+                costTrends: [
+                    { name: "Jan", value: 1400 },
+                    { name: "Feb", value: 1450 },
+                    { name: "Mar", value: 1420 },
+                    { name: "Apr", value: 1500 },
+                    { name: "May", value: 1550 },
+                    { name: "Jun", value: 1600 }
+                ]
+            };
+        }
+
+        try {
+            const response = await apiClient.get<ApiResponse<import('@/types/product').ProductStats>>(`${this.endpoint}/dashboard/stats`);
+            return response.data;
+        } catch (error) {
+            console.warn("API failed, falling back to mock stats", error);
+            // Fallback mock
+            return {
+                totalProducts: 0,
+                activeProducts: 0,
+                newThisMonth: 0,
+                avgCost: 0,
+                distribution: [],
+                costTrends: []
+            };
+        }
     }
 }
 

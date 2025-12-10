@@ -294,6 +294,48 @@ class WarehouseService {
         }
         await apiClient.patch(`${this.endpoint}/${id}/restore`, {});
     }
+
+    // --- Dashboard Stats ---
+    async getStats(): Promise<import('@/types/warehouse').WarehouseStats> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+
+            return {
+                totalWarehouses: MOCK_WAREHOUSES.length,
+                activeWarehouses: MOCK_WAREHOUSES.filter(w => w.is_active).length,
+                totalValue: 1250000,
+                totalItems: 8500,
+                lowStockAlerts: 5,
+                utilizationRate: 72,
+                distribution: [
+                    { name: "Main Warehouse", value: 850000, count: 5000, color: '#6366f1' },
+                    { name: "Chemical Storage", value: 250000, count: 1500, color: '#10b981' },
+                    { name: "Cold Storage", value: 150000, count: 2000, color: '#f59e0b' }
+                ],
+                capacity: [
+                    { name: "Main Warehouse", capacity: 10000, used: 5000, percentage: 50 },
+                    { name: "Chemical Storage", capacity: 2000, used: 1500, percentage: 75 },
+                    { name: "Cold Storage", capacity: 3000, used: 2000, percentage: 66 }
+                ]
+            };
+        }
+
+        try {
+            const response = await apiClient.get<ApiResponse<import('@/types/warehouse').WarehouseStats>>(`${this.endpoint}/dashboard/stats`);
+            return response.data;
+        } catch (error) {
+            console.warn("API warehouse stats failed, using fallback", error);
+            return {
+                totalWarehouses: 0,
+                activeWarehouses: 0,
+                totalValue: 0,
+                totalItems: 0,
+                lowStockAlerts: 0,
+                utilizationRate: 0,
+                distribution: []
+            };
+        }
+    }
 }
 
 export const warehouseService = new WarehouseService();

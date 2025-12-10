@@ -88,13 +88,15 @@ export interface ProductDTO {
     product_id: number;
     product_name: string;
     product_type_id: number;
-    active: number;
+    active?: number;
+    is_active?: boolean | number; // Support backend variation
     create_date: string;
     update_date: string;
     deleted_at?: string;
 
     // Relations
     product_type?: ProductTypeDTO;
+    type_name?: string; // Support flat structure
     boms?: BomDTO[];
 }
 
@@ -180,4 +182,13 @@ export interface AuditLogEntry {
     timestamp: string;
     details: string;
     entity: string;
+}
+
+export interface ProductStats {
+    totalProducts: number;
+    activeProducts: number;
+    newThisMonth: number;
+    avgCost: number;
+    distribution: { name: string; value: number; color?: string }[];
+    costTrends: { name: string; value: number }[];
 }

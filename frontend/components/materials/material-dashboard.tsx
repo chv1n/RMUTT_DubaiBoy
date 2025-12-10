@@ -39,7 +39,7 @@ export function MaterialDashboard() {
     // 1. Total Materials Count (Active)
     const { data: materialData, isLoading: loadMaterials } = useQuery({
         queryKey: ['materials', 'all', 'meta'],
-        queryFn: () => materialService.getAll(1, 1, "", true) // Fetch 1 just for meta
+        queryFn: () => materialService.getAll(1, 1, "", "true") // Fetch 1 just for meta
     });
 
     // 2. Inventory Balance (for Valuation & Distribution)
