@@ -6,9 +6,10 @@ import { TransactionType } from '../../../common/enums';
  * DTO สำหรับ query รายงานประวัติการเคลื่อนไหว
  */
 export class MovementHistoryQueryDto {
+    @IsOptional()
     @IsNumber()
     @Type(() => Number)
-    material_id: number;
+    material_id?: number;
 
     @IsOptional()
     @Type(() => Number)
