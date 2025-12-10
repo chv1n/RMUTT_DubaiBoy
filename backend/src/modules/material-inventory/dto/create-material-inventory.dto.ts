@@ -1,27 +1,35 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString, IsNotEmpty, IsDate } from "class-validator";
+import { Type } from "class-transformer";
 
 export class CreateMaterialInventoryDto {
 
 
     @IsNumber()
-    @IsOptional()
-    material_id?: number;
+    @IsNotEmpty()
+    material_id: number;
 
     @IsNumber()
-    @IsOptional()
-    warehouse_id?: number;
+    @IsNotEmpty()
+    warehouse_id: number;
 
     @IsNumber()
-    @IsOptional()
-    quantity?: number;
+    @IsNotEmpty()
+    quantity: number;
 
-    @IsNumber()
-    @IsOptional()
-    supplier_id?: number;
 
     @IsString()
     @IsOptional()
     order_number?: string;
+
+    @IsDate()
+    @Type(() => Date)
+    @IsOptional()
+    mfg_date?: Date;
+
+    @IsDate()
+    @Type(() => Date)
+    @IsOptional()
+    exp_date?: Date;
 
 
 }
