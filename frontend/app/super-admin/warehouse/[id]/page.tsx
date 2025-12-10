@@ -66,9 +66,21 @@ export default function WarehouseDetailPage() {
         try {
             setIsLoadingHistory(true);
             const res = await warehouseService.getMovementHistory(id, historyPage, 10);
-            if (res.success && res.data) {
-                setHistoryItems(res.data.data);
-                setHistoryTotalPages(res.data.meta.totalPages);
+
+            // Flexible handling for both nested (Mock/Type) and flat (Real API) structures
+            const responseData = res as any;
+
+            if (res.success) {
+                // Check if data is directly the array (Real API based on user snippet)
+                if (Array.isArray(responseData.data)) {
+                    setHistoryItems(responseData.data);
+                    setHistoryTotalPages(responseData.meta?.totalPages || 1);
+                }
+                // Fallback to nested structure (mock/legacy type)
+                else if (responseData.data && Array.isArray(responseData.data.data)) {
+                    setHistoryItems(responseData.data.data);
+                    setHistoryTotalPages(responseData.meta?.totalPages || 1);
+                }
             }
         } catch (error) {
             console.error("Failed to fetch history", error);

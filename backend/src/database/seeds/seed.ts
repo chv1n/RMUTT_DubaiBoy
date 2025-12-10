@@ -8,6 +8,7 @@ import { Role } from '../../common/enums/role.enum'; // Import Role enum
 import { Product } from '../../modules/product/entities/product.entity';
 import { ProductType } from '../../modules/product-type/entities/product-type.entity';
 import { WarehouseMaster } from '../../modules/warehouse-master/entities/warehouse-master.entity';
+import { MaterialMaster } from '../../modules/material/entities/material-master.entity';
 
 async function seed() {
     try {
@@ -242,6 +243,202 @@ async function seed() {
             } else {
                 console.log(`User already exists: ${userData.username}`);
             }
+        }
+
+        // --- Seed Materials ---
+        console.log('Seeding Materials...');
+        const materialRepo = AppDataSource.getRepository(MaterialMaster);
+
+        // Fetch dependencies for lookups
+        const waferGroup = await groupRepo.findOneBy({ group_name: 'ซิลิคอนเวเฟอร์' });
+        const chemGroup = await groupRepo.findOneBy({ group_name: 'สารเคมี' });
+        const prGroup = await groupRepo.findOneBy({ group_name: 'โฟโตเรซิสต์' });
+        const gasGroup = await groupRepo.findOneBy({ group_name: 'แก๊สอุตสาหกรรม' });
+        const spareGroup = await groupRepo.findOneBy({ group_name: 'อะไหล่เครื่องจักร' });
+
+        const waferUnit = await unitRepo.findOneBy({ unit_name: 'แผ่น' });
+        const literUnit = await unitRepo.findOneBy({ unit_name: 'ลิตร' });
+        const cylUnit = await unitRepo.findOneBy({ unit_name: 'ถัง' });
+        const pieceUnit = await unitRepo.findOneBy({ unit_name: 'ชิ้น' });
+
+        const foupCont = await containerRepo.findOneBy({ type_name: 'FOUP' });
+        const canisterCont = await containerRepo.findOneBy({ type_name: 'Canister' });
+        const bottleCont = await containerRepo.findOneBy({ type_name: 'Bottle' });
+        const cylinderCont = await containerRepo.findOneBy({ type_name: 'Cylinder' });
+        const boxCont = await containerRepo.findOneBy({ type_name: 'Box' });
+
+        const siamSilicon = await supplierRepo.findOneBy({ supplier_name: 'Siam Silicon Wafer Co., Ltd.' });
+        const advChem = await supplierRepo.findOneBy({ supplier_name: 'Advanced Chemical Solutions' });
+        const pureGas = await supplierRepo.findOneBy({ supplier_name: 'Pure Gas Supply' });
+        const techParts = await supplierRepo.findOneBy({ supplier_name: 'TechParts Precision' });
+
+        if (waferGroup && chemGroup && prGroup && gasGroup && spareGroup &&
+            waferUnit && literUnit && cylUnit && pieceUnit &&
+            foupCont && canisterCont && bottleCont && cylinderCont && boxCont &&
+            siamSilicon && advChem && pureGas && techParts) {
+
+            const materials = [
+                {
+                    material_name: '300mm Silicon Wafer (Prime)',
+                    material_group: waferGroup,
+                    unit: waferUnit,
+                    container_type: foupCont,
+                    quantity_per_container: 25,
+                    container_min_stock: 10,
+                    container_max_stock: 50,
+                    order_leadtime: 14,
+                    lifetime: 180,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 5000,
+                    supplier: siamSilicon,
+                    is_active: true
+                },
+                {
+                    material_name: '300mm Silicon Wafer (Test)',
+                    material_group: waferGroup,
+                    unit: waferUnit,
+                    container_type: foupCont,
+                    quantity_per_container: 25,
+                    container_min_stock: 20,
+                    container_max_stock: 100,
+                    order_leadtime: 14,
+                    lifetime: 365,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 2000,
+                    supplier: siamSilicon,
+                    is_active: true
+                },
+                {
+                    material_name: 'Photoresist PR-193nm',
+                    material_group: prGroup,
+                    unit: literUnit,
+                    container_type: bottleCont,
+                    quantity_per_container: 4,
+                    container_min_stock: 5,
+                    container_max_stock: 20,
+                    order_leadtime: 30,
+                    lifetime: 90,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 15000,
+                    supplier: advChem,
+                    is_active: true
+                },
+                {
+                    material_name: 'Developer Solution (TMAH 2.38%)',
+                    material_group: chemGroup,
+                    unit: literUnit,
+                    container_type: canisterCont,
+                    quantity_per_container: 20,
+                    container_min_stock: 10,
+                    container_max_stock: 40,
+                    order_leadtime: 7,
+                    lifetime: 180,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 500,
+                    supplier: advChem,
+                    is_active: true
+                },
+                {
+                    material_name: 'Sulfuric Acid (H2SO4 - ULSI)',
+                    material_group: chemGroup,
+                    unit: literUnit,
+                    container_type: canisterCont,
+                    quantity_per_container: 20,
+                    container_min_stock: 15,
+                    container_max_stock: 50,
+                    order_leadtime: 5,
+                    lifetime: 365,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 300,
+                    supplier: advChem,
+                    is_active: true
+                },
+                {
+                    material_name: 'Hydrogen Peroxide (H2O2)',
+                    material_group: chemGroup,
+                    unit: literUnit,
+                    container_type: canisterCont,
+                    quantity_per_container: 20,
+                    container_min_stock: 15,
+                    container_max_stock: 50,
+                    order_leadtime: 5,
+                    lifetime: 90,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 400,
+                    supplier: advChem,
+                    is_active: true
+                },
+                {
+                    material_name: 'Nitrogen Gas (N2 - 99.999%)',
+                    material_group: gasGroup,
+                    unit: cylUnit,
+                    container_type: cylinderCont,
+                    quantity_per_container: 1,
+                    container_min_stock: 20,
+                    container_max_stock: 100,
+                    order_leadtime: 2,
+                    lifetime: 3650,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 4000,
+                    supplier: pureGas,
+                    is_active: true
+                },
+                {
+                    material_name: 'Silane Gas (SiH4)',
+                    material_group: gasGroup,
+                    unit: cylUnit,
+                    container_type: cylinderCont,
+                    quantity_per_container: 1,
+                    container_min_stock: 5,
+                    container_max_stock: 20,
+                    order_leadtime: 45,
+                    lifetime: 365,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 25000,
+                    supplier: pureGas,
+                    is_active: true
+                },
+                {
+                    material_name: 'Copper Target (450mm)',
+                    material_group: spareGroup,
+                    unit: pieceUnit,
+                    container_type: boxCont,
+                    quantity_per_container: 1,
+                    container_min_stock: 2,
+                    container_max_stock: 10,
+                    order_leadtime: 60,
+                    lifetime: 0,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 80000,
+                    supplier: techParts,
+                    is_active: true
+                },
+                {
+                    material_name: 'CMP Slurry (Oxide)',
+                    material_group: chemGroup,
+                    unit: literUnit,
+                    container_type: canisterCont,
+                    quantity_per_container: 20,
+                    container_min_stock: 8,
+                    container_max_stock: 32,
+                    order_leadtime: 21,
+                    lifetime: 120,
+                    lifetime_unit: 'days',
+                    cost_per_unit: 2000,
+                    supplier: advChem,
+                    is_active: true
+                }
+            ];
+
+            for (const matData of materials) {
+                const exists = await materialRepo.findOneBy({ material_name: matData.material_name });
+                if (!exists) {
+                    await materialRepo.save(materialRepo.create(matData));
+                    console.log(`Seeded Material: ${matData.material_name}`);
+                }
+            }
+        } else {
+            console.warn('Skipping Material seeding due to missing dependencies.');
         }
 
         console.log('Seeding completed successfully.');

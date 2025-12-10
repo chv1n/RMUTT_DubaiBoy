@@ -182,7 +182,7 @@ class WarehouseService {
             };
         }
 
-        const response = await apiClient.get<ApiResponse<StockLocationResult>>(`/inventory/reports/stock-location?warehouse_id=${warehouseId}&page=${page}&limit=${limit}&search=${search}`);
+        const response = await apiClient.get<ApiResponse<StockLocationResult>>(`/inventory/reports/stock-location?warehouse_id=${warehouseId}`);
         return response;
     }
 
@@ -222,7 +222,7 @@ class WarehouseService {
             };
         }
 
-        const response = await apiClient.get<ApiResponse<MovementHistoryResult>>(`/inventory/reports/movement-history?warehouse_id=${warehouseId}&page=${page}&limit=${limit}`);
+        const response = await apiClient.get<ApiResponse<MovementHistoryResult>>(`/inventory/reports/movement-history?warehouse_id=${warehouseId}`);
         return response;
     }
 
@@ -257,7 +257,7 @@ class WarehouseService {
                 }
             };
         }
-        const response = await apiClient.get<ApiResponse<import('@/types/warehouse').MaterialInventoryDTO[]>>(`/material-inventory?warehouse_id=${warehouseId}&page=${page}&limit=${limit}`);
+        const response = await apiClient.get<ApiResponse<import('@/types/warehouse').MaterialInventoryDTO[]>>(`/material-inventory?warehouse_id=${warehouseId}`);
 
         return {
             ...response,

@@ -40,7 +40,7 @@ export const MovementHistoryTable: React.FC<MovementHistoryTableProps> = ({ item
                     <TableColumn>REASON</TableColumn>
                 </TableHeader>
                 <TableBody
-                    items={items}
+                    items={items || []}
                     loadingContent={<Spinner label="Loading..." />}
                     loadingState={isLoading ? 'loading' : 'idle'}
                     emptyContent={"No movement history found."}
