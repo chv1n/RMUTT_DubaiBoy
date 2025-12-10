@@ -30,7 +30,8 @@
         "analytics": "分析",
         "reports": "レポート",
         "help": "ヘルプとサポート",
-        "customize": "カスタマイズ"
+        "customize": "カスタマイズ",
+        "detail": "詳細"
     },
     "materials": {
         "title": "資材管理",
@@ -231,5 +232,87 @@
              "waste": "廃棄率 (%)",
              "cost": "原価"
         }
+    },
+    "inventory": {
+        "title": "在庫管理",
+        "balance": "在庫残高",
+        "transactions": "在庫移動履歴",
+        "movementHistory": "移動履歴",
+        "filterByMaterial": "材料でフィルタ",
+        "filterByWarehouse": "倉庫でフィルタ",
+        "allMaterials": "すべての材料",
+        "allWarehouses": "すべての倉庫",
+        "lowStock": "在庫不足アラート",
+        "checkStock": "在庫確認",
+        "goodsReceipt": "入庫 (IN)",
+        "goodsIssue": "出庫 (OUT)",
+        "transfer": "倉庫間移動",
+        "adjustment": "在庫調整",
+        "lotSuggestion": "ロット/バッチ提案",
+        "fields": {
+            "mfgDate": "製造日",
+            "expDate": "有効期限",
+            "type": "タイプ",
+            "warehouse": "倉庫",
+            "orderNumber": "ロット/バッチ番号",
+            "reference": "参照番号",
+            "reason": "理由・備考",
+            "quantity": "数量",
+            "sourceWarehouse": "移動元倉庫",
+            "targetWarehouse": "移動先倉庫",
+            "current": "現在の在庫",
+            "available": "利用可能在庫",
+            "shortage": "不足分"
+        },
+        "strategy": {
+            "fifo": "FIFO (先入先出)",
+            "fefo": "FEFO (先期限先出)",
+            "lifo": "LIFO (後入先出)"
+        }
+    },
+    "users": {
+        "title": "ユーザー管理",
+        "list": "ユーザー一覧",
+        "addUser": "ユーザー追加",
+        "editUser": "ユーザー編集",
+        "fullname": "氏名",
+        "username": "ユーザー名",
+        "email": "メールアドレス",
+        "role": "役割",
+        "status": "ステータス",
+        "lastLogin": "最終ログイン",
+        "active": "有効",
+        "inactive": "無効",
+        "delete": "削除",
+        "restore": "復元",
+        "search": "ユーザーを検索...",
+        "messages": {
+            "created": "ユーザーを作成しました",
+            "updated": "ユーザーを更新しました",
+            "deleted": "ユーザーを削除しました",
+            "restored": "ユーザーを復元しました"
+        },
+        "profile": "ユーザー",
+        "auditLog": "監査ログ",
+        "audit": {
+            "date": "日付",
+            "action": "アクション",
+            "details": "詳細",
+            "ip": "IPアドレス"
+        }
+    },
+    "user": {
+        "profile": {
+            "details": "ユーザー詳細"
+        },
+        "field": {
+            "username": "ユーザー名",
+            "email": "メールアドレス",
+            "fullname": "氏名",
+            "role": "役割",
+            "status": "ステータス",
+            "createdAt": "作成日時"
+        },
+        "edit": "ユーザー編集"
     }
 }

@@ -35,7 +35,7 @@
         "date": "Date",
         "user": "User",
         "action": "Action",
-        "details": "Details"
+        "detail": "Details"
     },
     "materials": {
         "title": "Material Management",
@@ -260,5 +260,119 @@
         "workCenter": "Work Center",
         "setupTime": "Setup Time (min)",
         "runTime": "Run Time (min)"
+    },
+    "warehouses": {
+        "title": "Warehouse Management",
+        "list": "Warehouse List",
+        "addWarehouse": "Add Warehouse",
+        "editWarehouse": "Edit Warehouse",
+        "name": "Warehouse Name",
+        "code": "Code",
+        "phone": "Phone",
+        "email": "Email",
+        "address": "Address",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "overview": "Overview",
+        "inventory": "Inventory",
+        "transactions": "Transactions",
+        "noInventory": "No items in stock",
+        "noTransactions": "No recent transactions",
+        "inventoryList": "Stock List",
+        "transactionList": "Movement History",
+        "material": "Material",
+        "quantity": "Quantity",
+        "supplier": "Supplier",
+        "orderNumber": "Order #",
+        "type": "Type",
+        "reason": "Reason",
+        "by": "By",
+        "in": "IN",
+        "out": "OUT",
+        "adjust": "ADJUST",
+        "transfer": "TRANSFER"
+    },
+    "inventory": {
+        "title": "Inventory Management",
+        "balance": "Balance",
+        "transactions": "Transactions",
+        "movementHistory": "Movement History",
+        "filterByMaterial": "Filter by Material",
+        "filterByWarehouse": "Filter by Warehouse",
+        "allMaterials": "All Materials",
+        "allWarehouses": "All Warehouses",
+        "lowStock": "Low Stock Alerts",
+        "checkStock": "Check Stock",
+        "goodsReceipt": "Goods Receipt (IN)",
+        "goodsIssue": "Goods Issue (OUT)",
+        "transfer": "Transfer",
+        "adjustment": "Adjustment",
+        "lotSuggestion": "Lot Suggestion",
+        "fields": {
+            "mfgDate": "Mfg Date",
+            "expDate": "Exp Date",
+            "type": "Type",
+            "warehouse": "Warehouse",
+            "orderNumber": "Lot/Batch No.",
+            "reference": "Reference No.",
+            "reason": "Reason",
+            "quantity": "Quantity",
+            "sourceWarehouse": "Source Warehouse",
+            "targetWarehouse": "Target Warehouse",
+            "current": "Current Stock",
+            "available": "Available",
+            "shortage": "Shortage"
+        },
+        "strategy": {
+            "fifo": "FIFO (First In First Out)",
+            "fefo": "FEFO (First Expire First Out)",
+            "lifo": "LIFO (Last In First Out)"
+        }
+    },
+    "users": {
+        "title": "User Management",
+        "list": "User List",
+        "addUser": "Add User",
+        "editUser": "Edit User",
+        "fullname": "Full Name",
+        "username": "Username",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "lastLogin": "Last Login",
+        "active": "Active",
+        "inactive": "Inactive",
+        "delete": "Delete",
+        "restore": "Restore",
+        "search": "Search Users...",
+        "messages": {
+            "created": "User created successfully",
+            "updated": "User updated successfully",
+            "deleted": "User deleted successfully",
+            "restored": "User restored successfully"
+        },
+        "profile": "Users",
+        "auditLog": "Audit Log",
+        "audit": {
+            "date": "Date",
+            "action": "Action",
+            "details": "Details",
+            "ip": "IP Address"
+        }
+    },
+    "user": {
+        "profile": {
+            "details": "User Details"
+        },
+        "field": {
+            "username": "Username",
+            "email": "Email",
+            "fullname": "Full Name",
+            "role": "Role",
+            "status": "Status",
+            "createdAt": "Created At"
+        },
+        "edit": "Edit User"
     }
 }

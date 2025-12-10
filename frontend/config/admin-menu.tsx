@@ -16,7 +16,9 @@ import {
     Box,
     Calendar,
     Layers,
-    Truck
+    Truck,
+    Warehouse,
+    ClipboardList
 } from "lucide-react";
 
 export interface SubMenuItem {
@@ -42,9 +44,14 @@ export const sidebarItems: MenuItem[] = [
     },
     {
         key: "users",
-        label: "user.title",
+        label: "users.title",
         icon: <Users className="w-5 h-5" />,
-        href: "/super-admin/users",
+        children: [
+            { key: "all-users", label: "users.list", href: "/super-admin/users" },
+            // In a real app, this might go to a separate audit page, but here we can reuse the page with a query param or just a placeholder for now
+            // The user asked for "wording in sidebar".
+            { key: "audit-logs", label: "users.auditLog", href: "/super-admin/users?view=audit" },
+        ]
     },
     {
         key: "plans",
@@ -82,6 +89,21 @@ export const sidebarItems: MenuItem[] = [
             { key: "dashboard-suppliers", label: "common.dashboard", href: "/super-admin/suppliers" },
             { key: "all-suppliers", label: "suppliers.list", href: "/super-admin/suppliers/all" },
         ],
+    },
+    {
+        key: "warehouses",
+        label: "warehouses.title",
+        icon: <Warehouse className="w-5 h-5" />,
+        href: "/super-admin/warehouse",
+    },
+    {
+        key: "inventory",
+        label: "inventory.title",
+        icon: <ClipboardList className="w-5 h-5" />,
+        children: [
+            { key: "inv-balance", label: "inventory.balance", href: "/super-admin/inventory/balance" },
+            { key: "inv-transactions", label: "inventory.transactions", href: "/super-admin/inventory/transactions" },
+        ]
     },
     {
         key: "analytics",

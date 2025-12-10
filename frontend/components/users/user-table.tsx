@@ -15,8 +15,8 @@ import { User as HeroUser } from "@heroui/user";
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import { Pagination } from "@heroui/pagination";
-import { MoreVertical, Eye, Edit, Key, Ban, UserCheck, Trash2 } from "lucide-react";
-import { User, UserRole, UserStatus } from "@/types/user";
+import { MoreVertical, Edit, Ban, UserCheck, Trash2, RotateCcw } from "lucide-react";
+import { User } from "@/types/user";
 import { UserStatusBadge, UserRoleBadge } from "./user-badges";
 import { useTranslation } from "react-i18next";
 
@@ -45,9 +45,9 @@ export const UserTable = ({
     onSelectionChange,
     onAction,
 }: UserTableProps) => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
-    const pages = Math.ceil(total / limit);
+    const pages = Math.ceil(total / limit) || 1;
 
     const renderCell = React.useCallback((user: User, columnKey: React.Key) => {
         switch (columnKey) {
@@ -56,20 +56,20 @@ export const UserTable = ({
                     <HeroUser
                         avatarProps={{ radius: "lg", src: user.avatar_url }}
                         description={user.email}
-                        name={user.display_name?.[i18n.language as 'en' | 'th' | 'ja'] || user.username}
+                        name={user.fullname}
                     >
                         {user.email}
                     </HeroUser>
                 );
-            case "roles":
+            case "role":
                 return (
                     <div className="flex flex-col gap-1">
-                        {user.roles.map(r => <UserRoleBadge key={r} role={r} />)}
+                        <UserRoleBadge role={user.role} />
                         <span className="text-tiny text-default-400">{user.department}</span>
                     </div>
                 );
-            case "status":
-                return <UserStatusBadge status={user.status} />;
+            case "is_active":
+                return <UserStatusBadge isActive={user.is_active} />;
             case "last_login":
                 return (
                     <div className="flex flex-col">
@@ -91,31 +91,30 @@ export const UserTable = ({
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu aria-label="User Actions" onAction={(key) => onAction(key as string, user)}>
-                                <DropdownItem key="view" startContent={<Eye size={16} />}>{t('user.actions.viewProfile')}</DropdownItem>
-                                <DropdownItem key="edit" startContent={<Edit size={16} />}>{t('user.actions.edit')}</DropdownItem>
-                                <DropdownItem key="reset-password" startContent={<Key size={16} />}>{t('user.actions.resetPassword')}</DropdownItem>
-                                {user.status === 'active' ? (
-                                    <DropdownItem key="disable" startContent={<Ban size={16} />} className="text-danger" color="danger">{t('user.actions.disable')}</DropdownItem>
+                                <DropdownItem key="edit" startContent={<Edit size={16} />}>{t('users.editUser')}</DropdownItem>
+                                {user.is_active ? (
+                                    <DropdownItem key="disable" startContent={<Ban size={16} />} className="text-warning" color="warning">{t('users.inactive')}</DropdownItem>
                                 ) : (
-                                    <DropdownItem key="enable" startContent={<UserCheck size={16} />} className="text-success" color="success">{t('user.actions.enable')}</DropdownItem>
+                                    <DropdownItem key="enable" startContent={<UserCheck size={16} />} className="text-success" color="success">{t('users.active')}</DropdownItem>
                                 )}
-                                <DropdownItem key="delete" startContent={<Trash2 size={16} />} className="text-danger" color="danger">{t('user.actions.delete')}</DropdownItem>
+                                <DropdownItem key="delete" startContent={<Trash2 size={16} />} className="text-danger" color="danger">{t('users.delete')}</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
                     </div>
                 );
             default:
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return (user as any)[String(columnKey)];
         }
-    }, [onAction, i18n.language, t]);
+    }, [onAction, t]);
 
     const columns = [
-        { name: t('user.field.fullname'), uid: "user", sortable: true },
-        { name: t('user.field.roles'), uid: "roles", sortable: false },
-        { name: t('user.field.status'), uid: "status", sortable: true },
-        { name: t('user.field.lastLogin'), uid: "last_login", sortable: true },
-        { name: t('user.field.createdAt'), uid: "created_at", sortable: true },
-        { name: t('user.loading'), uid: "actions" },
+        { name: t('users.fullname'), uid: "user", sortable: true },
+        { name: t('users.role'), uid: "role", sortable: false }, // Role sorting logic in mock might be tricky if not enabled, but enabled in spec sort_field
+        { name: t('users.status'), uid: "is_active", sortable: true },
+        { name: t('users.lastLogin'), uid: "last_login", sortable: true },
+        { name: t('common.date'), uid: "created_at", sortable: true },
+        { name: t('common.actions'), uid: "actions" },
     ];
 
     return (
@@ -141,7 +140,7 @@ export const UserTable = ({
                 sortDescriptor={sortDescriptor}
                 onSortChange={onSortChange}
                 selectionMode="multiple"
-                onSelectionChange={onSelectionChange} // Handle bulk selection state
+                onSelectionChange={onSelectionChange}
             >
                 <TableHeader columns={columns}>
                     {(column) => (

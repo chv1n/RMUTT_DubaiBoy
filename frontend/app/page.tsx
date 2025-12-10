@@ -7,7 +7,7 @@ import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
 import { useLogin } from "./../hooks/api/useLogin";
-import { loginSchema, LoginRequest } from "./../services/auth.service";
+import { loginSchema, LoginRequest, LoginResponse } from "./../services/auth.service";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { useRouter } from "next/navigation";
 import { title } from "@/components/primitives";
@@ -24,9 +24,10 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginRequest) => {
     try {
-      await login(data);
-      // Handle success (e.g., redirect)
-      router.push("/super-admin");
+      const response: any = await login(data);
+      if (response.data) {
+        router.push("/super-admin");
+      }
     } catch (e) {
       // Error is handled by the hook and displayed below
       console.error("Login failed", e);
@@ -56,23 +57,7 @@ export default function LoginPage() {
               <div className="mt-8 mr-10 h-44 w-full rounded-xl bg-gradient-to-tl from-primary via-primary to-white/30 opacity-90 blur-sm" />
             </div>
           </div>
-          {/* <div className="hidden lg:flex min-h-[500px] h-dvh  max-w-[60%] max-h-[700px]  relative flex-col justify-center px-12 overflow-hidden  ">
-            <div className="relative z-10   ">
-              <h1 className={title({ size: "lg", color: "blue", class: "font-bold" })}>Material Core</h1>
-              <h1 className="text-3xl font-bold leading-tight mb-6 mt-8">
-                ยกระดับการจัดการวัตถุดิบ ให้โรงงานทำงานได้อย่างมีประสิทธิภาพสูงสุด
-              </h1>
-              <p className=" text-lg">
-                เชื่อมต่อข้อมูลแบบเรียลไทม์ ลดความผิดพลาด และเพิ่มประสิทธิภาพไลน์ผลิต
-                ด้วยระบบจัดการ Material ที่ใช้งานง่ายและเชื่อถือได้
-              </p>
-            </div> */}
 
-          {/* Blue Blurred Gradient */}
-          {/* <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] bg-primary/70  blur-[120px] rounded-full pointer-events-none" />
-          </div> */}
-
-          {/* Right Side - Login Form */}
           <div className="flex w-full lg:w-1/2  items-center justify-center p-8 dark:bg-white/5 ">
 
             <div className="w-full max-w-md">

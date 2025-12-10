@@ -30,7 +30,8 @@
         "analytics": "การวิเคราะห์",
         "reports": "รายงาน",
         "help": "ช่วยเหลือ",
-        "customize": "ปรับแต่ง"
+        "customize": "ปรับแต่ง",
+        "detail": "รายละเอียด"
     },
     "materials": {
         "title": "จัดการวัสดุอุปกรณ์",
@@ -204,5 +205,87 @@
         "title": "จัดการสินค้า",
         "list": "รายการสินค้า",
         "productTypes": "ประเภทสินค้า"
+    },
+    "inventory": {
+        "title": "จัดการสินค้าคงคลัง",
+        "balance": "สินค้าคงเหลือ",
+        "transactions": "รายการเคลื่อนไหว",
+        "movementHistory": "ประวัติการเคลื่อนไหว",
+        "filterByMaterial": "กรองตามวัสดุ",
+        "filterByWarehouse": "กรองตามคลังสินค้า",
+        "allMaterials": "วัสดุทั้งหมด",
+        "allWarehouses": "คลังสินค้าทั้งหมด",
+        "lowStock": "สินค้าใกล้หมด",
+        "checkStock": "ตรวจสอบสต็อก",
+        "goodsReceipt": "รับสินค้าเข้า (IN)",
+        "goodsIssue": "เบิกสินค้าออก (OUT)",
+        "transfer": "โอนย้ายระหว่างคลัง",
+        "adjustment": "ปรับปรุงยอด",
+        "lotSuggestion": "แนะนำ Lot/Batch",
+        "fields": {
+            "mfgDate": "วันที่ผลิต",
+            "expDate": "วันหมดอายุ",
+            "type": "ประเภท",
+            "warehouse": "คลังสินค้า",
+            "orderNumber": "เลขที่ Lot/Batch",
+            "reference": "เลขที่อ้างอิง",
+            "reason": "เหตุผล/หมายเหตุ",
+            "quantity": "จำนวน",
+            "sourceWarehouse": "คลังต้นทาง",
+            "targetWarehouse": "คลังปลายทาง",
+            "current": "ยอดคงเหลือปัจจุบัน",
+            "available": "พร้อมใช้งาน",
+            "shortage": "ยอดขาดแคลน"
+        },
+        "strategy": {
+            "fifo": "FIFO (เข้าก่อนออกก่อน)",
+            "fefo": "FEFO (หมดอายุก่อนออกก่อน)",
+            "lifo": "LIFO (เข้าทีหลังออกก่อน)"
+        }
+    },
+    "users": {
+        "title": "จัดการผู้ใช้งาน",
+        "list": "รายชื่อผู้ใช้งาน",
+        "addUser": "เพิ่มผู้ใช้งาน",
+        "editUser": "แก้ไขผู้ใช้งาน",
+        "fullname": "ชื่อ-นามสกุล",
+        "username": "ชื่อผู้ใช้",
+        "email": "อีเมล",
+        "role": "สิทธิ์การใช้งาน",
+        "status": "สถานะ",
+        "lastLogin": "เข้าสู่ระบบล่าสุด",
+        "active": "เปิดใช้งาน",
+        "inactive": "ปิดใช้งาน",
+        "delete": "ลบ",
+        "restore": "กู้คืน",
+        "search": "ค้นหาผู้ใช้งาน...",
+        "messages": {
+            "created": "สร้างผู้ใช้งานสำเร็จ",
+            "updated": "แก้ไขผู้ใช้งานสำเร็จ",
+            "deleted": "ลบผู้ใช้งานสำเร็จ",
+            "restored": "กู้คืนผู้ใช้งานสำเร็จ"
+        },
+        "profile": "ผู้ใช้งาน",
+        "auditLog": "ประวัติการใช้งาน",
+        "audit": {
+            "date": "วันที่",
+            "action": "การกระทำ",
+            "details": "รายละเอียด",
+            "ip": "หมายเลข IP"
+        }
+    },
+    "user": {
+        "profile": {
+            "details": "รายละเอียดผู้ใช้"
+        },
+        "field": {
+            "username": "ชื่อผู้ใช้",
+            "email": "อีเมล",
+            "fullname": "ชื่อ-นามสกุล",
+            "role": "บทบาท",
+            "status": "สถานะ",
+            "createdAt": "วันที่สร้าง"
+        },
+        "edit": "แก้ไขผู้ใช้"
     }
 }

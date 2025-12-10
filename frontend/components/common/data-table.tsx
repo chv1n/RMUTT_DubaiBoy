@@ -192,10 +192,11 @@ export function DataTable<T extends { id: number | string }>({
                                 </DropdownMenu>
                             </Dropdown>
                         )}
-
-                        <Button color="primary" endContent={<Plus />} onPress={onAddNew}>
-                            {t("common.add")}
-                        </Button>
+                        {onAddNew && (
+                            <Button color="primary" endContent={<Plus />} onPress={onAddNew}>
+                                {t("common.add")}
+                            </Button>
+                        )}
                     </div>
                 </div>
                 <div className="flex justify-between items-center">

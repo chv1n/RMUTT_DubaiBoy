@@ -7,6 +7,7 @@ import { User } from '../../modules/user/entities/user.entity'; // Import User e
 import { Role } from '../../common/enums/role.enum'; // Import Role enum
 import { Product } from '../../modules/product/entities/product.entity';
 import { ProductType } from '../../modules/product-type/entities/product-type.entity';
+import { WarehouseMaster } from '../../modules/warehouse-master/entities/warehouse-master.entity';
 
 async function seed() {
     try {
@@ -160,6 +161,45 @@ async function seed() {
                     await productRepo.save(productRepo.create(productData));
                     console.log(`Seeded Product: ${productData.product_name}`);
                 }
+            }
+        }
+
+
+
+        // Seed Warehouses
+        const warehouseRepo = AppDataSource.getRepository(WarehouseMaster);
+        const warehouses = [
+            {
+                warehouse_name: 'Main Warehouse',
+                warehouse_code: 'WH-001',
+                warehouse_phone: '02-123-4567',
+                warehouse_address: '123 Industrial Estate, Bangkok',
+                warehouse_email: 'warehouse.main@example.com',
+                is_active: true
+            },
+            {
+                warehouse_name: 'Chemical Storage',
+                warehouse_code: 'WH-002',
+                warehouse_phone: '02-123-4568',
+                warehouse_address: '123 Industrial Estate, Bangkok',
+                warehouse_email: 'warehouse.chem@example.com',
+                is_active: true
+            },
+            {
+                warehouse_name: 'Cold Storage',
+                warehouse_code: 'WH-003',
+                warehouse_phone: '02-123-4569',
+                warehouse_address: '123 Industrial Estate, Bangkok',
+                warehouse_email: 'warehouse.cold@example.com',
+                is_active: true
+            }
+        ];
+
+        for (const whData of warehouses) {
+            const exists = await warehouseRepo.findOneBy({ warehouse_code: whData.warehouse_code });
+            if (!exists) {
+                await warehouseRepo.save(warehouseRepo.create(whData));
+                console.log(`Seeded Warehouse: ${whData.warehouse_name}`);
             }
         }
 
