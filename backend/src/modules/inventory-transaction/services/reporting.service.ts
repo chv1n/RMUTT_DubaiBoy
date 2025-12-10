@@ -39,7 +39,11 @@ export class ReportingService {
         summary: { total_in: number; total_out: number; net_change: number };
     }> {
         const qb = this.createBaseTransactionQuery()
-            .andWhere('material.material_id = :materialId', { materialId: query.material_id });
+
+
+        if (query.material_id) {
+            qb.andWhere('material.material_id = :materialId', { materialId: query.material_id });
+        }
 
         if (query.warehouse_id) {
             qb.andWhere('warehouse.id = :warehouseId', { warehouseId: query.warehouse_id });
