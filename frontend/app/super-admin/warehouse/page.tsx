@@ -1,6 +1,6 @@
 
-import { WarehouseList } from "@/components/warehouses/warehouse-list";
+import { WarehouseDashboard } from "@/components/warehouse/warehouse-dashboard";
 
 export default function WarehousePage() {
-    return <WarehouseList />;
+    return <WarehouseDashboard />;
 }

@@ -13,17 +13,18 @@ import { Search, Filter, ArrowUpDown, LayoutGrid, List, Flame, Plane, Eye, Check
 import { useRouter } from 'next/navigation';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/dropdown';
 import { Selection, SortDescriptor } from '@heroui/table';
-import PlanForm from './plan-form';
 import PlanCard from './plan-card';
 
-export default function PlanTable() {
+interface PlanTableProps {
+    onEdit: (plan: Plan) => void;
+}
+
+export default function PlanTable({ onEdit }: PlanTableProps) {
     const { t } = useTranslation();
     const router = useRouter();
     const [filterValue, setFilterValue] = React.useState("");
     const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
     const [view, setView] = React.useState<"list" | "board">("list");
-    const [isFormOpen, setIsFormOpen] = React.useState(false);
-    const [planToEdit, setPlanToEdit] = React.useState<Plan | null>(null);
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
         column: "lastUpdated",
         direction: "descending",
@@ -45,28 +46,13 @@ export default function PlanTable() {
     const onSearchChange = (value: string) => setFilterValue(value);
     const onClear = () => setFilterValue("");
 
-    const handleCreate = () => {
-        setPlanToEdit(null);
-        setIsFormOpen(true);
-    };
-
-    const handleEdit = (plan: Plan) => {
-        setPlanToEdit(plan);
-        setIsFormOpen(true);
-    };
-
-    const handleFormClose = () => {
-        setIsFormOpen(false);
-        setPlanToEdit(null);
-    };
-
     const handleAction = React.useCallback((key: string, plan: Plan) => {
         switch (key) {
             case 'view':
                 router.push(`/super-admin/plans/${plan.id}`);
                 break;
             case 'edit':
-                handleEdit(plan);
+                onEdit(plan);
                 break;
             case 'delete':
                 if (confirm(t('common.confirmDeleteMessage'))) {
@@ -74,7 +60,7 @@ export default function PlanTable() {
                 }
                 break;
         }
-    }, [deletePlanMutation, router, t]);
+    }, [deletePlanMutation, router, t, onEdit]);
 
     // Drag and Drop Logic
     const [draggedPlan, setDraggedPlan] = React.useState<Plan | null>(null);
@@ -189,7 +175,6 @@ export default function PlanTable() {
 
     return (
         <div className="w-full flex flex-col gap-6">
-            <PlanForm isOpen={isFormOpen} onClose={handleFormClose} planToEdit={planToEdit} />
 
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-content1 p-4 rounded-xl shadow-sm">

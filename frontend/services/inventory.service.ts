@@ -291,6 +291,54 @@ class InventoryService {
         const query = new URLSearchParams(params as any).toString();
         return await apiClient.get<ApiResponse<MovementHistoryResponse>>(`/inventory/reports/movement-history?${query}`);
     }
+
+    // --- Dashboard Stats ---
+    async getStats(): Promise<import('@/types/inventory').InventoryStats> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return {
+                totalValue: 2450000,
+                totalItems: 14500,
+                lowStockItems: 12,
+                outOfStockItems: 3,
+                movementInToday: 250,
+                movementOutToday: 180,
+                valueTrends: [
+                    { date: "2023-11-01", value: 2400000 },
+                    { date: "2023-11-08", value: 2450000 },
+                    { date: "2023-11-15", value: 2480000 },
+                    { date: "2023-11-22", value: 2420000 },
+                    { date: "2023-11-29", value: 2500000 },
+                    { date: "2023-12-06", value: 2450000 }
+                ],
+                movement: {
+                    inbound: [
+                        { name: "Mon", value: 120 }, { name: "Tue", value: 132 }, { name: "Wed", value: 101 }, { name: "Thu", value: 134 }, { name: "Fri", value: 90 }, { name: "Sat", value: 230 }, { name: "Sun", value: 210 }
+                    ],
+                    outbound: [
+                        { name: "Mon", value: 220 }, { name: "Tue", value: 182 }, { name: "Wed", value: 191 }, { name: "Thu", value: 234 }, { name: "Fri", value: 290 }, { name: "Sat", value: 330 }, { name: "Sun", value: 310 }
+                    ]
+                }
+            };
+        }
+
+        try {
+            const response = await apiClient.get<ApiResponse<import('@/types/inventory').InventoryStats>>('/inventory/dashboard/stats');
+            return response.data;
+        } catch (error) {
+            console.warn("API inventory stats failed, using fallback", error);
+            return {
+                totalValue: 0,
+                totalItems: 0,
+                lowStockItems: 0,
+                outOfStockItems: 0,
+                movementInToday: 0,
+                movementOutToday: 0,
+                valueTrends: [],
+                movement: { inbound: [], outbound: [] }
+            };
+        }
+    }
 }
 
 export const inventoryService = new InventoryService();

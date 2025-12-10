@@ -80,14 +80,7 @@ export function ProductDetail({ id }: ProductDetailProps) {
 
     return (
         <div className="max-w-7xl mx-auto space-y-6 pb-20">
-            {/* Breadcrumbs & Navigation */}
-            <div className="flex flex-col gap-2">
-                <Breadcrumbs size="lg">
-                    <BreadcrumbItem onPress={() => router.push("/super-admin/dashboard")}>{t("common.home")}</BreadcrumbItem>
-                    <BreadcrumbItem onPress={() => router.push("/super-admin/products")}>{t("products.title")}</BreadcrumbItem>
-                    <BreadcrumbItem>{product.name}</BreadcrumbItem>
-                </Breadcrumbs>
-            </div>
+
 
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-background/60 backdrop-blur-md p-6 rounded-2xl shadow-sm border border-default-200">

@@ -72,14 +72,12 @@ export interface CreatePlanRequest {
 }
 
 export interface UpdatePlanRequest {
-    // Product Plan Fields
     plan_name?: string;
     plan_description?: string;
     input_quantity?: number;
     start_date?: string;
     end_date?: string;
 
-    // Plan List Fields
     priority?: PlanPriority;
     status?: PlanStatus;
 }
@@ -89,7 +87,7 @@ export interface PlanFilter {
     limit?: number;
     sort_field?: string;
     sort_order?: 'ASC' | 'DESC';
-    search?: string; // Not directly supported by API yet for searching specific fields, but kept for UI
+    search?: string;
     status?: PlanStatus | 'all';
 }
 
@@ -104,5 +102,16 @@ export interface PaginatedResponse<T> {
         totalPages: number;
         currentPage: number;
     };
+}
+
+export interface PlanStats {
+    totalPlans: number;
+    activePlans: number;
+    completedPlans: number;
+    pendingPlans: number;
+    totalProductionTarget: number;
+    onTimeRate: number;
+    progress: { plan_name: string; target: number; produced: number; status: string }[];
+    statusDistribution: { name: string; value: number; color?: string }[];
 }
 

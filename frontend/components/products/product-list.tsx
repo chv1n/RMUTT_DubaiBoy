@@ -40,7 +40,6 @@ export function ProductList() {
         try {
             const response = await productService.getAll(page, rowsPerPage, search, status);
             setProducts(response.data);
-            setProducts(response.data);
             if (response.meta) {
                 setMeta(response.meta);
             }
