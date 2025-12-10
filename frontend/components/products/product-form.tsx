@@ -26,6 +26,8 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
     const { t } = useTranslation();
     const router = useRouter();
     const { isOpen: isBomOpen, onOpen: onBomOpen, onOpenChange: onBomOpenChange, onClose: onBomClose } = useDisclosure();
+    const { isOpen: isDeleteBomOpen, onOpen: onDeleteBomOpen, onOpenChange: onDeleteBomOpenChange, onClose: onDeleteBomClose } = useDisclosure();
+    const [bomToDelete, setBomToDelete] = useState<number | null>(null);
 
     // Core State
     const [loading, setLoading] = useState(false);
@@ -63,9 +65,19 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
                 typeId: initialData.typeId,
                 isActive: initialData.isActive
             });
-            setBoms(initialData.bom || []);
+            // Fetch BOMs from API
+            fetchBoms(initialData.id);
         }
     }, [initialData]);
+
+    const fetchBoms = async (productId: number) => {
+        try {
+            const fetchedBoms = await productService.getBomsByProduct(productId);
+            setBoms(fetchedBoms);
+        } catch (error) {
+            console.error("Failed to fetch BOMs", error);
+        }
+    };
 
     const loadDependencies = async () => {
         try {
@@ -129,8 +141,7 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
             };
 
             await productService.addBom(payload);
-            const updatedProduct = await productService.getById(initialData.id);
-            setBoms(updatedProduct.bom);
+            await fetchBoms(initialData.id);
 
             onBomClose();
             setNewBom({ material_id: 0, unit_id: 0, usage_per_piece: 1, scrap_factor: 0, active: 1, version: 1 });
@@ -141,16 +152,25 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
         }
     };
 
-    const handleDeleteBom = async (bomId: number) => {
-        if (!confirm(t("common.confirmDeleteMessage"))) return;
+    const handleDeleteBom = (bomId: number) => {
+        setBomToDelete(bomId);
+        onDeleteBomOpen();
+    };
+
+    const confirmDeleteBom = async () => {
+        if (!bomToDelete) return;
+        setBomLoading(true);
         try {
-            await productService.deleteBom(bomId);
+            await productService.deleteBom(bomToDelete);
             if (initialData) {
-                const updatedProduct = await productService.getById(initialData.id);
-                setBoms(updatedProduct.bom);
+                await fetchBoms(initialData.id);
             }
+            onDeleteBomClose();
+            setBomToDelete(null);
         } catch (error) {
             console.error("Failed to delete BOM", error);
+        } finally {
+            setBomLoading(false);
         }
     };
 
@@ -340,6 +360,28 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
                             <ModalFooter>
                                 <Button variant="flat" color="danger" onPress={onClose}>{t("common.cancel")}</Button>
                                 <Button color="primary" onPress={handleAddBom} isLoading={bomLoading}>{t("common.add")}</Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal isOpen={isDeleteBomOpen} onOpenChange={onDeleteBomOpenChange}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Confirm Delete</ModalHeader>
+                            <ModalBody>
+                                <p>{t("common.confirmDeleteMessage")}</p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="default" variant="light" onPress={onClose}>
+                                    {t("common.cancel")}
+                                </Button>
+                                <Button color="danger" onPress={confirmDeleteBom} isLoading={bomLoading}>
+                                    {t("common.delete")}
+                                </Button>
                             </ModalFooter>
                         </>
                     )}

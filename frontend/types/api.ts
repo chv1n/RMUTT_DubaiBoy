@@ -9,5 +9,7 @@ export interface Meta {
 export interface ApiResponse<T> {
     success: boolean;
     data: T;
-    meta: Meta;
+    meta?: Meta;
+    message?: string;
+    error?: any; // To support error responses if needed
 }

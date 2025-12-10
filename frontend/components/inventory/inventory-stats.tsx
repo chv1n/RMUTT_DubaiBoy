@@ -23,9 +23,9 @@ export const InventoryStats = () => {
                 // In a real app, might reference a specific dashboard endpoint or aggregate
                 // For now, let's use available endpoints to estimate
                 const [balanceRes, lowStockRes, totalRes] = await Promise.all([
-                    inventoryService.getBalance({ limit: 1 }), // Just to get total count from meta
-                    inventoryService.getLowStockAlerts({ limit: 1 }),
-                    inventoryService.getTotalBalance({ limit: 1 })
+                    inventoryService.getBalance({}), // Just to get total count from meta
+                    inventoryService.getLowStockAlerts({}),
+                    inventoryService.getTotalBalance({})
                 ]);
 
                 setStats({
