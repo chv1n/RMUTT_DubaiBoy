@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { Exclude } from 'class-transformer';
+import { PushSubscription } from 'src/modules/push-subscription/entities/push-subscription.entity';
 
 import {
     Column,
@@ -10,6 +11,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     DeleteDateColumn,
+    OneToMany,
 } from 'typeorm';
 
 
@@ -23,6 +25,10 @@ export class User {
 
     @Column({ unique: true })
     username: string;
+
+    @OneToMany(() => PushSubscription, (pushSubscription) => pushSubscription.user)
+    pushSubscriptions: PushSubscription[];
+
 
     @Column()
     fullname: string;

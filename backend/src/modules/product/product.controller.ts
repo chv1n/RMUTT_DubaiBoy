@@ -2,8 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query, ParseInt
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { BaseQueryDto } from 'src/common/dto/base-query.dto';
-
+import { ProductQueryDto } from './dto/product-query.dto';
 
 @Controller({
   path: 'products',
@@ -13,7 +12,6 @@ export class ProductController {
   constructor(
     private readonly service: ProductService
   ) { }
-
 
   @Post()
   async create(@Body() createProductDto: CreateProductDto) {
@@ -25,8 +23,8 @@ export class ProductController {
   }
 
   @Get()
-  findProduct(@Query() baseQueryDto: BaseQueryDto) {
-    return this.service.findAll(baseQueryDto);
+  findAll(@Query() query: ProductQueryDto) {
+    return this.service.findAll(query);
   }
 
   @Get(':id')
