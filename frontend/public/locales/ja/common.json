@@ -255,7 +255,7 @@
             "deleted": "ユーザーを削除しました",
             "restored": "ユーザーを復元しました"
         },
-        "profile": "ユーザープロファイル",
+        "profile": "ユーザー",
         "auditLog": "監査ログ",
         "audit": {
             "date": "日付",
@@ -263,5 +263,19 @@
             "details": "詳細",
             "ip": "IPアドレス"
         }
+    },
+    "user": {
+        "profile": {
+            "details": "ユーザー詳細"
+        },
+        "field": {
+            "username": "ユーザー名",
+            "email": "メールアドレス",
+            "fullname": "氏名",
+            "role": "役割",
+            "status": "ステータス",
+            "createdAt": "作成日時"
+        },
+        "edit": "ユーザー編集"
     }
 }

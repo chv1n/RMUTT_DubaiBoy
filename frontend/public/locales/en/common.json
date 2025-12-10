@@ -315,7 +315,7 @@
             "deleted": "User deleted successfully",
             "restored": "User restored successfully"
         },
-        "profile": "User Profile",
+        "profile": "Users",
         "auditLog": "Audit Log",
         "audit": {
             "date": "Date",
@@ -323,5 +323,19 @@
             "details": "Details",
             "ip": "IP Address"
         }
+    },
+    "user": {
+        "profile": {
+            "details": "User Details"
+        },
+        "field": {
+            "username": "Username",
+            "email": "Email",
+            "fullname": "Full Name",
+            "role": "Role",
+            "status": "Status",
+            "createdAt": "Created At"
+        },
+        "edit": "Edit User"
     }
 }
