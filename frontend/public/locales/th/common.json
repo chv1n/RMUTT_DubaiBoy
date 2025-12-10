@@ -206,6 +206,43 @@
         "list": "รายการสินค้า",
         "productTypes": "ประเภทสินค้า"
     },
+    "inventory": {
+        "title": "จัดการสินค้าคงคลัง",
+        "balance": "สินค้าคงเหลือ",
+        "transactions": "รายการเคลื่อนไหว",
+        "movementHistory": "ประวัติการเคลื่อนไหว",
+        "filterByMaterial": "กรองตามวัสดุ",
+        "filterByWarehouse": "กรองตามคลังสินค้า",
+        "allMaterials": "วัสดุทั้งหมด",
+        "allWarehouses": "คลังสินค้าทั้งหมด",
+        "lowStock": "สินค้าใกล้หมด",
+        "checkStock": "ตรวจสอบสต็อก",
+        "goodsReceipt": "รับสินค้าเข้า (IN)",
+        "goodsIssue": "เบิกสินค้าออก (OUT)",
+        "transfer": "โอนย้ายระหว่างคลัง",
+        "adjustment": "ปรับปรุงยอด",
+        "lotSuggestion": "แนะนำ Lot/Batch",
+        "fields": {
+            "mfgDate": "วันที่ผลิต",
+            "expDate": "วันหมดอายุ",
+            "type": "ประเภท",
+            "warehouse": "คลังสินค้า",
+            "orderNumber": "เลขที่ Lot/Batch",
+            "reference": "เลขที่อ้างอิง",
+            "reason": "เหตุผล/หมายเหตุ",
+            "quantity": "จำนวน",
+            "sourceWarehouse": "คลังต้นทาง",
+            "targetWarehouse": "คลังปลายทาง",
+            "current": "ยอดคงเหลือปัจจุบัน",
+            "available": "พร้อมใช้งาน",
+            "shortage": "ยอดขาดแคลน"
+        },
+        "strategy": {
+            "fifo": "FIFO (เข้าก่อนออกก่อน)",
+            "fefo": "FEFO (หมดอายุก่อนออกก่อน)",
+            "lifo": "LIFO (เข้าทีหลังออกก่อน)"
+        }
+    },
     "users": {
         "title": "จัดการผู้ใช้งาน",
         "list": "รายชื่อผู้ใช้งาน",

@@ -17,7 +17,8 @@ import {
     Calendar,
     Layers,
     Truck,
-    Warehouse
+    Warehouse,
+    ClipboardList
 } from "lucide-react";
 
 export interface SubMenuItem {
@@ -94,6 +95,15 @@ export const sidebarItems: MenuItem[] = [
         label: "warehouses.title",
         icon: <Warehouse className="w-5 h-5" />,
         href: "/super-admin/warehouse",
+    },
+    {
+        key: "inventory",
+        label: "inventory.title",
+        icon: <ClipboardList className="w-5 h-5" />,
+        children: [
+            { key: "inv-balance", label: "inventory.balance", href: "/super-admin/inventory/balance" },
+            { key: "inv-transactions", label: "inventory.transactions", href: "/super-admin/inventory/transactions" },
+        ]
     },
     {
         key: "analytics",
