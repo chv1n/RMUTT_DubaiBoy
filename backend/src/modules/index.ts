@@ -13,9 +13,11 @@ import { ProductModule } from "./product/product.module";
 import { ProductTypeModule } from "./product-type/product-type.module";
 import { ProductPlanModule } from "./product-plan/product-plan.module";
 import { PlanListModule } from "./plan-list/plan-list.module";
+import { AuditLogModule } from "./audit-log/audit-log.module";
 
 
 export const AppModules = [
+    AuditLogModule,
     MaterialModule,
     MaterialGroupModule,
     ContainerTypeModule,
