@@ -15,9 +15,11 @@ import { ProductPlanModule } from "./product-plan/product-plan.module";
 import { PlanListModule } from "./plan-list/plan-list.module";
 import { PushSubscriptionModule } from "./push-subscription/push-subscription.module";
 import { PushLogModule } from "./push-log/push-log.module";
+import { AuditLogModule } from "./audit-log/audit-log.module";
 
 
 export const AppModules = [
+    AuditLogModule,
     MaterialModule,
     MaterialGroupModule,
     ContainerTypeModule,
