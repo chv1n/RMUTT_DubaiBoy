@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBomDto } from './dto/create-bom.dto';
 import { UpdateBomDto } from './dto/update-bom.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,16 +11,31 @@ import { CrudHelper } from 'src/common/helpers/crud.helper';
 import { ISoftDeletable } from 'src/common/interfaces/soft-deletable.interface';
 import { QueryHelper } from 'src/common/helpers/query.helper';
 import { SoftDeleteHelper } from 'src/common/helpers/soft-delete.helper';
+import { MaterialService } from '../material/material.service';
+import { ProductService } from '../product/product.service';
 
 @Injectable()
 export class BomService implements ISoftDeletable {
 
   constructor(
     @InjectRepository(Bom) private readonly bomRepository: Repository<Bom>,
+    private readonly materialService: MaterialService,
+    private readonly productService: ProductService
   ) { }
 
   async create(createBomDto: CreateBomDto) {
-    const entity = await this.bomRepository.create(createBomDto)
+    const material = await this.materialService.findOne(createBomDto.material_id);
+    const product = await this.productService.findOne(createBomDto.product_id);
+
+    if (!material) throw new NotFoundException(`Material with ID ${createBomDto.material_id} not found`);
+    if (!product) throw new NotFoundException(`Product with ID ${createBomDto.product_id} not found`);
+
+    console.log(material.unit_id);
+
+    const entity = this.bomRepository.create({
+      ...createBomDto,
+      unit_id: material.unit_id
+    });
     return await this.bomRepository.save(entity);
   }
 
