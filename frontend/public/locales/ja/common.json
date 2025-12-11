@@ -418,5 +418,9 @@
         "overview": "概要",
         "predictedWeek": "予測 (7日間)",
         "stockStatus": "ステータス"
+    },
+    "audit": {
+        "title": "監査ログ",
+        "subtitle": "システムの変更とユーザーアクティビティを追跡"
     }
 }

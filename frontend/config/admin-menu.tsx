@@ -51,7 +51,7 @@ export const sidebarItems: MenuItem[] = [
             { key: "all-users", label: "users.list", href: "/super-admin/users/all" },
             // In a real app, this might go to a separate audit page, but here we can reuse the page with a query param or just a placeholder for now
             // The user asked for "wording in sidebar".
-            { key: "audit-logs", label: "users.auditLog", href: "/super-admin/users?view=audit" },
+            { key: "audit-logs", label: "audit.title", href: "/super-admin/audit-logs" },
         ]
     },
     {
