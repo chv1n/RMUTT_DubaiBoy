@@ -450,5 +450,19 @@
             "createdAt": "Created At"
         },
         "edit": "Edit User"
+    },
+    "analytics": {
+        "title": "Predictive Analytics",
+        "subtitle": "Forecast and trends",
+        "predict": "Predict Usage",
+        "material": "Material",
+        "targetDate": "Target Date",
+        "generating": "Generating Prediction...",
+        "result": "Prediction Result",
+        "confidence": "Confidence Score",
+        "factors": "Influencing Factors",
+        "overview": "Overview",
+        "predictedWeek": "Predicted (7 Days)",
+        "stockStatus": "Status"
     }
 }

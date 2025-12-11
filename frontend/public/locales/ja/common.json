@@ -404,5 +404,19 @@
             "createdAt": "作成日時"
         },
         "edit": "ユーザー編集"
+    },
+    "analytics": {
+        "title": "予測分析",
+        "subtitle": "予測と傾向",
+        "predict": "予測を実行",
+        "material": "資材",
+        "targetDate": "目標日",
+        "generating": "予測を生成中...",
+        "result": "予測結果",
+        "confidence": "信頼度スコア",
+        "factors": "影響要因",
+        "overview": "概要",
+        "predictedWeek": "予測 (7日間)",
+        "stockStatus": "ステータス"
     }
 }

@@ -118,7 +118,7 @@ export const sidebarItems: MenuItem[] = [
         key: "analytics",
         label: "common.analytics",
         icon: <BarChart3 className="w-5 h-5" />,
-        href: "",
+        href: "/super-admin/analytics",
     },
     {
         key: "reports",
