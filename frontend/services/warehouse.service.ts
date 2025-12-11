@@ -1,7 +1,7 @@
 
 import { apiClient } from '@/lib/api/core/client';
 import { ApiResponse } from '@/types/api';
-import { Warehouse, WarehouseDTO, CreateWarehouseDTO, UpdateWarehouseDTO } from '@/types/warehouse';
+import { Warehouse, WarehouseDTO, CreateWarehouseDTO, UpdateWarehouseDTO, StockLocationResult, MovementHistoryResult } from '@/types/warehouse';
 import { MOCK_CONFIG, simulateDelay } from '@/lib/mock/config';
 
 // Mock Data
@@ -61,10 +61,10 @@ class WarehouseService {
         if (MOCK_CONFIG.useMock) {
             await simulateDelay();
             let filtered = [...MOCK_WAREHOUSES];
-            
+
             if (search) {
                 const lowerSearch = search.toLowerCase();
-                filtered = filtered.filter(w => 
+                filtered = filtered.filter(w =>
                     w.warehouse_name.toLowerCase().includes(lowerSearch) ||
                     w.warehouse_code.toLowerCase().includes(lowerSearch)
                 );
@@ -93,7 +93,7 @@ class WarehouseService {
 
         const is_active_param = status === "all" || status === "" ? "" : `&is_active=${status === "active"}`;
         const response = await apiClient.get<ApiResponse<WarehouseDTO[]>>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}${is_active_param}`);
-        
+
         return {
             ...response,
             data: response.data.map(mapDTOToDomain)
@@ -128,11 +128,11 @@ class WarehouseService {
     }
 
     async update(id: number, data: UpdateWarehouseDTO): Promise<Warehouse> {
-         if (MOCK_CONFIG.useMock) {
+        if (MOCK_CONFIG.useMock) {
             await simulateDelay();
             const found = MOCK_WAREHOUSES.find(w => w.id === id);
             if (!found) throw new Error("Warehouse not found");
-            
+
             const updated: WarehouseDTO = {
                 ...found,
                 ...data,
@@ -145,6 +145,89 @@ class WarehouseService {
     }
 
     async getInventory(warehouseId: number, page: number = 1, limit: number = 10): Promise<ApiResponse<import('@/types/warehouse').MaterialInventory[]>> {
+        // Legacy or Alternative view - keeping for compatibility if utilized elsewhere
+        // But for Warehouse Detail we will prefer getStockLocation
+        return this.getInventoryLegacy(warehouseId, page, limit);
+    }
+
+    // New Method based on Reporting Spec: Stock Location
+    async getStockLocation(warehouseId: number, search: string = "", page: number = 1, limit: number = 10): Promise<ApiResponse<StockLocationResult>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            const warehouse = MOCK_WAREHOUSES.find(w => w.id === warehouseId);
+            const mockResult: StockLocationResult = {
+                warehouse_id: warehouseId,
+                warehouse_name: warehouse?.warehouse_name || "Unknown",
+                warehouse_code: warehouse?.warehouse_code || "UNKNOWN",
+                total_items: 5,
+                materials: [
+                    { material_id: 1, material_name: "Steel Bar", quantity: 100, mfg_date: "2023-01-01", exp_date: "2024-01-01", order_number: "LOT-001" },
+                    { material_id: 2, material_name: "Copper Wire", quantity: 500, mfg_date: "2023-02-01", exp_date: "2025-01-01", order_number: "LOT-002" },
+                    { material_id: 3, material_name: "Plastic Pellets", quantity: 2000, mfg_date: "2023-03-01", exp_date: "2024-03-01", order_number: "LOT-003" },
+                    { material_id: 4, material_name: "Aluminum Sheet", quantity: 300, mfg_date: "2023-04-01", exp_date: "2024-04-01", order_number: "LOT-004" },
+                    { material_id: 5, material_name: "Rubber Seal", quantity: 1000, mfg_date: "2023-05-01", exp_date: "2024-05-01", order_number: "LOT-005" },
+                ]
+            };
+
+            // Filter mock data
+            if (search) {
+                mockResult.materials = mockResult.materials.filter(m => m.material_name.toLowerCase().includes(search.toLowerCase()));
+                mockResult.total_items = mockResult.materials.length;
+            }
+
+            return {
+                success: true,
+                message: "Success",
+                data: mockResult
+            };
+        }
+
+        const response = await apiClient.get<ApiResponse<StockLocationResult>>(`/inventory/reports/stock-location?warehouse_id=${warehouseId}`);
+        return response;
+    }
+
+    // New Method based on Reporting Spec: Movement History
+    async getMovementHistory(warehouseId: number, page: number = 1, limit: number = 10): Promise<ApiResponse<MovementHistoryResult>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            const mockData = [
+                {
+                    transaction_id: 1, material_id: 1, material_name: "Steel Bar",
+                    warehouse_id: warehouseId, warehouse_name: "Main Warehouse",
+                    transaction_type: "IN", quantity_change: 100,
+                    reference_number: "GR-20231201-001", reason_remarks: "Initial Stock",
+                    transaction_date: "2023-12-01T10:00:00.000Z", created_at: "2023-12-01T10:00:00.000Z"
+                },
+                {
+                    transaction_id: 2, material_id: 2, material_name: "Copper Wire",
+                    warehouse_id: warehouseId, warehouse_name: "Main Warehouse",
+                    transaction_type: "OUT", quantity_change: -50,
+                    reference_number: "ISS-20231205-001", reason_remarks: "Production Request",
+                    transaction_date: "2023-12-05T14:30:00.000Z", created_at: "2023-12-05T14:30:00.000Z"
+                }
+            ];
+
+            return {
+                success: true,
+                message: "Success",
+                data: {
+                    data: mockData,
+                    meta: {
+                        totalItems: 2, itemCount: 2, itemsPerPage: limit, totalPages: 1, currentPage: page
+                    },
+                    summary: {
+                        total_in: 100, total_out: 50, net_change: 50
+                    }
+                }
+            };
+        }
+
+        const response = await apiClient.get<ApiResponse<MovementHistoryResult>>(`/inventory/reports/movement-history?warehouse_id=${warehouseId}`);
+        return response;
+    }
+
+    // Legacy support
+    private async getInventoryLegacy(warehouseId: number, page: number = 1, limit: number = 10): Promise<ApiResponse<import('@/types/warehouse').MaterialInventory[]>> {
         if (MOCK_CONFIG.useMock) {
             await simulateDelay();
             const mockInventory: import('@/types/warehouse').MaterialInventory[] = [
@@ -165,7 +248,7 @@ class WarehouseService {
                     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
                 }
             ];
-            
+
             return {
                 success: true,
                 data: mockInventory,
@@ -174,8 +257,8 @@ class WarehouseService {
                 }
             };
         }
-        const response = await apiClient.get<ApiResponse<import('@/types/warehouse').MaterialInventoryDTO[]>>(`/material-inventory?warehouse_id=${warehouseId}&page=${page}&limit=${limit}`);
-        
+        const response = await apiClient.get<ApiResponse<import('@/types/warehouse').MaterialInventoryDTO[]>>(`/material-inventory?warehouse_id=${warehouseId}`);
+
         return {
             ...response,
             data: response.data.map(dto => ({
@@ -196,47 +279,6 @@ class WarehouseService {
         };
     }
 
-    async getTransactions(warehouseId: number, page: number = 1, limit: number = 10): Promise<ApiResponse<import('@/types/warehouse').InventoryTransaction[]>> {
-        if (MOCK_CONFIG.useMock) {
-            await simulateDelay();
-            const mockTrx: import('@/types/warehouse').InventoryTransaction[] = [
-                {
-                    id: 1, type: 'IN', quantity: 1000,
-                    materialName: "Silicon Wafer 300mm", warehouseName: "Main Warehouse",
-                    reason: "Purchase Order #PO-2023-001",
-                    createdAt: new Date(Date.now() - 86400000).toISOString(), createdBy: "Admin"
-                },
-                {
-                    id: 2, type: 'OUT', quantity: 50,
-                    materialName: "Photoresist A", warehouseName: "Main Warehouse",
-                    reason: "Production Batch #B-999",
-                    createdAt: new Date(Date.now() - 43200000).toISOString(), createdBy: "Operator"
-                }
-            ];
-             return {
-                success: true,
-                data: mockTrx,
-                meta: {
-                    totalItems: 2, itemCount: 2, itemsPerPage: limit, totalPages: 1, currentPage: page
-                }
-            };
-        }
-        const response = await apiClient.get<ApiResponse<import('@/types/warehouse').InventoryTransactionDTO[]>>(`/inventory-transaction?warehouse_id=${warehouseId}&page=${page}&limit=${limit}`);
-         return {
-            ...response,
-            data: response.data.map(dto => ({
-                id: dto.id,
-                type: dto.transaction_type,
-                quantity: dto.quantity,
-                materialName: dto.material?.material_name ?? "Unknown",
-                warehouseName: dto.warehouse?.warehouse_name ?? "Unknown",
-                reason: dto.reason,
-                createdAt: dto.created_at,
-                createdBy: dto.created_by ?? "System"
-            }))
-        };
-    }
-
     async delete(id: number): Promise<void> {
         if (MOCK_CONFIG.useMock) {
             await simulateDelay();
@@ -250,7 +292,49 @@ class WarehouseService {
             await simulateDelay();
             return; // Mock restore
         }
-         await apiClient.patch(`${this.endpoint}/${id}/restore`, {});
+        await apiClient.patch(`${this.endpoint}/${id}/restore`, {});
+    }
+
+    // --- Dashboard Stats ---
+    async getStats(): Promise<import('@/types/warehouse').WarehouseStats> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+
+            return {
+                totalWarehouses: MOCK_WAREHOUSES.length,
+                activeWarehouses: MOCK_WAREHOUSES.filter(w => w.is_active).length,
+                totalValue: 1250000,
+                totalItems: 8500,
+                lowStockAlerts: 5,
+                utilizationRate: 72,
+                distribution: [
+                    { name: "Main Warehouse", value: 850000, count: 5000, color: '#6366f1' },
+                    { name: "Chemical Storage", value: 250000, count: 1500, color: '#10b981' },
+                    { name: "Cold Storage", value: 150000, count: 2000, color: '#f59e0b' }
+                ],
+                capacity: [
+                    { name: "Main Warehouse", capacity: 10000, used: 5000, percentage: 50 },
+                    { name: "Chemical Storage", capacity: 2000, used: 1500, percentage: 75 },
+                    { name: "Cold Storage", capacity: 3000, used: 2000, percentage: 66 }
+                ]
+            };
+        }
+
+        try {
+            const response = await apiClient.get<ApiResponse<import('@/types/warehouse').WarehouseStats>>(`${this.endpoint}/dashboard/stats`);
+            return response.data;
+        } catch (error) {
+            console.warn("API warehouse stats failed, using fallback", error);
+            return {
+                totalWarehouses: 0,
+                activeWarehouses: 0,
+                totalValue: 0,
+                totalItems: 0,
+                lowStockAlerts: 0,
+                utilizationRate: 0,
+                distribution: []
+            };
+        }
     }
 }
 

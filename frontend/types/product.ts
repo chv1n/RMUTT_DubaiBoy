@@ -25,7 +25,7 @@ export interface CreateProductTypeDTO {
     isActive?: boolean;
 }
 
-export interface UpdateProductTypeDTO extends Partial<CreateProductTypeDTO> {}
+export interface UpdateProductTypeDTO extends Partial<CreateProductTypeDTO> { }
 
 // BOM (Bill of Materials)
 export interface BomDTO {
@@ -33,23 +33,28 @@ export interface BomDTO {
     product_id: number;
     material_id: number;
     unit_id: number;
-    usage_per_piece: number;
-    version: number;
-    active: number;
-    scrap_factor: number;
+    usage_per_piece: string; // API returns string
+    version: string;         // API returns string
+    active: boolean;         // API returns boolean
+    scrap_factor: string;    // API returns string
     created_at: string;
     updated_at: string;
-    
-    // Relations (Mock/Expanded)
+
+    // Relations
     material?: {
         material_id: number;
         material_name: string;
-        cost_per_unit: number; 
+        cost_per_unit: number;
+        // ... other material fields
     };
     unit?: {
         unit_id: number;
         unit_name: string;
     };
+    product?: {
+        product_id: number;
+        product_name: string;
+    }
 }
 
 export interface BOM {
@@ -76,20 +81,22 @@ export interface CreateBomDTO {
     scrap_factor: number;
 }
 
-export interface UpdateBomDTO extends Partial<CreateBomDTO> {}
+export interface UpdateBomDTO extends Partial<CreateBomDTO> { }
 
 // Product
 export interface ProductDTO {
     product_id: number;
     product_name: string;
     product_type_id: number;
-    active: number;
+    active?: number;
+    is_active?: boolean | number; // Support backend variation
     create_date: string;
     update_date: string;
     deleted_at?: string;
-    
+
     // Relations
     product_type?: ProductTypeDTO;
+    type_name?: string; // Support flat structure
     boms?: BomDTO[];
 }
 
@@ -100,7 +107,7 @@ export interface Product {
     typeName?: string;
     isActive: boolean;
     lastUpdated: string;
-    
+
     // Relations
     bom: BOM[];
 }
@@ -113,7 +120,7 @@ export interface CreateProductDTO {
     // Based on backend DTO, it only accepts name and type_id. BOMs are likely created separately.
 }
 
-export interface UpdateProductDTO extends Partial<CreateProductDTO> {}
+export interface UpdateProductDTO extends Partial<CreateProductDTO> { }
 
 export interface BOMItem {
     id: string;
@@ -175,4 +182,13 @@ export interface AuditLogEntry {
     timestamp: string;
     details: string;
     entity: string;
+}
+
+export interface ProductStats {
+    totalProducts: number;
+    activeProducts: number;
+    newThisMonth: number;
+    avgCost: number;
+    distribution: { name: string; value: number; color?: string }[];
+    costTrends: { name: string; value: number }[];
 }

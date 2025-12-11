@@ -40,7 +40,9 @@ export function ProductList() {
         try {
             const response = await productService.getAll(page, rowsPerPage, search, status);
             setProducts(response.data);
-            // setMeta(response.meta);
+            if (response.meta) {
+                setMeta(response.meta);
+            }
         } catch (error) {
             console.error("Failed to load products", error);
         } finally {
@@ -72,35 +74,35 @@ export function ProductList() {
     };
 
     const columns: Column[] = [
-        { name: t("products.code"), uid: "product_id" },
-        { name: t("products.name"), uid: "product_name", sortable: true },
-        { name: t("products.type"), uid: "type_name" },
-        { name: t("products.fields.active"), uid: "active", align: "center" },
-        { name: t("products.lastUpdated"), uid: "update_date" },
+        { name: t("products.code"), uid: "id" },
+        { name: t("products.name"), uid: "name", sortable: true },
+        { name: t("products.type"), uid: "typeName" },
+        { name: t("products.fields.active"), uid: "isActive", align: "center" },
+        { name: t("products.lastUpdated"), uid: "lastUpdated" },
         { name: t("common.actions"), uid: "actions", align: "center" }
     ];
 
     const renderCell = useCallback((item: Product, columnKey: React.Key) => {
         switch (columnKey) {
-            case "product_id":
+            case "id":
                 return <span className="text-default-400">#{item.id}</span>;
-            case "product_name":
+            case "name":
                 return (
                     <div className="flex flex-col">
                         <p className="text-bold text-small capitalize">{item.name}</p>
                     </div>
                 );
-            case "type_name":
+            case "typeName":
                 return (
                     <Chip size="sm" variant="flat" color="primary">{item.typeName}</Chip>
                 );
-            case "active":
+            case "isActive":
                 return (
                     <Chip className="capitalize" color={item.isActive ? "success" : "default"} size="sm" variant="dot">
                         {item.isActive ? t("common.active") : t("common.inactive")}
                     </Chip>
                 );
-            case "update_date":
+            case "lastUpdated":
                 return (
                     <span className="text-tiny text-default-400">
                         {new Date(item.lastUpdated).toLocaleDateString()}

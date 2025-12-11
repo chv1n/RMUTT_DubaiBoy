@@ -128,3 +128,17 @@ export interface MovementHistoryResponse {
     };
     summary: MovementHistorySummary;
 }
+
+export interface InventoryStats {
+    totalValue: number;
+    totalItems: number;
+    lowStockItems: number;
+    outOfStockItems: number;
+    movementInToday: number;
+    movementOutToday: number;
+    valueTrends: { date: string; value: number }[];
+    movement: {
+        inbound: { name: string; value: number }[];
+        outbound: { name: string; value: number }[];
+    }
+}

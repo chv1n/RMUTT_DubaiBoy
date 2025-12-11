@@ -41,7 +41,9 @@ export const InventoryBalanceList = () => {
                     id: `${item.material_id}-${item.warehouse_id}-${item.order_number || index}`
                 }));
                 setData(processedData);
-                setMeta(response.meta);
+                if (response.meta) {
+                    setMeta(response.meta);
+                }
             }
         } catch (error) {
             console.error("Failed to load inventory balance", error);

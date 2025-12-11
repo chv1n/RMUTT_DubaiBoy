@@ -1,6 +1,6 @@
 
-import { redirect } from "next/navigation";
+import { InventoryDashboard } from "@/components/inventory/inventory-dashboard";
 
-export default function InventoryPage() {
-    redirect("/super-admin/inventory/balance");
+export default function InventoryDashboardPage() {
+    return <InventoryDashboard />;
 }
