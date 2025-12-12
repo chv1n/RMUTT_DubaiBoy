@@ -2,9 +2,10 @@ import { Exclude } from "class-transformer";
 import { MaterialMaster } from "src/modules/material/entities/material-master.entity";
 import { Product } from "src/modules/product/entities/product.entity";
 import { MaterialUnits } from "src/modules/unit/entities/unit.entity";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'BOM' })
+@Unique('UQ_BOM_PRODUCT_MATERIAL', ['product_id', 'material_id'])
 export class Bom {
     @PrimaryGeneratedColumn({ name: 'id' })
     id: number;
