@@ -26,5 +26,6 @@ import { WarehouseMaster } from '../warehouse-master/entities/warehouse-master.e
   ],
   controllers: [MaterialController],
   providers: [MaterialService],
+  exports: [MaterialService],
 })
 export class MaterialModule { }
