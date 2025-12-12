@@ -44,6 +44,7 @@ interface DataTableProps<T> {
     statusOptions?: { name: string; uid: string }[];
     initialVisibleColumns?: string[];
     onSelectionChange?: (keys: Selection) => void;
+    statusLabel?: string;
 }
 
 export function DataTable<T extends { id: number | string }>({
@@ -66,6 +67,7 @@ export function DataTable<T extends { id: number | string }>({
     ],
     initialVisibleColumns,
     onSelectionChange,
+    statusLabel
 }: DataTableProps<T>) {
     const { t } = useTranslation();
     const [filterValue, setFilterValue] = useState("");
@@ -130,7 +132,7 @@ export function DataTable<T extends { id: number | string }>({
                         <Dropdown>
                             <DropdownTrigger className="hidden sm:flex">
                                 <Button endContent={<ChevronDown className="text-small" />} variant="flat">
-                                    {t("common.status")}
+                                    {statusLabel || t("common.status")}
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu
@@ -192,10 +194,11 @@ export function DataTable<T extends { id: number | string }>({
                                 </DropdownMenu>
                             </Dropdown>
                         )}
-
-                        <Button color="primary" endContent={<Plus />} onPress={onAddNew}>
-                            {t("common.add")}
-                        </Button>
+                        {onAddNew && (
+                            <Button color="primary" endContent={<Plus />} onPress={onAddNew}>
+                                {t("common.add")}
+                            </Button>
+                        )}
                     </div>
                 </div>
                 <div className="flex justify-between items-center">

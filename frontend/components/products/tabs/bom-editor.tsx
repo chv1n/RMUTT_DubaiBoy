@@ -1,263 +1,280 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { BOMVersion, BOMItem } from "@/types/product";
+import React, { useState, useEffect, useMemo } from "react";
+import { BOM, CreateBomDTO } from "@/types/product";
 import { productService } from "@/services/product.service";
+import { materialService, materialUnitService } from "@/services/material.service";
+import { Material, MaterialUnit } from "@/types/materials";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { Input } from "@heroui/input";
 import { Card, CardBody } from "@heroui/card";
-import { ChevronRight, ChevronDown, Plus, Trash, Save, CheckCircle, AlertCircle } from "lucide-react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
+import { Plus, Trash, AlertCircle } from "lucide-react";
 import { useTranslation } from "@/components/providers/language-provider";
-import { Chip } from "@heroui/chip";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 
 interface BOMEditorProps {
     productId: string;
 }
 
-const BOMNode = ({ item, level, onUpdate, onDelete, onAddHost }: {
-    item: BOMItem,
-    level: number,
-    onUpdate: (item: BOMItem) => void,
-    onDelete: (id: string) => void,
-    onAddHost: (parentId: string) => void
-}) => {
-    const [expanded, setExpanded] = useState(true);
-    const { t } = useTranslation();
-
-    return (
-        <>
-            <div className="flex items-center gap-2 py-2 border-b border-default/50 hover:bg-default-50 transition-colors" style={{ paddingLeft: `${level * 20}px` }}>
-                <Button
-                    isIconOnly
-                    size="sm"
-                    variant="light"
-                    onPress={() => setExpanded(!expanded)}
-                    isDisabled={!item.children || item.children.length === 0}
-                >
-                    {item.children && item.children.length > 0 ? (expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <div className="w-3" />}
-                </Button>
-
-                <div className="flex-1 grid grid-cols-12 gap-4 items-center">
-                    <div className="col-span-3 font-medium text-sm flex flex-col">
-                        <span>{item.componentName}</span>
-                        <span className="text-tiny text-default-400">{item.componentCode}</span>
-                    </div>
-
-                    <div className="col-span-2">
-                        <Input
-                            size="sm"
-                            type="number"
-                            value={item.quantity.toString()}
-                            onChange={(e) => onUpdate({ ...item, quantity: Number(e.target.value) })}
-                            endContent={<span className="text-small text-default-400">{item.unit}</span>}
-                        />
-                    </div>
-
-                    <div className="col-span-2 text-sm text-default-500">
-                        {/* Cost placeholder */}
-                        ${(item.quantity * (item.price || 0)).toFixed(2)}
-                    </div>
-
-                    <div className="col-span-2">
-                        {/* Mock Inventory Status */}
-                        <Chip size="sm" color="success" variant="flat">In Stock</Chip>
-                    </div>
-
-                    <div className="col-span-3 flex justify-end gap-1">
-                        <Button size="sm" isIconOnly variant="light" color="primary" onPress={() => onAddHost(item.id)}>
-                            <Plus size={16} />
-                        </Button>
-                        <Button size="sm" isIconOnly variant="light" color="danger" onPress={() => onDelete(item.id)}>
-                            <Trash size={16} />
-                        </Button>
-                    </div>
-                </div>
-            </div>
-            {expanded && item.children && item.children.map(child => (
-                <BOMNode
-                    key={child.id}
-                    item={child}
-                    level={level + 1}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                    onAddHost={onAddHost}
-                />
-            ))}
-        </>
-    );
-};
-
 export function BOMEditor({ productId }: BOMEditorProps) {
     const { t } = useTranslation();
-    const [versions, setVersions] = useState<BOMVersion[]>([]);
-    const [currentVersionId, setCurrentVersionId] = useState<string>("");
-    const [activeBOM, setActiveBOM] = useState<BOMVersion | null>(null);
+    const { isOpen: isBomOpen, onOpen: onBomOpen, onOpenChange: onBomOpenChange, onClose: onBomClose } = useDisclosure();
+    const { isOpen: isDeleteBomOpen, onOpen: onDeleteBomOpen, onOpenChange: onDeleteBomOpenChange, onClose: onDeleteBomClose } = useDisclosure();
+
+    // Data State
+    const [boms, setBoms] = useState<BOM[]>([]);
+    const [materials, setMaterials] = useState<Material[]>([]);
+    const [units, setUnits] = useState<MaterialUnit[]>([]);
+
+    // UI State
     const [loading, setLoading] = useState(false);
+    const [bomLoading, setBomLoading] = useState(false);
+    const [bomToDelete, setBomToDelete] = useState<number | null>(null);
+
+    // New BOM Item State
+    const [newBom, setNewBom] = useState<Partial<CreateBomDTO>>({
+        material_id: 0,
+        unit_id: 0,
+        usage_per_piece: 1,
+        scrap_factor: 0,
+        active: 1,
+        version: 1,
+    });
 
     useEffect(() => {
-        loadVersions();
+        loadData();
     }, [productId]);
 
-    const loadVersions = async () => {
+    const loadData = async () => {
         setLoading(true);
         try {
-            const data = await productService.getBOMVersions(productId);
-            setVersions(data);
-            if (data.length > 0) {
-                // Select latest or default
-                setCurrentVersionId(data[0].id);
-                setActiveBOM(data[0]);
-            }
+            await Promise.all([
+                fetchBoms(),
+                loadDependencies()
+            ]);
         } catch (error) {
-            console.error(error);
+            console.error("Failed to load BOM data", error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleVersionChange = (key: string) => {
-        setCurrentVersionId(key);
-        const selected = versions.find(v => v.id === key);
-        if (selected) setActiveBOM(selected);
-    };
-
-    const handleSave = async () => {
-        if (!activeBOM) return;
+    const fetchBoms = async () => {
         try {
-            await productService.saveBOM(productId, activeBOM);
-            alert(t("common.success"));
-            loadVersions(); // Reload data from server to ensure sync
-        } catch (e) {
-            alert(t("common.error"));
+            const data = await productService.getBomsByProduct(Number(productId));
+            setBoms(data);
+        } catch (error) {
+            console.error("Failed to fetch BOMs", error);
         }
     };
 
-    const updateItem = (updatedItem: BOMItem) => {
-        // Logic to find and update item recursively
-        if (!activeBOM) return;
-
-        const updateRecursive = (items: BOMItem[]): BOMItem[] => {
-            return items.map(item => {
-                if (item.id === updatedItem.id) return updatedItem;
-                if (item.children) return { ...item, children: updateRecursive(item.children) };
-                return item;
-            });
-        };
-
-        setActiveBOM({ ...activeBOM, items: updateRecursive(activeBOM.items) });
+    const loadDependencies = async () => {
+        try {
+            const [mats, u] = await Promise.all([
+                materialService.getAll(1, 100),
+                materialUnitService.getAll()
+            ]);
+            setMaterials(mats.data || []);
+            setUnits(u);
+        } catch (error) {
+            console.error("Failed to load dependencies", error);
+        }
     };
 
-    const deleteItem = (itemId: string) => {
-        if (!activeBOM) return;
+    const handleAddBom = async () => {
+        if (!newBom.material_id || !newBom.usage_per_piece) return;
 
-        const deleteRecursive = (items: BOMItem[]): BOMItem[] => {
-            return items.filter(item => item.id !== itemId).map(item => ({
-                ...item,
-                children: item.children ? deleteRecursive(item.children) : undefined
-            }));
-        };
+        setBomLoading(true);
+        try {
+            let unitId = newBom.unit_id;
+            if (!unitId) {
+                const mat = materials.find(m => m.id === newBom.material_id);
+                if (mat && mat.unitId) unitId = mat.unitId;
+                else if (units.length > 0) unitId = units[0].id;
+            }
 
-        setActiveBOM({ ...activeBOM, items: deleteRecursive(activeBOM.items) });
-    };
-
-    const addItem = (parentId: string | null) => {
-        // Mock opening a material picker
-        const newItem: BOMItem = {
-            id: Math.random().toString(),
-            componentId: 999,
-            componentName: "New Component (Mock)",
-            componentCode: "NEW-001",
-            quantity: 1,
-            unit: "pcs",
-            level: parentId ? 2 : 1, // simplified
-            hasChildren: false,
-            price: 10
-        };
-
-        if (!activeBOM) return;
-
-        if (parentId === null) {
-            setActiveBOM({ ...activeBOM, items: [...activeBOM.items, newItem] });
-        } else {
-            const addRecursive = (items: BOMItem[]): BOMItem[] => {
-                return items.map(item => {
-                    if (item.id === parentId) {
-                        return { ...item, children: [...(item.children || []), newItem] };
-                    }
-                    if (item.children) return { ...item, children: addRecursive(item.children) };
-                    return item;
-                });
+            const payload: CreateBomDTO = {
+                product_id: Number(productId),
+                material_id: Number(newBom.material_id),
+                unit_id: Number(unitId),
+                usage_per_piece: Number(newBom.usage_per_piece),
+                scrap_factor: Number(newBom.scrap_factor || 0),
+                version: 1,
+                active: 1
             };
-            setActiveBOM({ ...activeBOM, items: addRecursive(activeBOM.items) });
-        }
-    }
 
-    if (loading) return <div>{t("common.loading")}</div>;
-    if (!activeBOM) return <div>No BOM Found</div>;
+            await productService.addBom(payload);
+            await fetchBoms();
+
+            onBomClose();
+            setNewBom({ material_id: 0, unit_id: 0, usage_per_piece: 1, scrap_factor: 0, active: 1, version: 1 });
+        } catch (error) {
+            console.error("Failed to add BOM", error);
+        } finally {
+            setBomLoading(false);
+        }
+    };
+
+    const handleDeleteBom = (bomId: number) => {
+        setBomToDelete(bomId);
+        onDeleteBomOpen();
+    };
+
+    const confirmDeleteBom = async () => {
+        if (!bomToDelete) return;
+        setBomLoading(true);
+        try {
+            await productService.deleteBom(bomToDelete);
+            await fetchBoms();
+            onDeleteBomClose();
+            setBomToDelete(null);
+        } catch (error) {
+            console.error("Failed to delete BOM", error);
+        } finally {
+            setBomLoading(false);
+        }
+    };
+
+    const selectedMaterialUnitName = useMemo(() => {
+        if (!newBom.material_id) return "";
+        const mat = materials.find(m => m.id === Number(newBom.material_id));
+        return mat ? mat.unit : "";
+    }, [newBom.material_id, materials]);
+
+    if (loading) {
+        return <div className="p-4 flex justify-center">{t("common.loading")}</div>;
+    }
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center bg-content1 p-4 rounded-lg shadow-sm">
-                <div className="flex items-center gap-4">
-                    <Select
-                        label={t("products.version")}
-                        selectedKeys={[currentVersionId]}
-                        onChange={(e) => handleVersionChange(e.target.value)}
-                        className="w-48"
-                        size="sm"
-                    >
-                        {versions.map(v => (
-                            <SelectItem key={v.id} textValue={v.version}>
-                                {v.version} - {v.status}
-                            </SelectItem>
-                        ))}
-                    </Select>
-                    <Chip color={activeBOM.status === 'approved' ? 'success' : 'warning'} variant="flat">
-                        {t(`products.${activeBOM.status}`)}
-                    </Chip>
-                    <span className="text-small text-default-500">{activeBOM.description}</span>
-                </div>
-                <div className="flex gap-2">
-                    <Button color="primary" variant="flat" startContent={<Save size={18} />} onPress={handleSave}>
-                        {t("common.save")}
-                    </Button>
-                    <Button color="secondary" variant="flat" startContent={<CheckCircle size={18} />}>
-                        {t("products.approve")}
-                    </Button>
-                </div>
+            <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">{t("products.bomList")}</h3>
+                <Button color="primary" size="sm" startContent={<Plus size={16} />} onPress={onBomOpen}>
+                    {t("products.addBom")}
+                </Button>
             </div>
 
             <Card>
-                <CardBody>
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold">{t("products.bom")}</h3>
-                        <Button size="sm" startContent={<Plus size={16} />} onPress={() => addItem(null)}>
-                            {t("products.addComponent")}
-                        </Button>
-                    </div>
-
-                    <div className=" rounded-lg">
-                        <div className="grid grid-cols-12 gap-4 bg-default-100 p-3 text-sm font-semibold rounded-t-lg">
-                            <div className="col-span-3 ml-8">{t("products.component")}</div>
-                            <div className="col-span-2">{t("products.quantity")}</div>
-                            <div className="col-span-2">{t("products.cost")}</div>
-                            <div className="col-span-2">{t("products.status")}</div>
-                            <div className="col-span-3 text-right">{t("products.actions")}</div>
-                        </div>
-                        {activeBOM.items.map(item => (
-                            <BOMNode
-                                key={item.id}
-                                item={item}
-                                level={0}
-                                onUpdate={updateItem}
-                                onDelete={deleteItem}
-                                onAddHost={addItem}
-                            />
-                        ))}
-                    </div>
+                <CardBody className="p-0">
+                    <Table aria-label="BOM Table" shadow="none" classNames={{ wrapper: "rounded-none shadow-none" }}>
+                        <TableHeader>
+                            <TableColumn>{t("products.fields.material")}</TableColumn>
+                            <TableColumn>{t("products.fields.quantity")}</TableColumn>
+                            <TableColumn>{t("products.fields.unit")}</TableColumn>
+                            <TableColumn>{t("products.fields.waste")}</TableColumn>
+                            <TableColumn>{t("products.fields.cost")} (Est.)</TableColumn>
+                            <TableColumn align="center">{t("common.actions")}</TableColumn>
+                        </TableHeader>
+                        <TableBody emptyContent={"No materials added yet."} items={boms}>
+                            {(bom) => (
+                                <TableRow key={bom.id}>
+                                    <TableCell>{bom.materialName}</TableCell>
+                                    <TableCell>{bom.quantity}</TableCell>
+                                    <TableCell>{bom.unitName}</TableCell>
+                                    <TableCell>{bom.wastePercent}%</TableCell>
+                                    <TableCell>
+                                        {((bom.costPerUnit || 0) * bom.quantity).toFixed(2)}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex justify-center">
+                                            <span className="text-danger cursor-pointer active:opacity-50" onClick={() => handleDeleteBom(bom.id)}>
+                                                <Trash size={18} />
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
                 </CardBody>
             </Card>
+
+            {/* BOM Modal */}
+            <Modal isOpen={isBomOpen} onOpenChange={onBomOpenChange} placement="center">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader>{t("products.addBom")}</ModalHeader>
+                            <ModalBody>
+                                <Select
+                                    label={t("products.fields.material")}
+                                    placeholder="Select material"
+                                    selectedKeys={newBom.material_id ? [newBom.material_id.toString()] : []}
+                                    onChange={(e) => setNewBom({ ...newBom, material_id: Number(e.target.value) })}
+                                >
+                                    {materials.map((mat) => (
+                                        <SelectItem key={mat.id} textValue={mat.name}>
+                                            <div className="flex justify-between items-center w-full">
+                                                <span>{mat.name}</span>
+                                                <span className="text-tiny text-default-400">{mat.sku}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        type="number"
+                                        label={t("products.fields.quantity")}
+                                        value={newBom.usage_per_piece?.toString()}
+                                        onValueChange={(v) => setNewBom({ ...newBom, usage_per_piece: Number(v) })}
+                                    />
+                                    <Input
+                                        type="number"
+                                        label={t("products.fields.waste")}
+                                        placeholder="0"
+                                        endContent="%"
+                                        value={newBom.scrap_factor?.toString()}
+                                        onValueChange={(v) => setNewBom({ ...newBom, scrap_factor: Number(v) })}
+                                    />
+                                </div>
+
+                                <Select
+                                    label={t("products.fields.unit")}
+                                    placeholder="Select unit"
+                                    selectedKeys={newBom.unit_id ? [newBom.unit_id.toString()] : []}
+                                    onChange={(e) => setNewBom({ ...newBom, unit_id: Number(e.target.value) })}
+                                    description={selectedMaterialUnitName ? `Default: ${selectedMaterialUnitName}` : ""}
+                                >
+                                    {units.map((u) => (
+                                        <SelectItem key={u.id}>
+                                            {u.name}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button variant="flat" color="danger" onPress={onClose}>{t("common.cancel")}</Button>
+                                <Button color="primary" onPress={handleAddBom} isLoading={bomLoading}>{t("common.add")}</Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <Modal isOpen={isDeleteBomOpen} onOpenChange={onDeleteBomOpenChange} placement="center">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Confirm Delete</ModalHeader>
+                            <ModalBody>
+                                <p>{t("common.confirmDeleteMessage")}</p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="default" variant="light" onPress={onClose}>
+                                    {t("common.cancel")}
+                                </Button>
+                                <Button color="danger" onPress={confirmDeleteBom} isLoading={bomLoading}>
+                                    {t("common.delete")}
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

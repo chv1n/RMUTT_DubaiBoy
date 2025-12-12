@@ -9,16 +9,20 @@ import { User } from '@heroui/user';
 import { Divider } from '@heroui/divider';
 import { useTranslation } from '@/components/providers/language-provider';
 import { Material } from '@/types/materials';
-import { ArrowLeft, Box, Package, History, Info, Tag, Layers, Truck, FileText, AlertTriangle, CheckCircle, Edit, Trash2 } from 'lucide-react';
+import { ArrowLeft, Box, Package, History, Info, Tag, Layers, Truck, FileText, AlertTriangle, Edit, Trash2, Building } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Image } from '@heroui/image';
+import { useQuery } from '@tanstack/react-query';
+import { inventoryService } from '@/services/inventory.service';
+import { MovementHistoryTable } from '@/components/warehouses/MovementHistoryTable';
+import { Spinner } from '@heroui/spinner';
 
 interface MaterialDetailProps {
     material: Material;
 }
 
 export default function MaterialDetail({ material }: MaterialDetailProps) {
-    const { t, locale } = useTranslation();
+    const { t } = useTranslation();
     const router = useRouter();
 
     const statusColorMap: Record<string, "success" | "danger" | "warning" | "default"> = {
@@ -26,6 +30,40 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
         inactive: "default",
         discontinued: "danger",
     };
+
+    // --- Data Fetching ---
+
+    // 1. Fetch Total Inventory Balance
+    const { data: balanceData, isLoading: isLoadingBalance } = useQuery({
+        queryKey: ['inventory', 'balance', 'total', material.id],
+        queryFn: () => inventoryService.getTotalBalance({ material_id: material.id })
+    });
+
+    const totalStock = balanceData?.data?.[0]?.total_quantity || 0;
+    const warehouseBreakdown = balanceData?.data?.[0]?.warehouse_breakdown || [];
+
+    // 2. Fetch Movement History
+    const [historyPage, setHistoryPage] = React.useState(1);
+    const { data: historyData, isLoading: isLoadingHistory } = useQuery({
+        queryKey: ['inventory', 'history', material.id, historyPage],
+        queryFn: () => inventoryService.getMovementHistory({ material_id: material.id, page: historyPage, limit: 10 })
+    });
+
+    // Helper to normalize history data structure (flat vs nested)
+    const historyItems = React.useMemo(() => {
+        if (!historyData || !historyData.success) return [];
+        const raw = historyData as any;
+        if (Array.isArray(raw.data)) return raw.data;
+        if (raw.data && Array.isArray(raw.data.data)) return raw.data.data;
+        return [];
+    }, [historyData]);
+
+    const historyTotalPages = React.useMemo(() => {
+        if (!historyData || !historyData.success) return 1;
+        const raw = historyData as any;
+        return raw.meta?.totalPages || raw.data?.meta?.totalPages || 1;
+    }, [historyData]);
+
 
     const handleEdit = () => {
         router.push(`/super-admin/materials/${material.id}/edit`);
@@ -44,57 +82,84 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
     const OverviewTab = () => (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Main Info Card */}
-            <Card className="col-span-1 md:col-span-2 shadow-sm border border-default-100">
-                <CardHeader className="pb-0 px-6 pt-6 flex-col items-start gap-2">
-                    <h4 className="font-bold text-large uppercase text-default-600 flex items-center gap-2">
-                        <Info size={18} />
-                        {t('materials.field.description')}
-                    </h4>
-                </CardHeader>
-                <CardBody className="py-6 px-6">
-                    <p className="text-default-500 whitespace-pre-wrap leading-relaxed">
-                        {material.description || t('common.noDescription')}
-                    </p>
+            <div className="col-span-1 md:col-span-2 space-y-6">
+                <Card className="shadow-sm border border-default-100">
+                    <CardHeader className="pb-0 px-6 pt-6 flex-col items-start gap-2">
+                        <h4 className="font-bold text-large uppercase text-default-600 flex items-center gap-2">
+                            <Info size={18} />
+                            {t('materials.field.description')}
+                        </h4>
+                    </CardHeader>
+                    <CardBody className="py-6 px-6">
+                        <p className="text-default-500 whitespace-pre-wrap leading-relaxed">
+                            {material.description || t('common.noDescription')}
+                        </p>
 
-                    <Divider className="my-6" />
+                        <Divider className="my-6" />
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <span className="text-small text-default-500 block mb-1">{t('materials.group')}</span>
-                            <div className="flex items-center gap-2">
-                                <Layers size={18} className="text-primary" />
-                                <span className="font-medium text-default-900">{material.materialGroup?.name || "-"}</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <span className="text-small text-default-500 block mb-1">{t('materials.group')}</span>
+                                <div className="flex items-center gap-2">
+                                    <Layers size={18} className="text-primary" />
+                                    <span className="font-medium text-default-900">{material.materialGroup?.name || "-"}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span className="text-small text-default-500 block mb-1">{t('materials.container')}</span>
+                                <div className="flex items-center gap-2">
+                                    <Box size={18} className="text-secondary" />
+                                    <span className="font-medium text-default-900">{material.containerType?.name || "-"}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span className="text-small text-default-500 block mb-1">{t('materials.field.supplier')}</span>
+                                {material.supplier ? (
+                                    <User
+                                        name={material.supplier.name}
+                                        description={material.supplier.email}
+                                        avatarProps={{ src: "", size: "sm", name: material.supplier.name.charAt(0) }}
+                                    />
+                                ) : (
+                                    <span className="text-default-400">-</span>
+                                )}
+                            </div>
+                            <div>
+                                <span className="text-small text-default-500 block mb-1">{t('materials.field.leadTime')}</span>
+                                <div className="flex items-center gap-2">
+                                    <Truck size={18} className="text-warning" />
+                                    <span className="font-medium text-default-900">{material.orderLeadTime} Days</span>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <span className="text-small text-default-500 block mb-1">{t('materials.container')}</span>
-                            <div className="flex items-center gap-2">
-                                <Box size={18} className="text-secondary" />
-                                <span className="font-medium text-default-900">{material.containerType?.name || "-"}</span>
+                    </CardBody>
+                </Card>
+
+                {/* Warehouse Breakdown */}
+                {warehouseBreakdown.length > 0 && (
+                    <Card className="shadow-sm border border-default-100">
+                        <CardHeader className="pb-0 px-6 pt-6">
+                            <h4 className="font-bold text-medium text-default-600 flex items-center gap-2">
+                                <Building size={18} />
+                                Stock by Warehouse
+                            </h4>
+                        </CardHeader>
+                        <CardBody className="px-6 py-4">
+                            <div className="flex flex-col gap-2">
+                                {warehouseBreakdown.map((wh) => (
+                                    <div key={wh.warehouse_id} className="flex justify-between items-center py-2 border-b border-default-100 last:border-0">
+                                        <span className="text-default-600">{wh.warehouse_name}</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold">{wh.quantity.toLocaleString()}</span>
+                                            <span className="text-tiny text-default-400">{material.unit}</span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                        <div>
-                            <span className="text-small text-default-500 block mb-1">{t('materials.field.supplier')}</span>
-                            {material.supplier ? (
-                                <User
-                                    name={material.supplier.name}
-                                    description={material.supplier.email}
-                                    avatarProps={{ src: "", size: "sm", name: material.supplier.name.charAt(0) }}
-                                />
-                            ) : (
-                                <span className="text-default-400">-</span>
-                            )}
-                        </div>
-                        <div>
-                            <span className="text-small text-default-500 block mb-1">{t('materials.field.leadTime')}</span>
-                            <div className="flex items-center gap-2">
-                                <Truck size={18} className="text-warning" />
-                                <span className="font-medium text-default-900">{material.orderLeadTime} Days</span>
-                            </div>
-                        </div>
-                    </div>
-                </CardBody>
-            </Card>
+                        </CardBody>
+                    </Card>
+                )}
+            </div>
 
             {/* Stats / Side Card */}
             <div className="space-y-4">
@@ -105,44 +170,55 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
                         </div>
                         <div className="flex flex-col">
                             <p className="text-small text-default-500 uppercase font-bold">{t('materials.inventoryLevel')}</p>
+                            <span className="text-tiny text-default-400">Total across all warehouses</span>
                         </div>
                     </CardHeader>
                     <CardBody className="px-6 pb-6 pt-2 gap-4">
                         <div className="flex justify-between items-baseline">
-                            <span className="text-3xl font-bold">{material.quantity.toLocaleString()}</span>
+                            {isLoadingBalance ? (
+                                <Spinner size="sm" />
+                            ) : (
+                                <span className="text-3xl font-bold">{totalStock.toLocaleString()}</span>
+                            )}
                             <span className="text-small font-medium text-default-500">{material.unit}</span>
                         </div>
                         <Divider />
                         <div className="grid grid-cols-2 gap-4 text-small">
                             <div>
-                                <span className="text-default-500 block">{t('materials.minStock')}</span>
+                                <span className="text-default-500 block">Min Stock</span>
                                 <span className="font-semibold text-danger">{material.minStockLevel}</span>
                             </div>
                             <div>
-                                <span className="text-default-500 block">{t('materials.field.maxStock')}</span>
+                                <span className="text-default-500 block">Max Stock</span>
                                 <span className="font-semibold text-success">{material.containerMaxStock}</span>
                             </div>
                             <div>
-                                <span className="text-default-500 block">{t('materials.price')}</span>
-                                <span className="font-semibold">${material.price.toFixed(2)}</span>
+                                <span className="text-default-500 block">Qty / Container</span>
+                                <span className="font-semibold">{material.quantity.toLocaleString()}</span>
                             </div>
                             <div>
-                                <span className="text-default-500 block">{t('materials.totalValue')}</span>
-                                <span className="font-semibold text-primary">${(material.price * material.quantity).toLocaleString()}</span>
+                                <span className="text-default-500 block uppercase">Valuation</span>
+                                {isLoadingBalance ? (
+                                    <span className="text-tiny text-default-400">Calcul...</span>
+                                ) : (
+                                    <span className="font-semibold text-primary">${(material.price * totalStock).toLocaleString()}</span>
+                                )}
                             </div>
                         </div>
                     </CardBody>
                 </Card>
 
-                <Card className="shadow-sm border border-default-100">
-                    <CardBody className="flex flex-row items-center gap-4 p-4 text-warning">
-                        <AlertTriangle size={24} />
-                        <div className="flex flex-col">
-                            <span className="font-bold">Low Stock Warning</span>
-                            <span className="text-xs">Current stock is approaching minimum level.</span>
-                        </div>
-                    </CardBody>
-                </Card>
+                {((!isLoadingBalance && totalStock <= material.minStockLevel)) && (
+                    <Card className="shadow-sm border border-transparent bg-warning/10">
+                        <CardBody className="flex flex-row items-center gap-4 p-4 text-warning-600">
+                            <AlertTriangle size={24} />
+                            <div className="flex flex-col">
+                                <span className="font-bold">Low Stock Warning</span>
+                                <span className="text-xs">Current stock is at or below minimum level.</span>
+                            </div>
+                        </CardBody>
+                    </Card>
+                )}
             </div>
         </div>
     );
@@ -206,9 +282,16 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
                         <span>{t('materials.tab.history')}</span>
                     </div>
                 }>
-                    <Card className="shadow-none border border-default-200 p-8 flex flex-col items-center justify-center text-default-400">
-                        <History size={48} className="mb-4 opacity-50" />
-                        <p>No history available.</p>
+                    <Card className="shadow-sm border border-default-100">
+                        <CardBody>
+                            <MovementHistoryTable
+                                items={historyItems}
+                                isLoading={isLoadingHistory}
+                                page={historyPage}
+                                totalPages={historyTotalPages}
+                                onPageChange={setHistoryPage}
+                            />
+                        </CardBody>
                     </Card>
                 </Tab>
                 <Tab key="documents" title={

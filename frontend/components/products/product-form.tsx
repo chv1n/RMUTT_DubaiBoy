@@ -18,14 +18,22 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { Chip } from "@heroui/chip";
 
 interface ProductFormProps {
-    initialData?: Product;
+    initialData?: Product | null;
     mode: "create" | "edit";
+    onSuccess?: () => void;
+    onCancel?: () => void;
 }
 
-export function ProductForm({ initialData, mode }: ProductFormProps) {
+export function ProductForm({ initialData, mode: initialMode, onSuccess, onCancel }: ProductFormProps) {
     const { t } = useTranslation();
     const router = useRouter();
     const { isOpen: isBomOpen, onOpen: onBomOpen, onOpenChange: onBomOpenChange, onClose: onBomClose } = useDisclosure();
+    const { isOpen: isDeleteBomOpen, onOpen: onDeleteBomOpen, onOpenChange: onDeleteBomOpenChange, onClose: onDeleteBomClose } = useDisclosure();
+    const [bomToDelete, setBomToDelete] = useState<number | null>(null);
+
+    // Mode handling (can switch from create to edit)
+    const [mode, setMode] = useState(initialMode);
+    const [currentProduct, setCurrentProduct] = useState<Product | null>(initialData || null);
 
     // Core State
     const [loading, setLoading] = useState(false);
@@ -57,15 +65,39 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
 
     useEffect(() => {
         loadDependencies();
+    }, []);
+
+    useEffect(() => {
         if (initialData) {
-            setFormData({
-                name: initialData.name,
-                typeId: initialData.typeId,
-                isActive: initialData.isActive
-            });
-            setBoms(initialData.bom || []);
+            setCurrentProduct(initialData);
+            setMode("edit");
+        } else if (initialMode === "create") {
+            setCurrentProduct(null);
+            setMode("create");
+            setFormData({ name: "", typeId: 0, isActive: true });
+            setBoms([]);
         }
-    }, [initialData]);
+    }, [initialData, initialMode]);
+
+    useEffect(() => {
+        if (currentProduct) {
+            setFormData({
+                name: currentProduct.name,
+                typeId: currentProduct.typeId,
+                isActive: currentProduct.isActive
+            });
+            fetchBoms(currentProduct.id);
+        }
+    }, [currentProduct]);
+
+    const fetchBoms = async (productId: number) => {
+        try {
+            const fetchedBoms = await productService.getBomsByProduct(productId);
+            setBoms(fetchedBoms);
+        } catch (error) {
+            console.error("Failed to fetch BOMs", error);
+        }
+    };
 
     const loadDependencies = async () => {
         try {
@@ -86,18 +118,23 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
         e.preventDefault();
         setLoading(true);
         try {
-            if (mode === "edit" && initialData) {
-                await productService.update(initialData.id, {
+            if (mode === "edit" && currentProduct) {
+                await productService.update(currentProduct.id, {
                     product_name: formData.name,
                     product_type_id: Number(formData.typeId),
                     // active mapping if needed
                 });
+                if (onSuccess) onSuccess();
             } else {
                 const newProduct = await productService.create({
                     product_name: formData.name,
                     product_type_id: Number(formData.typeId)
                 });
-                router.push(`/super-admin/products/${newProduct.id}/edit`);
+                // Switch to edit mode in place
+                setCurrentProduct(newProduct);
+                setMode("edit");
+                // Don't close modal, let user add BOMs
+                // if (onSuccess) onSuccess(); 
             }
         } catch (error) {
             console.error("Failed to save product", error);
@@ -107,7 +144,7 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
     };
 
     const handleAddBom = async () => {
-        if (!initialData || !newBom.material_id || !newBom.usage_per_piece) return;
+        if (!currentProduct || !newBom.material_id || !newBom.usage_per_piece) return;
 
         setBomLoading(true);
         try {
@@ -119,7 +156,7 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
             }
 
             const payload: CreateBomDTO = {
-                product_id: initialData.id,
+                product_id: currentProduct.id,
                 material_id: Number(newBom.material_id),
                 unit_id: Number(unitId),
                 usage_per_piece: Number(newBom.usage_per_piece),
@@ -129,8 +166,7 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
             };
 
             await productService.addBom(payload);
-            const updatedProduct = await productService.getById(initialData.id);
-            setBoms(updatedProduct.bom);
+            await fetchBoms(currentProduct.id);
 
             onBomClose();
             setNewBom({ material_id: 0, unit_id: 0, usage_per_piece: 1, scrap_factor: 0, active: 1, version: 1 });
@@ -141,16 +177,25 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
         }
     };
 
-    const handleDeleteBom = async (bomId: number) => {
-        if (!confirm(t("common.confirmDeleteMessage"))) return;
+    const handleDeleteBom = (bomId: number) => {
+        setBomToDelete(bomId);
+        onDeleteBomOpen();
+    };
+
+    const confirmDeleteBom = async () => {
+        if (!bomToDelete) return;
+        setBomLoading(true);
         try {
-            await productService.deleteBom(bomId);
-            if (initialData) {
-                const updatedProduct = await productService.getById(initialData.id);
-                setBoms(updatedProduct.bom);
+            await productService.deleteBom(bomToDelete);
+            if (currentProduct) {
+                await fetchBoms(currentProduct.id);
             }
+            onDeleteBomClose();
+            setBomToDelete(null);
         } catch (error) {
             console.error("Failed to delete BOM", error);
+        } finally {
+            setBomLoading(false);
         }
     };
 
@@ -160,25 +205,21 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
         return mat ? mat.unit : "";
     }, [newBom.material_id, materials]);
 
-    return (
-        <div className="space-y-6 max-w-5xl mx-auto">
-            <div className="flex items-center gap-4">
-                <Button isIconOnly variant="light" onPress={() => router.back()}>
-                    <ArrowLeft size={20} />
-                </Button>
-                <h1 className="text-2xl font-bold">
-                    {mode === "create" ? t("products.addProduct") : t("products.editProduct")}
-                </h1>
-            </div>
+    const handleCancel = () => {
+        if (onCancel) onCancel();
+        else router.back();
+    };
 
+    return (
+        <div className="space-y-6 w-full h-full">
             <Tabs aria-label="Product Options" selectedKey={activeTab} onSelectionChange={(k) => setActiveTab(k as string)} color="primary" variant="underlined">
                 <Tab key="info" title={
                     <div className="flex items-center gap-2">
                         <span>{t("products.tabs.info")}</span>
                     </div>
                 }>
-                    <Card>
-                        <CardBody className="p-6">
+                    <Card className="shadow-none border-none bg-transparent">
+                        <CardBody className="p-0">
                             <form onSubmit={handleSaveProduct} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <Input
@@ -211,8 +252,8 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
                                         <SelectItem key="opt_inactive">{t("common.inactive")}</SelectItem>
                                     </Select>
                                 </div>
-                                <div className="flex justify-end gap-2">
-                                    <Button variant="light" color="danger" onPress={() => router.back()}>
+                                <div className="flex justify-end gap-2 mt-4">
+                                    <Button variant="light" color="danger" onPress={handleCancel}>
                                         {t("common.cancel")}
                                     </Button>
                                     <Button color="primary" type="submit" isLoading={loading} startContent={<Save size={18} />}>
@@ -227,11 +268,11 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
                 <Tab key="bom" title={
                     <div className="flex items-center gap-2">
                         <span>{t("products.tabs.bom")}</span>
-                        <Chip size="sm" variant="flat">{boms.length}</Chip>
+                        {boms.length > 0 && <Chip size="sm" variant="flat">{boms.length}</Chip>}
                     </div>
                 } isDisabled={mode === "create"}>
-                    <Card>
-                        <CardBody className="p-6 space-y-4">
+                    <Card className="shadow-none border-none bg-transparent">
+                        <CardBody className="p-0 space-y-4">
                             {mode === "create" ? (
                                 <div className="flex flex-col items-center justify-center p-8 text-default-400">
                                     <AlertCircle size={32} className="mb-2" />
@@ -246,7 +287,7 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
                                         </Button>
                                     </div>
 
-                                    <Table aria-label="BOM Table">
+                                    <Table aria-label="BOM Table" shadow="none" classNames={{ wrapper: "p-0" }}>
                                         <TableHeader>
                                             <TableColumn>{t("products.fields.material")}</TableColumn>
                                             <TableColumn>{t("products.fields.quantity")}</TableColumn>
@@ -283,8 +324,8 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
                 </Tab>
             </Tabs>
 
-            {/* BOM Modal */}
-            <Modal isOpen={isBomOpen} onOpenChange={onBomOpenChange}>
+            {/* BOM Modal - Nested */}
+            <Modal isOpen={isBomOpen} onClose={() => onBomClose()} size="3xl" placement="center" backdrop="blur" portalContainer={document.body}>
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -340,6 +381,28 @@ export function ProductForm({ initialData, mode }: ProductFormProps) {
                             <ModalFooter>
                                 <Button variant="flat" color="danger" onPress={onClose}>{t("common.cancel")}</Button>
                                 <Button color="primary" onPress={handleAddBom} isLoading={bomLoading}>{t("common.add")}</Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
+
+            {/* Delete Confirmation Modal - Nested */}
+            <Modal isOpen={isDeleteBomOpen} onOpenChange={onDeleteBomOpenChange} placement="center" backdrop="blur" portalContainer={document.body}>
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">Confirm Delete</ModalHeader>
+                            <ModalBody>
+                                <p>{t("common.confirmDeleteMessage")}</p>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button color="default" variant="light" onPress={onClose}>
+                                    {t("common.cancel")}
+                                </Button>
+                                <Button color="danger" onPress={confirmDeleteBom} isLoading={bomLoading}>
+                                    {t("common.delete")}
+                                </Button>
                             </ModalFooter>
                         </>
                     )}

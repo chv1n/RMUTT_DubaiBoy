@@ -7,7 +7,7 @@ import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
 import { useLogin } from "./../hooks/api/useLogin";
-import { loginSchema, LoginRequest } from "./../services/auth.service";
+import { loginSchema, LoginRequest, LoginResponse } from "./../services/auth.service";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { useRouter } from "next/navigation";
 import { title } from "@/components/primitives";
@@ -24,9 +24,10 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginRequest) => {
     try {
-      await login(data);
-      // Handle success (e.g., redirect)
-      router.push("/super-admin");
+      const response: any = await login(data);
+      if (response.data) {
+        router.push("/super-admin");
+      }
     } catch (e) {
       // Error is handled by the hook and displayed below
       console.error("Login failed", e);
@@ -56,23 +57,7 @@ export default function LoginPage() {
               <div className="mt-8 mr-10 h-44 w-full rounded-xl bg-gradient-to-tl from-primary via-primary to-white/30 opacity-90 blur-sm" />
             </div>
           </div>
-          {/* <div className="hidden lg:flex min-h-[500px] h-dvh  max-w-[60%] max-h-[700px]  relative flex-col justify-center px-12 overflow-hidden  ">
-            <div className="relative z-10   ">
-              <h1 className={title({ size: "lg", color: "blue", class: "font-bold" })}>Material Core</h1>
-              <h1 className="text-3xl font-bold leading-tight mb-6 mt-8">
-                ยกระดับการจัดการวัตถุดิบ ให้โรงงานทำงานได้อย่างมีประสิทธิภาพสูงสุด
-              </h1>
-              <p className=" text-lg">
-                เชื่อมต่อข้อมูลแบบเรียลไทม์ ลดความผิดพลาด และเพิ่มประสิทธิภาพไลน์ผลิต
-                ด้วยระบบจัดการ Material ที่ใช้งานง่ายและเชื่อถือได้
-              </p>
-            </div> */}
 
-          {/* Blue Blurred Gradient */}
-          {/* <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] bg-primary/70  blur-[120px] rounded-full pointer-events-none" />
-          </div> */}
-
-          {/* Right Side - Login Form */}
           <div className="flex w-full lg:w-1/2  items-center justify-center p-8 dark:bg-white/5 ">
 
             <div className="w-full max-w-md">
@@ -81,17 +66,21 @@ export default function LoginPage() {
                 <ThemeSwitch />
               </div>
               {/* Logo & Header */}
-              <div className="flex items-start gap-4 mb-8">
-                <div className="w-15 h-15 text-white rounded-full bg-primary flex items-center justify-center  font-bold text-xl shrink-0">
-                  MC
+              <div className="flex flex-col items-center mb-8 gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center shadow-lg shadow-primary-500/30">
+                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <h1 className="text-4xl font-black tracking-tight">
+                    <span className="text-default-900">Material</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600">Core</span>
+                  </h1>
                 </div>
-                <div>
-
-                  <h2 className="text-2xl font-bold ">เข้าสู่ระบบบัญชีของคุณ</h2>
-                  <p className="text-default-500 text-sm mt-1">
-                    ยินดีต้อนรับเข้าสู่ระบบจัดการวัตถุดิบ
-                  </p>
-                </div>
+                <p className="text-default-500 text-sm mt-1 text-center max-w-xs">
+                  ระบบจัดการทรัพยากรการผลิตอัจฉริยะ <br /> เพื่อประสิทธิภาพสูงสุดของโรงงาน
+                </p>
               </div>
 
               <div className="mb-6">

@@ -16,7 +16,9 @@ import {
     Box,
     Calendar,
     Layers,
-    Truck
+    Truck,
+    Warehouse,
+    ClipboardList
 } from "lucide-react";
 
 export interface SubMenuItem {
@@ -41,23 +43,38 @@ export const sidebarItems: MenuItem[] = [
         href: "/super-admin",
     },
     {
-        key: "users",
-        label: "user.title",
-        icon: <Users className="w-5 h-5" />,
-        href: "/super-admin/users",
+        key: "analytics",
+        label: "common.analytics",
+        icon: <BarChart3 className="w-5 h-5" />,
+        href: "/super-admin/analytics",
     },
+    {
+        key: "inventory",
+        label: "inventory.title",
+        icon: <ClipboardList className="w-5 h-5" />,
+        children: [
+            { key: "dashboard-inventory", label: "common.dashboard", href: "/super-admin/inventory" },
+            { key: "inv-balance", label: "inventory.balance", href: "/super-admin/inventory/balance" },
+            { key: "inv-transactions", label: "inventory.transactions", href: "/super-admin/inventory/transactions" },
+        ]
+    },
+
     {
         key: "plans",
         label: "plan.title",
         icon: <Calendar className="w-5 h-5" />,
-        href: "/super-admin/plans",
+        children: [
+            { key: "dashboard-plans", label: "common.dashboard", href: "/super-admin/plans" },
+            { key: "all-plans", label: "plan.list", href: "/super-admin/plans/management" },
+        ],
     },
     {
         key: "products",
         label: "products.title",
         icon: <Package className="w-5 h-5" />,
         children: [
-            { key: "all-products", label: "products.list", href: "/super-admin/products" },
+            { key: "dashboard-products", label: "common.dashboard", href: "/super-admin/products" },
+            { key: "all-products", label: "products.list", href: "/super-admin/products/all" },
             { key: "product-types", label: "products.productTypes", href: "/super-admin/products/types" },
         ],
     },
@@ -84,16 +101,23 @@ export const sidebarItems: MenuItem[] = [
         ],
     },
     {
-        key: "analytics",
-        label: "common.analytics",
-        icon: <BarChart3 className="w-5 h-5" />,
-        href: "",
+        key: "warehouses",
+        label: "warehouses.title",
+        icon: <Warehouse className="w-5 h-5" />,
+        children: [
+            { key: "dashboard-warehouses", label: "common.dashboard", href: "/super-admin/warehouse" },
+            { key: "all-warehouses", label: "warehouses.list", href: "/super-admin/warehouse/all" },
+        ],
     },
     {
-        key: "reports",
-        label: "common.reports",
-        icon: <FileText className="w-5 h-5" />,
-        href: "",
+        key: "users",
+        label: "users.title",
+        icon: <Users className="w-5 h-5" />,
+        children: [
+            { key: "dashboard-users", label: "common.dashboard", href: "/super-admin/users" },
+            { key: "all-users", label: "users.list", href: "/super-admin/users/all" },
+            { key: "audit-logs", label: "audit.title", href: "/super-admin/audit-logs" },
+        ]
     },
 ];
 

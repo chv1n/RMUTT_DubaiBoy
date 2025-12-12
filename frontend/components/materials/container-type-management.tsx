@@ -140,7 +140,7 @@ export function ContainerTypeManagement() {
                 }}
             />
 
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
                 <ModalContent>
                     {(onClose) => (
                         <>

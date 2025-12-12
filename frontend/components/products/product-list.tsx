@@ -12,6 +12,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/common/confirm-modal";
 import { DataTable, Column } from "@/components/common/data-table";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+import { ProductForm } from "./product-form";
 
 export function ProductList() {
     const { t } = useTranslation();
@@ -34,13 +36,20 @@ export function ProductList() {
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+    // Form Modal State
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [formMode, setFormMode] = useState<"create" | "edit">("create");
+
     // Load Data
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const response = await productService.getAll(page, rowsPerPage, search, status);
             setProducts(response.data);
-            // setMeta(response.meta);
+            if (response.meta) {
+                setMeta(response.meta);
+            }
         } catch (error) {
             console.error("Failed to load products", error);
         } finally {
@@ -71,40 +80,55 @@ export function ProductList() {
         }
     };
 
+    const handleCreate = () => {
+        setSelectedProduct(null);
+        setFormMode("create");
+        setIsFormModalOpen(true);
+    };
+
+    const handleEdit = (product: Product) => {
+        setSelectedProduct(product);
+        setFormMode("edit");
+        setIsFormModalOpen(true);
+    };
+
+    const handleFormSuccess = () => {
+        setIsFormModalOpen(false);
+        loadData();
+    };
+
+    const handleFormClose = () => {
+        setIsFormModalOpen(false);
+        setSelectedProduct(null);
+    };
+
     const columns: Column[] = [
-        { name: t("products.code"), uid: "product_id" },
-        { name: t("products.name"), uid: "product_name", sortable: true },
-        { name: t("products.type"), uid: "type_name" },
-        { name: t("products.fields.active"), uid: "active", align: "center" },
-        { name: t("products.lastUpdated"), uid: "update_date" },
+        { name: t("products.code"), uid: "id" },
+        { name: t("products.name"), uid: "name", sortable: true },
+        { name: t("products.type"), uid: "typeName" },
+        { name: t("products.fields.active"), uid: "isActive", align: "center" },
         { name: t("common.actions"), uid: "actions", align: "center" }
     ];
 
     const renderCell = useCallback((item: Product, columnKey: React.Key) => {
         switch (columnKey) {
-            case "product_id":
+            case "id":
                 return <span className="text-default-400">#{item.id}</span>;
-            case "product_name":
+            case "name":
                 return (
                     <div className="flex flex-col">
                         <p className="text-bold text-small capitalize">{item.name}</p>
                     </div>
                 );
-            case "type_name":
+            case "typeName":
                 return (
                     <Chip size="sm" variant="flat" color="primary">{item.typeName}</Chip>
                 );
-            case "active":
+            case "isActive":
                 return (
                     <Chip className="capitalize" color={item.isActive ? "success" : "default"} size="sm" variant="dot">
                         {item.isActive ? t("common.active") : t("common.inactive")}
                     </Chip>
-                );
-            case "update_date":
-                return (
-                    <span className="text-tiny text-default-400">
-                        {new Date(item.lastUpdated).toLocaleDateString()}
-                    </span>
                 );
             case "actions":
                 return (
@@ -115,7 +139,7 @@ export function ProductList() {
                             </span>
                         </Tooltip>
                         <Tooltip content={t("common.edit")}>
-                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => router.push(`/super-admin/products/${item.id}/edit`)}>
+                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item)}>
                                 <Edit size={20} />
                             </span>
                         </Tooltip>
@@ -159,10 +183,11 @@ export function ProductList() {
                     { name: t("common.active"), uid: "active" },
                     { name: t("common.inactive"), uid: "inactive" }
                 ]}
-                onAddNew={() => router.push("/super-admin/products/new")}
+                onAddNew={handleCreate}
                 renderCell={renderCell}
             />
 
+            {/* Delete Modal */}
             <ConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -170,6 +195,36 @@ export function ProductList() {
                 title={t("common.confirmDelete")}
                 message={t("common.confirmDeleteMessage")}
             />
+
+            {/* Create/Edit Modal */}
+            <Modal
+                isOpen={isFormModalOpen}
+                onClose={handleFormClose}
+                size="4xl"
+                placement="center"
+                scrollBehavior="inside"
+                classNames={{
+                    body: "p-6",
+                }}
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                {formMode === "create" ? t("products.addProduct") : t("products.editProduct")}
+                            </ModalHeader>
+                            <ModalBody>
+                                <ProductForm
+                                    initialData={selectedProduct}
+                                    mode={formMode}
+                                    onSuccess={handleFormSuccess}
+                                    onCancel={handleFormClose}
+                                />
+                            </ModalBody>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

@@ -1,258 +1,221 @@
-import { User, CreateUserPayload, UpdateUserPayload, UserFilter, UserListResponse, UserActivity, UserSession } from "@/types/user";
-import { apiClient } from "@/lib/api/core/client";
-import seedUsers from "@/mocks/seed/users.json"; // Ensure TS config allows json import or use require
+import { apiClient } from '@/lib/api/core/client';
+import { User, CreateUserPayload, UpdateUserPayload } from "@/types/user";
+import { ApiResponse } from '@/types/api';
+import seedUsers from "@/mocks/seed/users.json";
+import { MOCK_CONFIG, simulateDelay } from '@/lib/mock/config';
 
-// Types for internal usage
-type UserWithIndex = User & { [key: string]: any };
+// User Service
+class UserService {
+    private readonly endpoint = '/users';
 
-export interface IUserService {
-    listUsers(filter: UserFilter): Promise<UserListResponse>;
-    getUser(id: string): Promise<User | null>;
-    createUser(payload: CreateUserPayload): Promise<User>;
-    updateUser(id: string, payload: UpdateUserPayload): Promise<User>;
-    deleteUser(id: string): Promise<void>;
-    bulkDelete(ids: string[]): Promise<void>;
-    enableUser(id: string): Promise<void>;
-    disableUser(id: string): Promise<void>;
-    inviteUser(email: string): Promise<void>;
-    resetPassword(id: string): Promise<void>;
-    importUsers(file: File): Promise<void>;
-    exportUsers(filter: UserFilter): Promise<void>;
-    listRoles(): Promise<string[]>; // Simple list of role names for now // Simplified for now
-    getUserActivity(id: string): Promise<UserActivity[]>;
-    getUserSessions(id: string): Promise<UserSession[]>;
-}
+    async getAll(
+        page: number = 1,
+        limit: number = 10,
+        search: string = "",
+        is_active?: boolean | null,
+        sort_field: string = "created_at",
+        sort_order: 'ASC' | 'DESC' = 'DESC'
+    ): Promise<ApiResponse<User[]>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            let filtered = [...(seedUsers as unknown as User[])];
 
-// Mock Implementation
-class MockUserService implements IUserService {
-    private users: User[] = [...(seedUsers as unknown as User[])];
+            // Exclude soft-deleted by default unless maybe specific requirement? 
+            // Spec says "Get All Users", usually implies active list. 
+            // Let's filter out deleted_at != null
+            filtered = filtered.filter(u => !u.deleted_at);
 
-    async listUsers(filter: UserFilter): Promise<UserListResponse> {
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-        
-        let filtered = [...this.users];
+            if (search) {
+                const s = search.toLowerCase();
+                filtered = filtered.filter(u =>
+                    u.username.toLowerCase().includes(s) ||
+                    u.email.toLowerCase().includes(s) ||
+                    u.fullname.toLowerCase().includes(s)
+                );
+            }
 
-        if (filter.search) {
-            const s = filter.search.toLowerCase();
-            filtered = filtered.filter(u => 
-                u.username.toLowerCase().includes(s) || 
-                u.email.toLowerCase().includes(s) || 
-                u.display_name.en.toLowerCase().includes(s)
-            );
-        }
-        
-        if (filter.role) {
-            filtered = filtered.filter(u => u.roles.includes(filter.role!));
-        }
+            if (is_active !== undefined && is_active !== null) {
+                filtered = filtered.filter(u => u.is_active === is_active);
+            }
 
-        if (filter.status && filter.status !== 'all') {
-            filtered = filtered.filter(u => u.status === filter.status);
-        }
-
-        if (filter.department) {
-            filtered = filtered.filter(u => u.department === filter.department);
-        }
-
-        // Sorting
-        if (filter.sort_by) {
+            // Sorting
             filtered.sort((a, b) => {
-                const valA = (a as UserWithIndex)[filter.sort_by!] || '';
-                const valB = (b as UserWithIndex)[filter.sort_by!] || '';
-                if (valA < valB) return filter.sort_desc ? 1 : -1;
-                if (valA > valB) return filter.sort_desc ? -1 : 1;
+                const valA = (a as any)[sort_field] ?? '';
+                const valB = (b as any)[sort_field] ?? '';
+                if (valA < valB) return sort_order === 'DESC' ? 1 : -1;
+                if (valA > valB) return sort_order === 'DESC' ? -1 : 1;
                 return 0;
             });
+
+            const start = (page - 1) * limit;
+            const paginatedData = filtered.slice(start, start + limit);
+
+            return {
+                success: true,
+                data: paginatedData,
+                meta: {
+                    totalItems: filtered.length,
+                    itemCount: paginatedData.length,
+                    itemsPerPage: limit,
+                    totalPages: Math.ceil(filtered.length / limit),
+                    currentPage: page
+                }
+            };
         }
 
-        const page = filter.page || 1;
-        const limit = filter.limit || 10;
-        const start = (page - 1) * limit;
-        const end = start + limit;
-
-        return {
-            data: filtered.slice(start, end),
-            meta: {
-                total: filtered.length,
-                page,
-                limit,
-                total_pages: Math.ceil(filtered.length / limit)
-            }
-        };
-    }
-
-    async getUser(id: string): Promise<User | null> {
-        await new Promise(resolve => setTimeout(resolve, 300));
-        return this.users.find(u => u.id === id) || null;
-    }
-
-    async createUser(payload: CreateUserPayload): Promise<User> {
-        await new Promise(resolve => setTimeout(resolve, 600));
-        const newUser: User = {
-            id: `user-${Date.now()}`,
-            ...payload,
-            status: payload.status || 'active',
-            last_login: null,
-            created_at: new Date().toISOString()
-        };
-        this.users.push(newUser);
-        return newUser;
-    }
-
-    async updateUser(id: string, payload: UpdateUserPayload): Promise<User> {
-        await new Promise(resolve => setTimeout(resolve, 400));
-        const index = this.users.findIndex(u => u.id === id);
-        if (index === -1) throw new Error("User not found");
-        
-        this.users[index] = { ...this.users[index], ...payload };
-        return this.users[index];
-    }
-
-    async deleteUser(id: string): Promise<void> {
-        await new Promise(resolve => setTimeout(resolve, 400));
-        this.users = this.users.filter(u => u.id !== id);
-    }
-
-    async bulkDelete(ids: string[]): Promise<void> {
-        await new Promise(resolve => setTimeout(resolve, 600));
-        this.users = this.users.filter(u => !ids.includes(u.id));
-    }
-
-    async enableUser(id: string): Promise<void> {
-        await this.updateUser(id, { status: 'active' });
-    }
-
-    async disableUser(id: string): Promise<void> {
-        await this.updateUser(id, { status: 'inactive' });
-    }
-
-    async inviteUser(email: string): Promise<void> {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        console.log(`Mock: Invite sent to ${email}`);
-    }
-
-    async resetPassword(id: string): Promise<void> {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        console.log(`Mock: Password reset for ${id}`);
-    }
-
-    async importUsers(file: File): Promise<void> {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        console.log(`Mock: Imported users from ${file.name}`);
-    }
-
-    async exportUsers(filter: UserFilter): Promise<void> {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log(`Mock: Exported users with filter`, filter);
-    }
-
-    async listRoles(): Promise<string[]> {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        return ["admin", "approver", "editor", "viewer"];
-    }
-
-    async getUserActivity(id: string): Promise<UserActivity[]> {
-        await new Promise(resolve => setTimeout(resolve, 400));
-        return [
-            { id: "log-1", action: "login", details: "Logged in from Chrome on Windows", timestamp: new Date(Date.now() - 3600000).toISOString(), ip_address: "192.168.1.1" },
-            { id: "log-2", action: "update_profile", details: "Updated display name", timestamp: new Date(Date.now() - 86400000).toISOString(), ip_address: "192.168.1.1" },
-            { id: "log-3", action: "change_password", details: "Password changed successfully", timestamp: new Date(Date.now() - 172800000).toISOString(), ip_address: "192.168.1.1" }
-        ];
-    }
-
-    async getUserSessions(id: string): Promise<UserSession[]> {
-        await new Promise(resolve => setTimeout(resolve, 300));
-        return [
-             { id: "sess-1", device: "Desktop (Windows)", browser: "Chrome 120.0", ip_address: "192.168.1.1", last_active: new Date().toISOString(), is_current: true },
-             { id: "sess-2", device: "Mobile (iOS)", browser: "Safari Mobile", ip_address: "10.0.0.5", last_active: new Date(Date.now() - 86400000).toISOString(), is_current: false }
-        ];
-    }
-}
-
-// API Implementation
-class ApiUserService implements IUserService {
-    private baseUrl = '/users';
-
-    async listUsers(filter: UserFilter): Promise<UserListResponse> {
+        // Real API
         const params = new URLSearchParams();
-        if (filter.page) params.append('page', filter.page.toString());
-        if (filter.limit) params.append('limit', filter.limit.toString());
-        if (filter.search) params.append('search', filter.search);
-        if (filter.role) params.append('role', filter.role);
-        if (filter.status && filter.status !== 'all') params.append('status', filter.status);
-        if (filter.department) params.append('department', filter.department);
-        if (filter.sort_by) params.append('sort', filter.sort_by); // Simplified
+        params.append('page', page.toString());
+        params.append('limit', limit.toString());
+        if (search) params.append('search', search);
+        if (is_active !== undefined && is_active !== null) params.append('is_active', is_active.toString());
+        // params.append('sort_field', sort_field);
+        // params.append('sort_order', sort_order);
 
-        const response = await apiClient.get<UserListResponse>(`${this.baseUrl}?${params.toString()}`);
-        return response as unknown as UserListResponse; // Type assertion depending on client return
+        const response = await apiClient.get<ApiResponse<User[]>>(`${this.endpoint}?${params.toString()}`);
+        return response;
     }
 
-    async getUser(id: string): Promise<User | null> {
-        const response = await apiClient.get<User>(`${this.baseUrl}/${id}`);
-        return response as unknown as User;
+    async getById(id: number | string): Promise<User> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            const user = (seedUsers as unknown as User[]).find(u => u.id == id);
+            if (!user) throw new Error("User not found");
+            return user;
+        }
+        const response = await apiClient.get<ApiResponse<User>>(`${this.endpoint}/${id}`);
+        return response.data;
     }
 
-    async createUser(payload: CreateUserPayload): Promise<User> {
-        const response = await apiClient.post<User>(this.baseUrl, payload);
-        return response as unknown as User;
+    async create(data: CreateUserPayload): Promise<User> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            // Mock creation
+            // Ideally we need to persist this in memory if strictly needed for session
+            // But for simple "Mock Data" display, returning a fake object is okay.
+            return {
+                id: Math.floor(Math.random() * 10000),
+                ...data,
+                role: data.role || 'USER',
+                is_active: data.is_active ?? true,
+                created_at: new Date().toISOString(),
+                deleted_at: null
+            };
+        }
+        const response = await apiClient.post<ApiResponse<User>>(this.endpoint, data);
+        return response.data;
     }
 
-    async updateUser(id: string, payload: UpdateUserPayload): Promise<User> {
-        const response = await apiClient.put<User>(`${this.baseUrl}/${id}`, payload);
-        return response as unknown as User;
+    async update(id: number | string, data: UpdateUserPayload): Promise<User> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            const originalUser = (seedUsers as unknown as User[]).find(u => u.id == id) || {} as User;
+            return {
+                ...originalUser,
+                ...data,
+                // Ensure required fields for User type are present if originalUser is empty (though it shouldn't be found)
+            } as User;
+        }
+        const response = await apiClient.put<ApiResponse<User>>(`${this.endpoint}/${id}`, data);
+        return response.data;
     }
 
-    async deleteUser(id: string): Promise<void> {
-        await apiClient.delete(`${this.baseUrl}/${id}`);
+    async delete(id: number | string): Promise<void> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return;
+        }
+        await apiClient.delete<void>(`${this.endpoint}/${id}`);
     }
 
-    async bulkDelete(ids: string[]): Promise<void> {
-        await apiClient.post(`${this.baseUrl}/bulk-delete`, { ids });
+    async restore(id: number | string): Promise<void> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return;
+        }
+        await apiClient.put<void>(`${this.endpoint}/${id}/restore`, {});
     }
 
-    async enableUser(id: string): Promise<void> {
-        await apiClient.post(`${this.baseUrl}/${id}/enable`, {});
+    async export(filter: any): Promise<void> {
+        if (MOCK_CONFIG.useMock) {
+            console.log("Mock Export", filter);
+            return;
+        }
+        // Use browser download logic if API returns blob, or window.open
+        window.open(`${this.endpoint}/export?${new URLSearchParams(filter).toString()}`, '_blank');
     }
 
-    async disableUser(id: string): Promise<void> {
-        await apiClient.post(`${this.baseUrl}/${id}/disable`, {});
+    async getUserActivity(id: number | string): Promise<any[]> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return [
+                { id: "1", action: "LOGIN", details: "User logged in", timestamp: new Date(Date.now() - 100000).toISOString(), ip_address: "192.168.1.1" },
+                { id: "2", action: "UPDATE_PROFILE", details: "Updated email address", timestamp: new Date(Date.now() - 5000000).toISOString(), ip_address: "192.168.1.1" },
+                { id: "3", action: "PASSWORD_CHANGE", details: "Changed password", timestamp: new Date(Date.now() - 10000000).toISOString(), ip_address: "192.168.1.1" },
+                { id: "4", action: "LOGOUT", details: "User logged out", timestamp: new Date(Date.now() - 12000000).toISOString(), ip_address: "192.168.1.1" },
+            ];
+        }
+        const response = await apiClient.get<ApiResponse<any[]>>(`${this.endpoint}/${id}/activity`);
+        return response.data;
     }
 
-    async inviteUser(email: string): Promise<void> {
-        await apiClient.post(`${this.baseUrl}/invite`, { email });
+    async getUserSessions(id: number | string): Promise<any[]> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return [
+                { id: "1", device: "Desktop (Windows)", browser: "Chrome", ip_address: "192.168.1.1", last_active: new Date().toISOString(), is_current: true },
+                { id: "2", device: "Mobile (iOS)", browser: "Safari", ip_address: "10.0.0.1", last_active: new Date(Date.now() - 86400000).toISOString(), is_current: false },
+            ];
+        }
+        const response = await apiClient.get<ApiResponse<any[]>>(`${this.endpoint}/${id}`);
+        return response.data;
     }
+    async getStats(): Promise<any> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return {
+                totalUsers: 1254,
+                activeUsers: 980,
+                inactiveUsers: 240,
+                newUsersThisMonth: 120,
+                roleDistribution: [
+                    { name: 'User', value: 1000, color: '#0088FE' },
+                    { name: 'Admin', value: 150, color: '#00C49F' },
+                    { name: 'Super Admin', value: 104, color: '#FFBB28' },
+                ],
+                userGrowth: [
+                    { month: 'Jan', count: 400 },
+                    { month: 'Feb', count: 600 },
+                    { month: 'Mar', count: 800 },
+                    { month: 'Apr', count: 850 },
+                    { month: 'May', count: 1100 },
+                    { month: 'Jun', count: 1254 },
+                ],
+                recentActivity: [
+                    { id: 1, user: "Alice", action: "Login", time: "2 mins ago" },
+                    { id: 2, user: "Bob", action: "Purchase", time: "1 hour ago" },
+                    { id: 3, user: "Charlie", action: "Update Profile", time: "3 hours ago" },
+                    { id: 4, user: "David", action: "Logout", time: "5 hours ago" },
+                ]
+            };
+        }
 
-    async resetPassword(id: string): Promise<void> {
-        await apiClient.post(`${this.baseUrl}/${id}/reset-password`, {});
-    }
-
-    async importUsers(file: File): Promise<void> {
-        const formData = new FormData();
-        formData.append('file', file);
-        await apiClient.post(`${this.baseUrl}/import`, formData);
-    }
-
-    async exportUsers(filter: UserFilter): Promise<void> {
-        // Implement blob download if needed
-        window.open(`${this.baseUrl}/export?${new URLSearchParams(filter as any).toString()}`, '_blank');
-    }
-
-    async listRoles(): Promise<string[]> {
-        const response = await apiClient.get<string[]>('/roles'); // Assuming API exists
-        return response as unknown as string[];
-    }
-    
-    async getUserActivity(id: string): Promise<UserActivity[]> {
-        const response = await apiClient.get<UserActivity[]>(`${this.baseUrl}/${id}/activity`);
-        return response as unknown as UserActivity[];
-    }
-
-    async getUserSessions(id: string): Promise<UserSession[]> {
-        const response = await apiClient.get<UserSession[]>(`${this.baseUrl}/${id}/sessions`);
-        return response as unknown as UserSession[];
+        try {
+            const response = await apiClient.get<ApiResponse<any>>(`${this.endpoint}/dashboard/stats`);
+            return response.data;
+        } catch (error) {
+            console.warn("API user stats failed", error);
+            return {
+                totalUsers: 0,
+                activeUsers: 0,
+                inactiveUsers: 0,
+                newUsersThisMonth: 0,
+                roleDistribution: [],
+                userGrowth: [],
+                recentActivity: []
+            };
+        }
     }
 }
 
-// Factory
-const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true' || true; // Default to true for development as requested
-
-export const userService = useMock ? new MockUserService() : new ApiUserService();
+export const userService = new UserService();

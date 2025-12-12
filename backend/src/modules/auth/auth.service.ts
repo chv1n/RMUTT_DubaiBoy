@@ -6,6 +6,8 @@ import Redis from 'ioredis';
 import { User } from '../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditAction } from '../audit-log/enums/audit-action.enum';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +18,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     @InjectRepository(User) private userRepo: Repository<User>,
+    private auditLogService: AuditLogService,
   ) { }
 
   async validate(user_name: string, pass_word: string): Promise<any> {
@@ -23,10 +26,20 @@ export class AuthService {
     if (user && (await bcrypt.compare(pass_word, user.password))) {
       return { ...user };
     }
+    await this.auditLogService.logSecurityEvent({
+      username: user_name,
+      action: AuditAction.LOGIN_FAILED,
+    });
     return null;
   }
 
   async login(user: any) {
+    await this.auditLogService.logSecurityEvent({
+      userId: user.id,
+      username: user.username,
+      action: AuditAction.LOGIN_SUCCESS,
+    });
+
     const payload = { ...user };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -115,6 +128,12 @@ export class AuthService {
   }
 
   async logout(userId: number) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    await this.auditLogService.logSecurityEvent({
+      userId,
+      username: user?.username || 'unknown',
+      action: AuditAction.LOGOUT,
+    });
     await this.redis.del(`refresh_token:${userId}`);
     await this.userService.update(userId, { refresh_token: null });
   }

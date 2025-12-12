@@ -1,9 +1,9 @@
 
 import { apiClient } from '@/lib/api/core/client';
-import { 
-    Product, 
-    ProductDTO, 
-    CreateProductDTO, 
+import {
+    Product,
+    ProductDTO,
+    CreateProductDTO,
     UpdateProductDTO,
     ProductType,
     ProductTypeDTO,
@@ -34,8 +34,8 @@ const mapBomDTOToDomain = (dto: BomDTO): BOM => ({
     unitName: dto.unit?.unit_name || `Unit-${dto.unit_id}`,
     quantity: Number(dto.usage_per_piece),
     wastePercent: Number(dto.scrap_factor),
-    version: dto.version,
-    isActive: dto.active === 1,
+    version: Number(dto.version),
+    isActive: Boolean(dto.active),
     costPerUnit: Number(dto.material?.cost_per_unit || 0)
 });
 
@@ -43,8 +43,8 @@ const mapProductDTOToDomain = (dto: ProductDTO): Product => ({
     id: dto.product_id,
     name: dto.product_name,
     typeId: dto.product_type_id,
-    typeName: dto.product_type?.type_name || "Unknown",
-    isActive: dto.active === 1,
+    typeName: dto.product_type?.type_name || dto.type_name || "Unknown",
+    isActive: dto.is_active !== undefined ? Boolean(dto.is_active) : Boolean(dto.active),
     lastUpdated: dto.update_date || dto.create_date,
     bom: (dto.boms || []).map(mapBomDTOToDomain)
 });
@@ -52,7 +52,7 @@ const mapProductDTOToDomain = (dto: ProductDTO): Product => ({
 class ProductService {
     private readonly endpoint = '/products';
     private readonly typeEndpoint = '/product-types';
-    private readonly bomEndpoint = '/bom'; // Assuming standard pluralization, check if 'bom' or 'boms' in controller, defaulting to boms as typical
+    private readonly bomEndpoint = '/boms'; // Assuming standard pluralization, check if 'bom' or 'boms' in controller, defaulting to boms as typical
 
     // --- Products ---
     async getAll(page: number = 1, limit: number = 10, search: string = "", status: string = ""): Promise<ApiResponse<Product[]>> {
@@ -67,10 +67,10 @@ class ProductService {
                 const isActive = status === "active" ? 1 : 0;
                 filtered = filtered.filter(p => p.active === isActive);
             }
-            
+
             const start = (page - 1) * limit;
             const paginatedData = filtered.slice(start, start + limit);
-            
+
             return {
                 success: true,
                 data: paginatedData.map(mapProductDTOToDomain),
@@ -85,11 +85,37 @@ class ProductService {
         }
 
         const is_active_param = status === "all" || status === "" ? "" : `&active=${status === "active" ? 1 : 0}`;
-        // const response = await apiClient.get<ApiResponse<ProductDTO[]>>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}${is_active_param}`);
-        const response = await apiClient.get<ApiResponse<ProductDTO[]>>(`${this.endpoint}`);
+        const response = await apiClient.get<ApiResponse<ProductDTO[]> | ProductDTO[]>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}${is_active_param}`);
+
+        let data: ProductDTO[] = [];
+        let meta = {
+            totalItems: 0,
+            itemCount: 0,
+            itemsPerPage: limit,
+            totalPages: 1,
+            currentPage: 1
+        };
+
+        if (Array.isArray(response)) {
+            data = response;
+            meta.totalItems = data.length;
+            meta.itemCount = data.length;
+            meta.itemsPerPage = data.length || limit;
+        } else if (response.data) {
+            data = response.data;
+            if (response.meta) {
+                meta = response.meta;
+            } else {
+                meta.totalItems = data.length;
+                meta.itemCount = data.length;
+                meta.itemsPerPage = data.length || limit;
+            }
+        }
+
         return {
-            ...response,
-            data: response.data.map(mapProductDTOToDomain)
+            success: true,
+            data: data.map(mapProductDTOToDomain),
+            meta
         };
     }
 
@@ -153,7 +179,7 @@ class ProductService {
             await simulateDelay();
             return MOCK_PRODUCT_TYPES.map(mapProductTypeDTOToDomain);
         }
-        
+
         // Backend service might return array directly or wrapped
         const response = await apiClient.get<any>(this.typeEndpoint);
         let dtos: ProductTypeDTO[] = [];
@@ -161,6 +187,20 @@ class ProductService {
         else if (Array.isArray(response.data)) dtos = response.data;
 
         return dtos.map(mapProductTypeDTOToDomain);
+    }
+
+    async getBomsByProduct(productId: number): Promise<BOM[]> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return MOCK_BOMS.filter(b => b.product_id === productId).map(mapBomDTOToDomain);
+        }
+        const response = await apiClient.get<ApiResponse<BomDTO[]>>(`${this.bomEndpoint}?product_id=${productId}`);
+        // Handle array response if needed (API structure in user request suggests wrapping in 'data')
+        // User request: { success: true, data: [...], ... }
+        if (response.success && response.data) {
+            return response.data.map(mapBomDTOToDomain);
+        }
+        return [];
     }
 
     // --- BOM Management ---
@@ -172,10 +212,10 @@ class ProductService {
                 product_id: data.product_id,
                 material_id: data.material_id,
                 unit_id: data.unit_id,
-                usage_per_piece: data.usage_per_piece,
-                version: data.version,
-                active: data.active,
-                scrap_factor: data.scrap_factor,
+                usage_per_piece: String(data.usage_per_piece),
+                version: String(data.version),
+                active: Boolean(data.active),
+                scrap_factor: String(data.scrap_factor),
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
@@ -262,7 +302,7 @@ class ProductService {
     }
 
     async saveRouting(productId: string, steps: import('@/types/product').RoutingStep[]): Promise<void> {
-         if (MOCK_CONFIG.useMock) {
+        if (MOCK_CONFIG.useMock) {
             await simulateDelay();
             return;
         }
@@ -316,6 +356,60 @@ class ProductService {
         const response = await apiClient.get<ApiResponse<import('@/types/product').AuditLogEntry[]>>(`${this.endpoint}/${productId}/audit-log`);
         return response.data;
     }
+
+    // --- Dashboard Stats ---
+    async getStats(): Promise<import('@/types/product').ProductStats> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            // Count from mock data
+            const total = MOCK_PRODUCTS.length;
+            const active = MOCK_PRODUCTS.filter(p => p.active).length;
+
+            // Mock distribution
+            const typeCounts: Record<string, number> = {};
+            MOCK_PRODUCTS.forEach(p => {
+                const typeName = p.product_type?.type_name || "Unknown";
+                typeCounts[typeName] = (typeCounts[typeName] || 0) + 1;
+            });
+            const distribution = Object.entries(typeCounts).map(([name, count]) => ({
+                name,
+                value: count,
+                color: '#' + Math.floor(Math.random() * 16777215).toString(16) // Random color for mock
+            }));
+
+            return {
+                totalProducts: total,
+                activeProducts: active,
+                newThisMonth: 5, // mock
+                avgCost: 1500, // mock
+                distribution,
+                costTrends: [
+                    { name: "Jan", value: 1400 },
+                    { name: "Feb", value: 1450 },
+                    { name: "Mar", value: 1420 },
+                    { name: "Apr", value: 1500 },
+                    { name: "May", value: 1550 },
+                    { name: "Jun", value: 1600 }
+                ]
+            };
+        }
+
+        try {
+            const response = await apiClient.get<ApiResponse<import('@/types/product').ProductStats>>(`${this.endpoint}/dashboard/stats`);
+            return response.data;
+        } catch (error) {
+            console.warn("API failed, falling back to mock stats", error);
+            // Fallback mock
+            return {
+                totalProducts: 0,
+                activeProducts: 0,
+                newThisMonth: 0,
+                avgCost: 0,
+                distribution: [],
+                costTrends: []
+            };
+        }
+    }
 }
 
 class ProductTypeService {
@@ -325,7 +419,7 @@ class ProductTypeService {
         if (MOCK_CONFIG.useMock) {
             await simulateDelay();
             let filtered = [...MOCK_PRODUCT_TYPES];
-            
+
             if (search) {
                 const lowerSearch = search.toLowerCase();
                 filtered = filtered.filter(t => t.type_name.toLowerCase().includes(lowerSearch));
@@ -350,27 +444,27 @@ class ProductTypeService {
                 }
             };
         }
-        
+
         const is_active_param = status === "all" || status === "" ? "" : `&active=${status === "active" ? 1 : 0}`;
         // Assuming backend supports pagination for product-types now
         // const response = await apiClient.get<ApiResponse<ProductTypeDTO[]>>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}${is_active_param}`);
         const response = await apiClient.get<ApiResponse<ProductTypeDTO[]>>(`${this.endpoint}`);
-        
+
         // Handle case where backend might return array directly (legacy compat) vs ApiResponse
         if (Array.isArray(response)) {
-             // Fallback if backend doesn't support pagination yet but we want to avoid breaking
-             const dtos = response as ProductTypeDTO[];
-             return {
-                 success: true,
-                 data: dtos.map(mapProductTypeDTOToDomain),
-                 meta: {
-                     totalItems: dtos.length,
-                     itemCount: dtos.length,
-                     itemsPerPage: dtos.length,
-                     totalPages: 1,
-                     currentPage: 1
-                 }
-             };
+            // Fallback if backend doesn't support pagination yet but we want to avoid breaking
+            const dtos = response as ProductTypeDTO[];
+            return {
+                success: true,
+                data: dtos.map(mapProductTypeDTOToDomain),
+                meta: {
+                    totalItems: dtos.length,
+                    itemCount: dtos.length,
+                    itemsPerPage: dtos.length,
+                    totalPages: 1,
+                    currentPage: 1
+                }
+            };
         }
 
         return {
@@ -391,7 +485,7 @@ class ProductTypeService {
             };
             return mapProductTypeDTOToDomain(newType);
         }
-        
+
         // Map domain DTO to backend DTO
         const payload = {
             type_name: data.name,
@@ -406,7 +500,7 @@ class ProductTypeService {
             await simulateDelay();
             const existing = MOCK_PRODUCT_TYPES.find(t => t.product_type_id === id);
             if (!existing) throw new Error("Product Type not found");
-            
+
             // Mock update
             const updated: ProductTypeDTO = {
                 ...existing,
@@ -414,7 +508,7 @@ class ProductTypeService {
                 active: data.isActive !== undefined ? (data.isActive ? 1 : 0) : existing.active,
                 update_date: new Date().toISOString()
             };
-            
+
             return mapProductTypeDTOToDomain(updated);
         }
 
