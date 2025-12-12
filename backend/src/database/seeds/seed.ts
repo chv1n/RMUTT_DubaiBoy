@@ -9,6 +9,7 @@ import { Product } from '../../modules/product/entities/product.entity';
 import { ProductType } from '../../modules/product-type/entities/product-type.entity';
 import { WarehouseMaster } from '../../modules/warehouse-master/entities/warehouse-master.entity';
 import { MaterialMaster } from '../../modules/material/entities/material-master.entity';
+import { ProductPlan } from '../../modules/product-plan/entities/product-plan.entity';
 
 async function seed() {
     try {
@@ -439,6 +440,70 @@ async function seed() {
             }
         } else {
             console.warn('Skipping Material seeding due to missing dependencies.');
+        }
+
+        // Seed Additional Products for Planning (10 items)
+        const newProductsData: { product_name: string; product_type: ProductType | null; is_active: boolean }[] = [];
+        for (let i = 1; i <= 10; i++) {
+            newProductsData.push({
+                product_name: `Seeded Product ${i}`,
+                product_type: i % 2 === 0 ? finishedType : semiType,
+                is_active: true
+            });
+        }
+
+        const seededProducts: Product[] = [];
+        for (const pData of newProductsData) {
+            if (!pData.product_type) continue;
+            let prod = await productRepo.findOneBy({ product_name: pData.product_name });
+            if (!prod) {
+                const newProd = productRepo.create({
+                    ...pData,
+                    product_type: pData.product_type as ProductType
+                });
+                prod = await productRepo.save(newProd);
+                console.log(`Seeded Product: ${pData.product_name}`);
+            }
+            if (prod) {
+                seededProducts.push(prod);
+            }
+        }
+
+        // Seed Product Plans (14 days backwards for the 10 seeded products)
+        const planRepo = AppDataSource.getRepository(ProductPlan);
+        const today = new Date();
+
+        for (const product of seededProducts) {
+            for (let i = 0; i < 14; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                // Reset time to start of day to avoid timezone confusion in naming/checking
+                date.setHours(0, 0, 0, 0);
+
+                const dateStr = date.toISOString().split('T')[0];
+                const planName = `Plan for ${product.product_name} - ${dateStr}`;
+
+                const exists = await planRepo.findOne({
+                    where: {
+                        plan_name: planName,
+                        product: { product_id: product.product_id }
+                    }
+                });
+
+                if (!exists) {
+                    const plan = planRepo.create({
+                        product: product,
+                        product_id: product.product_id,
+                        plan_name: planName,
+                        plan_description: `Auto-seeded plan for ${dateStr}`,
+                        input_quantity: Math.floor(Math.random() * 1000) + 100,
+                        start_date: date,
+                        end_date: date,
+                    });
+                    await planRepo.save(plan);
+                }
+            }
+            console.log(`Seeded 14 plans for ${product.product_name}`);
         }
 
         console.log('Seeding completed successfully.');
