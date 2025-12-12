@@ -206,6 +206,11 @@ class PlanService {
             };
         }
     }
+    async import(file: File): Promise<void> {
+        // Mock import implementation
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log("Imported file", file.name);
+    }
 }
 
 export const planService = new PlanService();

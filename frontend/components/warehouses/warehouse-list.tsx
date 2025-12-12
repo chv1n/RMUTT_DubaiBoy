@@ -235,7 +235,7 @@ export function WarehouseList() {
                 renderCell={renderCell}
             />
 
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -248,7 +248,7 @@ export function WarehouseList() {
                                         autoFocus
                                         label={t("warehouses.code")}
                                         placeholder="WH-001"
-                                        variant="bordered"
+
                                         value={formData.warehouse_code}
                                         onValueChange={(val) => setFormData({ ...formData, warehouse_code: val })}
                                         isRequired
@@ -256,7 +256,7 @@ export function WarehouseList() {
                                     <Input
                                         label={t("warehouses.name")}
                                         placeholder="Main Warehouse"
-                                        variant="bordered"
+
                                         value={formData.warehouse_name}
                                         onValueChange={(val) => setFormData({ ...formData, warehouse_name: val })}
                                         isRequired
@@ -265,7 +265,7 @@ export function WarehouseList() {
                                 <Input
                                     label={t("warehouses.email")}
                                     placeholder="contact@warehouse.com"
-                                    variant="bordered"
+
                                     startContent={<Mail className="text-2xl text-default-400 pointer-events-none flex-shrink-0" size={16} />}
                                     value={formData.warehouse_email}
                                     onValueChange={(val) => setFormData({ ...formData, warehouse_email: val })}
@@ -273,7 +273,7 @@ export function WarehouseList() {
                                 <Input
                                     label={t("warehouses.phone")}
                                     placeholder="02-123-4567"
-                                    variant="bordered"
+
                                     startContent={<Phone className="text-2xl text-default-400 pointer-events-none flex-shrink-0" size={16} />}
                                     value={formData.warehouse_phone}
                                     onValueChange={(val) => setFormData({ ...formData, warehouse_phone: val })}
@@ -281,7 +281,7 @@ export function WarehouseList() {
                                 <Textarea
                                     label={t("warehouses.address")}
                                     placeholder="123 Street..."
-                                    variant="bordered"
+
                                     value={formData.warehouse_address}
                                     onValueChange={(val) => setFormData({ ...formData, warehouse_address: val })}
                                 />

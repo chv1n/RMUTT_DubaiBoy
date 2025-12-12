@@ -363,7 +363,6 @@
         "filterByWarehouse": "Filter by Warehouse",
         "allMaterials": "All Materials",
         "allWarehouses": "All Warehouses",
-        "lowStock": "Low Stock Alerts",
         "checkStock": "Check Stock",
         "goodsReceipt": "Goods Receipt (IN)",
         "goodsIssue": "Goods Issue (OUT)",
@@ -450,5 +449,23 @@
             "createdAt": "Created At"
         },
         "edit": "Edit User"
+    },
+    "analytics": {
+        "title": "Predictive Analytics",
+        "subtitle": "Forecast and trends",
+        "predict": "Predict Usage",
+        "material": "Material",
+        "targetDate": "Target Date",
+        "generating": "Generating Prediction...",
+        "result": "Prediction Result",
+        "confidence": "Confidence Score",
+        "factors": "Influencing Factors",
+        "overview": "Overview",
+        "predictedWeek": "Predicted (7 Days)",
+        "stockStatus": "Status"
+    },
+    "audit": {
+        "title": "Audit Logs",
+        "subtitle": "Track system changes and user activities"
     }
 }

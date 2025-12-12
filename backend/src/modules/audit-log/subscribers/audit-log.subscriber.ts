@@ -42,6 +42,7 @@ export class AuditLogSubscriber implements EntitySubscriberInterface {
     }
 
     private getEntityId(entity: any): string {
+        if (!entity) return '';
         return String(entity.id || entity.material_id || entity.supplier_id || '');
     }
 

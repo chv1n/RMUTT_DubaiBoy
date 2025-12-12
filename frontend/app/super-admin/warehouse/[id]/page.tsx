@@ -6,10 +6,10 @@ import { Tabs, Tab } from '@heroui/tabs';
 import { Card, CardBody } from '@heroui/card';
 import { warehouseService } from '@/services/warehouse.service';
 import { Warehouse, StockLocationItem, MovementHistoryResult } from '@/types/warehouse';
-import { WarehouseHeading } from '@/components/warehouse-detail/WarehouseHeading';
-import { WarehouseInfo } from '@/components/warehouse-detail/WarehouseInfo';
-import { StockLocationTable } from '@/components/warehouse-detail/StockLocationTable';
-import { MovementHistoryTable } from '@/components/warehouse-detail/MovementHistoryTable';
+import { WarehouseHeading } from '@/components/warehouses/WarehouseHeading';
+import { WarehouseInfo } from '@/components/warehouses/WarehouseInfo';
+import { StockLocationTable } from '@/components/warehouses/StockLocationTable';
+import { MovementHistoryTable } from '@/components/warehouses/MovementHistoryTable';
 import { Spinner } from '@heroui/spinner';
 import { useTranslation } from 'react-i18next';
 

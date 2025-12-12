@@ -182,7 +182,7 @@ export function UnitManagement() {
             />
 
             {/* Edit/Create Modal */}
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
                 <ModalContent>
                     {(onClose) => (
                         <>

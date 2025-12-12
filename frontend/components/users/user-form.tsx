@@ -10,6 +10,7 @@ import { Select, SelectItem } from "@heroui/select";
 import { Button } from "@heroui/button";
 import { Switch } from "@heroui/switch";
 import { useTranslation } from "react-i18next";
+import { User as UserIcon, Mail, Lock, Briefcase, Phone, Shield, FileText, BadgeCheck } from "lucide-react";
 
 // Schema for form validation
 const createUserSchema = z.object({
@@ -20,8 +21,6 @@ const createUserSchema = z.object({
     role: z.enum(["USER", "ADMIN", "SUPER_ADMIN"]),
     department: z.string().optional(),
     is_active: z.boolean().default(true),
-    phone: z.string().optional(),
-    notes: z.string().optional(),
 });
 
 // For update, password is optional
@@ -63,9 +62,8 @@ export const UserForm = ({ initialData, onSubmit, onCancel, isLoading }: UserFor
             password: "",
             role: "USER",
             department: "",
-            phone: "",
             is_active: true,
-            notes: "",
+
         },
     });
 
@@ -77,9 +75,7 @@ export const UserForm = ({ initialData, onSubmit, onCancel, isLoading }: UserFor
                 fullname: initialData.fullname,
                 role: initialData.role,
                 department: initialData.department || "",
-                phone: initialData.phone || "",
                 is_active: initialData.is_active,
-                notes: "", // Notes not in User type officially but might be in payload
                 password: "", // Password always empty on edit
             });
         } else {
@@ -108,116 +104,149 @@ export const UserForm = ({ initialData, onSubmit, onCancel, isLoading }: UserFor
     };
 
     return (
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-4">
-            <Controller
-                name="username"
-                control={control}
-                render={({ field }) => (
-                    <Input
-                        {...field}
-                        label={t('users.username')}
-                        errorMessage={errors.username?.message}
-                        isInvalid={!!errors.username}
-                        isDisabled={isEdit} // Usually username immutable
-                    />
-                )}
-            />
+        <form id="user-form" onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Account Info */}
+                <div className="sm:col-span-2">
+                    <h3 className="text-small font-bold text-default-500 mb-2 uppercase tracking-wide border-b border-default-200 pb-2">
+                        {t('users.accountInfo') || "Account Information"}
+                    </h3>
+                </div>
 
-            <Controller
-                name="email"
-                control={control}
-                render={({ field }) => (
-                    <Input
-                        {...field}
-                        label={t('users.email')}
-                        errorMessage={errors.email?.message}
-                        isInvalid={!!errors.email}
-                    />
-                )}
-            />
+                <Controller
+                    name="username"
+                    control={control}
+                    render={({ field }) => (
+                        <Input
+                            {...field}
+                            label={t('users.username')}
+                            placeholder="jdoe"
+                            startContent={<UserIcon className="text-default-400" size={18} />}
+                            errorMessage={errors.username?.message}
+                            isInvalid={!!errors.username}
+                            isDisabled={isEdit}
 
-            <Controller
-                name="fullname"
-                control={control}
-                render={({ field }) => (
-                    <Input
-                        {...field}
-                        label={t('users.fullname')}
-                        errorMessage={errors.fullname?.message}
-                        isInvalid={!!errors.fullname}
-                    />
-                )}
-            />
+                        />
+                    )}
+                />
+                <Controller
+                    name="password"
+                    control={control}
+                    render={({ field }) => (
+                        <Input
+                            {...field}
+                            type="password"
+                            label={isEdit ? "New Password" : "Password"}
+                            placeholder={isEdit ? "• • • • • •" : "Enter password"}
+                            description={isEdit ? "Leave blank to keep current password" : undefined}
+                            startContent={<Lock className="text-default-400" size={18} />}
+                            errorMessage={errors.password?.message}
+                            isInvalid={!!errors.password}
 
-            <Controller
-                name="password"
-                control={control}
-                render={({ field }) => (
-                    <Input
-                        {...field}
-                        type="password"
-                        label={isEdit ? "New Password (Optional)" : "Password"}
-                        placeholder={isEdit ? "Leave blank to keep current" : ""}
-                        errorMessage={errors.password?.message}
-                        isInvalid={!!errors.password}
-                    />
-                )}
-            />
+                        />
+                    )}
+                />
 
-            <div className="flex gap-4">
+
+
+                {/* Personal Info */}
+                <div className="sm:col-span-2 mt-2">
+                    <h3 className="text-small font-bold text-default-500 mb-2 uppercase tracking-wide border-b border-default-200 pb-2">
+                        {t('users.personalDetails') || "Personal Details"}
+                    </h3>
+                </div>
+
+                <Controller
+                    name="fullname"
+                    control={control}
+                    render={({ field }) => (
+                        <Input
+                            {...field}
+                            label={t('users.fullname')}
+                            placeholder="John Doe"
+                            startContent={<BadgeCheck className="text-default-400" size={18} />}
+                            errorMessage={errors.fullname?.message}
+                            isInvalid={!!errors.fullname}
+
+                        />
+                    )}
+                />
+                <Controller
+                    name="email"
+                    control={control}
+                    render={({ field }) => (
+                        <Input
+                            {...field}
+                            label={t('users.email')}
+                            placeholder="john@example.com"
+                            startContent={<Mail className="text-default-400" size={18} />}
+                            errorMessage={errors.email?.message}
+                            isInvalid={!!errors.email}
+
+                        />
+                    )}
+                />
+
+
+
                 <Controller
                     name="role"
                     control={control}
                     render={({ field }) => (
                         <Select
                             label={t('users.role')}
-                            className="w-full"
+                            placeholder="Select role"
+                            startContent={<Shield className="text-default-400" size={18} />}
                             selectedKeys={field.value ? [field.value] : []}
                             onChange={(e) => field.onChange(e.target.value)}
                             errorMessage={errors.role?.message}
                             isInvalid={!!errors.role}
+
                         >
                             {ROLES.map(role => <SelectItem key={role.key}>{role.label}</SelectItem>)}
                         </Select>
                     )}
                 />
-            </div>
 
-            <Controller
-                name="department"
-                control={control}
-                render={({ field }) => (
-                    <Input
-                        {...field}
-                        label="Department" // Not translated yet properly, using raw string fallback
+                <Controller
+                    name="department"
+                    control={control}
+                    render={({ field }) => (
+                        <Input
+                            {...field}
+                            label="Department"
+                            placeholder="Engineering"
+                            startContent={<Briefcase className="text-default-400" size={18} />}
+
+                        />
+                    )}
+                />
+
+
+
+
+
+                <div className="sm:col-span-2">
+                    <Controller
+                        name="is_active"
+                        control={control}
+                        render={({ field }) => (
+                            <div className="flex items-center justify-between bg-default-50 p-4 rounded-lg ">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-medium font-medium">Active Status</span>
+                                    <span className="text-tiny text-default-400">User account access control</span>
+                                </div>
+                                <Switch
+                                    isSelected={field.value}
+                                    onValueChange={field.onChange}
+                                    color="success"
+                                >
+                                    {field.value ? t('users.active') : t('users.inactive')}
+                                </Switch>
+                            </div>
+                        )}
                     />
-                )}
-            />
-
-            <Controller
-                name="is_active"
-                control={control}
-                render={({ field }) => (
-                    <div className="flex items-center justify-between border p-3 rounded-lg">
-                        <span className="text-small">{t('users.status')}</span>
-                        <Switch
-                            isSelected={field.value}
-                            onValueChange={field.onChange}
-                            color="success"
-                        >
-                            {field.value ? t('users.active') : t('users.inactive')}
-                        </Switch>
-                    </div>
-                )}
-            />
-
-            <div className="flex justify-end gap-2 mt-4">
-                <Button variant="flat" color="danger" onPress={onCancel}>
-                    {t('common.cancel')}
-                </Button>
-                <Button color="primary" type="submit" isLoading={isLoading}>
-                    {isEdit ? t('common.save') : t('users.addUser')}
-                </Button>
+                </div>
             </div>
         </form>
     );

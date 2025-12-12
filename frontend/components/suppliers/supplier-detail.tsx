@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, Tab } from '@heroui/tabs';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
 import { Button } from '@heroui/button';
@@ -10,10 +10,14 @@ import { Divider } from '@heroui/divider';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
 import { useTranslation } from '@/components/providers/language-provider';
 import { Supplier } from '@/types/suppliers';
+import { Material } from '@/types/materials';
+import { materialService } from '@/services/material.service';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
+import { SupplierForm } from './supplier-form';
 import {
     ArrowLeft, Phone, Mail, MapPin, Globe, Star, Shield,
     MessageSquare, AlertTriangle, FileText, CheckCircle,
-    XCircle, Edit, Trash2, ExternalLink, Package, DollarSign, Calendar
+    XCircle, Edit, Trash2, ExternalLink, Package, DollarSign, Calendar, Eye
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -24,6 +28,29 @@ interface SupplierDetailProps {
 export default function SupplierDetail({ supplier }: SupplierDetailProps) {
     const { t } = useTranslation();
     const router = useRouter();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [products, setProducts] = useState<Material[]>([]);
+    const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+
+    useEffect(() => {
+        const loadProducts = async () => {
+            if (!supplier?.id) return;
+            setIsLoadingProducts(true);
+            try {
+                // Fetch all materials for this supplier (limit 100 or paginate if needed)
+                const response = await materialService.getAll(1, 100, "", "all", supplier.id);
+                if (response.success && response.data) {
+                    setProducts(response.data);
+                }
+            } catch (error) {
+                console.error("Failed to load supplier products", error);
+            } finally {
+                setIsLoadingProducts(false);
+            }
+        };
+
+        loadProducts();
+    }, [supplier.id]);
 
     const handleEdit = () => {
         router.push(`/super-admin/suppliers/${supplier.id}/edit`);
@@ -39,13 +66,6 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
         console.log(`Action triggered: ${action}`);
         // Implement real logic or toast here
     };
-
-    // Mock products for the tab
-    const mockProducts = [
-        { id: 1, name: "High Grade Steel", sku: "MT-001", price: 1200, unit: "Ton" },
-        { id: 2, name: "Industrial Lubricant", sku: "CH-044", price: 450, unit: "Barrel" },
-        { id: 3, name: "Copper Wire 5mm", sku: "EL-202", price: 25, unit: "Meter" },
-    ];
 
     const OverviewTab = () => (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -177,30 +197,48 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
 
     const ProductsTab = () => (
         <Card className="shadow-none border border-default-200">
-            <Table aria-label="Products Table" shadow="none" removeWrapper>
+            <Table
+                aria-label="Products Table"
+                shadow="none"
+                removeWrapper
+            >
                 <TableHeader>
                     <TableColumn>NAME</TableColumn>
                     <TableColumn>SKU</TableColumn>
                     <TableColumn>UNIT PRICE</TableColumn>
-                    <TableColumn>UNIT</TableColumn>
+                    <TableColumn>QUANTITY</TableColumn>
+                    <TableColumn>STATUS</TableColumn>
                     <TableColumn>ACTIONS</TableColumn>
                 </TableHeader>
-                <TableBody>
-                    {mockProducts.map((item) => (
+                <TableBody
+                    items={products}
+                    emptyContent={isLoadingProducts ? "Loading products..." : "No products found"}
+                    isLoading={isLoadingProducts}
+                >
+                    {(item) => (
                         <TableRow key={item.id}>
                             <TableCell className="font-medium">{item.name}</TableCell>
                             <TableCell>{item.sku}</TableCell>
-                            <TableCell>${item.price}</TableCell>
-                            <TableCell>{item.unit}</TableCell>
+                            <TableCell>${item.price} / {item.unit}</TableCell>
+                            <TableCell>{item.quantity}</TableCell>
                             <TableCell>
-                                <Button size="sm" variant="light" isIconOnly><ExternalLink size={16} /></Button>
+                                <Chip size="sm" variant="dot" color={item.status === 'active' ? 'success' : 'danger'}>
+                                    {item.status}
+                                </Chip>
+                            </TableCell>
+                            <TableCell>
+                                <Button size="sm" variant="light" isIconOnly onPress={() => router.push(`/super-admin/materials/${item.id}`)}>
+                                    <Eye size={16} />
+                                </Button>
                             </TableCell>
                         </TableRow>
-                    ))}
+                    )}
                 </TableBody>
             </Table>
             <CardFooter className="justify-center border-t border-default-100">
-                <Button variant="ghost" size="sm">View All Products</Button>
+                <Button variant="ghost" size="sm" onPress={() => router.push('/super-admin/materials')}>
+                    View All Materials
+                </Button>
             </CardFooter>
         </Card>
     );
@@ -259,7 +297,7 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
                         </Button>
                     )}
 
-                    <Button variant="ghost" startContent={<Edit size={18} />} onPress={handleEdit}>
+                    <Button variant="ghost" startContent={<Edit size={18} />} onPress={onOpen}>
                         {t('common.edit')}
                     </Button>
                     <Button variant="ghost" color="danger" isIconOnly onPress={handleDelete}>
@@ -267,6 +305,28 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
                     </Button>
                 </div>
             </div>
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl" placement="center">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">{t('common.edit')}</ModalHeader>
+                            <ModalBody>
+                                <SupplierForm
+                                    mode="edit"
+                                    initialData={supplier}
+                                    onSuccess={() => {
+                                        onClose();
+                                        window.location.reload();
+                                    }}
+                                    onCancel={onClose}
+                                />
+                            </ModalBody>
+                            <ModalFooter />
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
 
             {/* Tabs */}
             <Tabs aria-label="Supplier Details" color="primary" variant="underlined">
