@@ -50,15 +50,15 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
                 material_group_id: initialData.materialGroupId,
                 order_leadtime: initialData.orderLeadTime,
                 container_type_id: initialData.containerTypeId,
-                quantity_per_container: initialData.quantity, // mapped from quantity_per_container
-                unit_id: initialData.unit, // Use unit name as ID as per requirement "KG"
+                quantity_per_container: initialData.quantity,
+                unit_id: initialData.unitId,
                 container_min_stock: initialData.minStockLevel,
                 container_max_stock: initialData.containerMaxStock,
                 lifetime: initialData.lifetime,
                 lifetime_unit: initialData.lifetimeUnit,
                 supplier_id: initialData.supplierId,
                 cost_per_unit: initialData.price,
-                is_active: initialData.status === "active" ? true : false,
+                is_active: initialData.is_active,
                 expiration_date: initialData.expirationDate
             });
         }
@@ -171,14 +171,14 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
                 <Input
                     type="number"
                     label={t("materials.price")}
-                    value={formData.cost_per_unit.toString()}
+                    value={formData.cost_per_unit?.toString() ?? ""}
                     onValueChange={(val) => setFormData({ ...formData, cost_per_unit: Number(val) })}
                     isRequired
                 />
                 <Input
                     type="number"
                     label={t("materials.quantity")}
-                    value={formData.quantity_per_container.toString()}
+                    value={formData.quantity_per_container?.toString() ?? ""}
                     onValueChange={(val) => setFormData({ ...formData, quantity_per_container: Number(val) })}
                     isRequired
                     description="Quantity per container"
@@ -186,8 +186,16 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
 
                 <Input
                     type="number"
+                    label={t("materials.orderLeadTime")}
+                    value={formData.order_leadtime?.toString() ?? ""}
+                    onValueChange={(val) => setFormData({ ...formData, order_leadtime: Number(val) })}
+                    description="Time in days to receive order"
+                />
+
+                <Input
+                    type="number"
                     label={t("materials.minStock")}
-                    value={formData.container_min_stock.toString()}
+                    value={formData.container_min_stock?.toString() ?? ""}
                     onValueChange={(val) => setFormData({ ...formData, container_min_stock: Number(val) })}
                     isRequired
                     description="Min Container Stock"
@@ -195,7 +203,7 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
                 <Input
                     type="number"
                     label="Max Stock"
-                    value={formData.container_max_stock.toString()}
+                    value={formData.container_max_stock?.toString() ?? ""}
                     onValueChange={(val) => setFormData({ ...formData, container_max_stock: Number(val) })}
                     description="Max Container Stock"
                 />
@@ -203,13 +211,13 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
                 <Input
                     type="number"
                     label="Lifetime"
-                    value={formData.lifetime.toString()}
+                    value={formData.lifetime?.toString() ?? ""}
                     onValueChange={(val) => setFormData({ ...formData, lifetime: Number(val) })}
                 />
 
                 <Select
                     label="Lifetime Unit"
-                    selectedKeys={[formData.lifetime_unit]}
+                    selectedKeys={formData.lifetime_unit ? [formData.lifetime_unit] : []}
                     onChange={(e) => setFormData({ ...formData, lifetime_unit: e.target.value })}
                 >
                     <SelectItem key="day">Day</SelectItem>

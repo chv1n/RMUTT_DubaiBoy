@@ -1,3 +1,4 @@
+import { Exclude } from "class-transformer";
 import { MaterialMaster } from "src/modules/material/entities/material-master.entity";
 import { Product } from "src/modules/product/entities/product.entity";
 import { MaterialUnits } from "src/modules/unit/entities/unit.entity";
@@ -21,6 +22,9 @@ export class Bom {
     @JoinColumn({ name: 'unit_id' })
     unit: MaterialUnits;
 
+    @Column({ name: 'unit_id', type: 'int', })
+    unit_id: number;
+
     @Column({ name: 'product_id', type: 'int' })
     product_id: number;
 
@@ -43,6 +47,7 @@ export class Bom {
     created_at: Date;
 
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
+    @Exclude()
     updated_at: Date;
 
     @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp' })

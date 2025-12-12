@@ -1,6 +1,8 @@
 import { SupplierDTO } from "./suppliers";
 
+
 export interface MaterialDTO {
+    data: MaterialDTO;
     material_id: number;
     material_group_id: number | null;
     material_name: string;
@@ -12,7 +14,7 @@ export interface MaterialDTO {
     container_max_stock: number | null;
     lifetime: number | null;
     lifetime_unit: string | null;
-    active: number;
+    is_active: boolean;
     supplier_id: number | null;
     update_date: string; // ISO date string
     cost_per_unit: number | null;
@@ -26,6 +28,7 @@ export interface MaterialDTO {
 }
 
 export interface Material {
+    is_active: boolean;
     id: number;
     name: string;
     description: string;
@@ -37,8 +40,7 @@ export interface Material {
     minStockLevel: number;
     materialGroupId: number | null;
     containerTypeId: number | null;
-    status: "active" | "inactive";
-    imageUrl: string; 
+    imageUrl?: string; 
     
     orderLeadTime: number;
     containerMaxStock: number;
@@ -59,6 +61,7 @@ export interface Material {
         address: string;
         status: string;
     };
+    status: string;
 }
 
 export interface MaterialGroupDTO {
@@ -70,8 +73,6 @@ export interface MaterialGroupDTO {
 }
 
 export interface MaterialGroup {
-    group_id: Key | null | undefined;
-    group_name: ReactNode;
     id: number;
     name: string;
     abbreviation: string;
@@ -84,8 +85,6 @@ export interface ContainerTypeDTO {
 }
 
 export interface ContainerType {
-    type_id: Key | null | undefined;
-    type_name: ReactNode;
     id: number;
     name: string;
 }
@@ -98,8 +97,6 @@ export interface MaterialUnitDTO {
 }
 
 export interface MaterialUnit {
-    unit_id: Key | null | undefined;
-    unit_name: ReactNode;
     id: number;
     name: string;
 }

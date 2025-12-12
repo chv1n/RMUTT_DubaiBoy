@@ -10,6 +10,7 @@ class HttpClient {
       headers: {
         'Content-Type': 'application/json',
       },
+      withCredentials: true,
     });
 
     // Add interceptor to normalize errors

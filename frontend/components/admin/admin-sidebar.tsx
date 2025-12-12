@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Avatar } from "@heroui/avatar";
 import { ScrollShadow } from "@heroui/scroll-shadow";
 import { Button } from "@heroui/button";
@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 import { sidebarItems, bottomItems, MenuItem } from "@/config/admin-menu";
 import { useTranslation } from "@/components/providers/language-provider";
+import { authService } from "@/services/auth.service";
+import { ConfirmModal } from "@/components/common/confirm-modal";
 
 
 
@@ -27,12 +29,18 @@ export function AdminSidebar() {
     const pathname = usePathname();
     const { isCollapsed, toggleSidebar, isMobileOpen, closeMobileSidebar } = useSidebar();
     const { t } = useTranslation();
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     // Helper to check if a menu item is active
     const isItemActive = (item: MenuItem) => {
         if (item.href) return pathname === item.href;
         if (item.children) return item.children.some(child => pathname === child.href);
         return false;
+    };
+
+    const handleLogout = () => {
+        setIsLogoutModalOpen(false);
+        authService.logout();
     };
 
     const SidebarContent = () => (
@@ -62,11 +70,16 @@ export function AdminSidebar() {
                 </div>
             </ScrollShadow>
 
+
+
             <div className={cn("p-4 border-t border-divider", isCollapsed ? "flex justify-center" : "")}>
-                <div className={cn(
-                    "flex items-center gap-3 p-2 rounded-xl hover:bg-default-100 cursor-pointer transition-colors group",
-                    isCollapsed ? "justify-center" : ""
-                )}>
+                <div
+                    className={cn(
+                        "flex items-center gap-3 p-2 rounded-xl hover:bg-default-100 cursor-pointer transition-colors group",
+                        isCollapsed ? "justify-center" : ""
+                    )}
+                    onClick={() => setIsLogoutModalOpen(true)}
+                >
                     <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" size="sm" isBordered className="transition-transform group-hover:scale-105" />
                     {!isCollapsed && (
                         <div className="flex flex-col flex-1 min-w-0">
@@ -120,6 +133,16 @@ export function AdminSidebar() {
             >
                 <SidebarContent />
             </div>
+
+            <ConfirmModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleLogout}
+                title="Logout Confirmation"
+                message="Are you sure you want to log out of your account?"
+                confirmText="Logout"
+                variant="danger"
+            />
         </>
     );
 }

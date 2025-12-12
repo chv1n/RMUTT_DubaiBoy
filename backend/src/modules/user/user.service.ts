@@ -1,103 +1,56 @@
 import { Injectable } from '@nestjs/common';
-import { RegisterDto } from './dto/register.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { UpdateDto } from './dto/update.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { ISoftDeletable } from 'src/common/interfaces/soft-deletable.interface';
+import { BaseQueryDto } from 'src/common/dto/base-query.dto';
+import { QueryHelper } from 'src/common/helpers/query.helper';
+import { CrudHelper } from 'src/common/helpers/crud.helper';
+import { SoftDeleteHelper } from 'src/common/helpers/soft-delete.helper';
 
 
 @Injectable()
-export class UserService {
+export class UserService implements ISoftDeletable {
   constructor(
     @InjectRepository(User) private readonly user: Repository<User>,
   ) { }
 
   async register(
-    registerDto: RegisterDto,
+    createUserDto: CreateUserDto,
   ) {
-    const user = await this.user.create(registerDto);
-    await this.user.save(user);
-    return {
-      email: user.email,
-      fullname: user.fullname,
-      username: user.username,
-      id: user.id,
-      role: user.role,
-    }
+    const user = await this.user.create(createUserDto);
+    return await this.user.save(user);
   }
 
-  async findAll() {
-    const users = await this.user.find();
-    return users.map(user => ({
-      email: user.email,
-      fullname: user.fullname,
-      username: user.username,
-      id: user.id,
-      role: user.role,
-    }));
+  async findAll(query: BaseQueryDto) {
+    return QueryHelper.paginate(this.user, query, { sortField: 'username' });
   }
 
   async findOne(id: number) {
-
-    const user = await this.user.findOne({ where: { id } });
-    if (!user) {
-      throw new Error('User not found');
-    }
-    return {
-      email: user.email,
-      fullname: user.fullname,
-      username: user.username,
-      id: user.id,
-      role: user.role,
-    };
+    return this.user.findOne({ where: { id } });
   }
 
-  async update(id: number, updateUserDto: UpdateDto) {
-    const user = await this.user.findOne({ where: { id } });
-
-    if (!user) throw new Error('User not found');
-
-    if (updateUserDto.pass_word) {
-      updateUserDto.pass_word = await bcrypt.hash(updateUserDto.pass_word, 10);
-    }
-    Object.assign(user, updateUserDto);
-    await this.user.save(user)
-    return {
-      email: user.email,
-      fullname: user.fullname,
-      username: user.username,
-      id: user.id,
-      role: user.role,
-    };
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    return CrudHelper.update(this.user, id, 'id', updateUserDto, 'User not found');
   }
 
   async remove(id: number) {
-    return await this.user.delete(id);
+    await SoftDeleteHelper.remove(this.user, id, 'id', 'User not found');
+  }
+
+  async restore(id: number) {
+    await SoftDeleteHelper.restore(this.user, id, 'id', 'User not found');
   }
 
   async findByUsername(username: string) {
-    const user = await this.user.findOne({ where: { username } })
-    return {
-      id: user?.id,
-      email: user?.email,
-      fullname: user?.fullname,
-      username: user?.username,
-      role: user?.role,
-    };
+    return await this.user.findOne({ where: { username } });
   }
 
   async findById(id: number) {
-    const user = await this.user.findOne({ where: { id } });
-    if (!user) {
-      throw new Error('User not found');
-    }
-    return {
-      email: user.email,
-      fullname: user.fullname,
-      username: user.username,
-      id: user.id,
-      role: user.role,
-    };
+    return this.findOne(id);
   }
 }
+

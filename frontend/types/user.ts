@@ -1,69 +1,66 @@
+import { Meta } from "./api"; // Assuming types/api is accessible as "./api" or "@/types/api"
+
 export type LocaleString = {
     en: string;
     th: string;
     ja: string;
 };
 
-export type UserRole = 'admin' | 'approver' | 'editor' | 'viewer' | string;
-
-export type UserStatus = 'active' | 'inactive' | 'pending';
+export type UserRole = 'USER' | 'ADMIN' | 'SUPER_ADMIN';
 
 export interface User {
-    id: string;
-    username: string;
+    id: number | string; 
     email: string;
-    display_name: LocaleString;
-    roles: UserRole[];
-    department: string;
-    status: UserStatus;
-    last_login: string | null; // ISO Date string
-    created_at: string; // ISO Date string
-    phone?: string;
-    locale?: string;
-    timezone?: string;
-    external_id?: string;
+    username: string;
+    fullname: string;
+    role: UserRole;
+    is_active: boolean;
+    created_at: string; 
+    deleted_at: string | null;
+    
+    last_login?: string | null; 
     avatar_url?: string;
-    notes?: string;
+    phone?: string;
+    department?: string; 
 }
 
 export interface CreateUserPayload {
-    username: string;
     email: string;
-    display_name: LocaleString;
-    roles: UserRole[];
-    department: string;
+    username: string;
+    fullname: string;
+    password: string;
+    role?: UserRole;
+    department?: string;
     phone?: string;
-    locale?: string;
-    timezone?: string;
+    is_active?: boolean;
     notes?: string;
-    status?: UserStatus;
 }
 
-export interface UpdateUserPayload extends Partial<CreateUserPayload> {
-    status?: UserStatus;
+export interface UpdateUserPayload {
+    email?: string;
+    username?: string;
+    fullname?: string;
+    password?: string;
+    role?: UserRole;
+    department?: string;
+    phone?: string;
+    is_active?: boolean;
+    notes?: string;
 }
 
 export interface UserFilter {
-    search?: string;
-    role?: string;
-    department?: string;
-    status?: UserStatus | 'all';
-    page?: number; // 1-based
+    page?: number;
     limit?: number;
-    sort_by?: string;
-    sort_desc?: boolean;
+    is_active?: boolean; // undefined = all, true = active, false = inactive
+    search?: string;
+    sort_field?: string;
+    sort_order?: 'ASC' | 'DESC';
 }
 
-export interface UserListResponse {
-    data: User[];
-    meta: {
-        total: number;
-        page: number;
-        limit: number;
-        total_pages: number;
-    };
-}
+// UserListResponse is replaced by ApiResponse<User[]> in service
 
+// Keep existing auxiliary types if likely to be used, or remove if strict cleanup needed.
+// Keeping them for now to avoid breaking other imports immediately, but they are not in the spec.
 export interface UserActivity {
     id: string;
     action: string;

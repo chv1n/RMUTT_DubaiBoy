@@ -1,21 +1,42 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ISoftDeletable } from '../../common/interfaces/soft-deletable.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder, LessThan, MoreThan } from 'typeorm';
 import { MaterialMaster } from './entities/material-master.entity';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { MaterialQueryDto } from './dto/material-query.dto';
+import { SoftDeleteHelper } from '../../common/helpers/soft-delete.helper';
+
+import { MaterialInventory } from '../material-inventory/entities/material-inventory.entity';
+import { WarehouseMaster } from '../warehouse-master/entities/warehouse-master.entity';
 
 @Injectable()
-export class MaterialService {
+export class MaterialService implements ISoftDeletable {
   constructor(
     @InjectRepository(MaterialMaster)
     private readonly materialRepository: Repository<MaterialMaster>,
+    @InjectRepository(MaterialInventory)
+    private readonly materialInventoryRepository: Repository<MaterialInventory>,
+    @InjectRepository(WarehouseMaster)
+    private readonly warehouseRepository: Repository<WarehouseMaster>,
   ) { }
 
   async create(createMaterialDto: CreateMaterialDto) {
     const material = this.materialRepository.create(createMaterialDto);
     const savedMaterial = await this.materialRepository.save(material);
+
+    // Create default inventory
+    const warehouse = await this.warehouseRepository.findOne({ where: { is_active: true } });
+    if (warehouse) {
+      const inventory = this.materialInventoryRepository.create({
+        material: savedMaterial,
+        warehouse: warehouse,
+        quantity: 0,
+      });
+      await this.materialInventoryRepository.save(inventory);
+    }
+
     return savedMaterial;
   }
 
@@ -32,7 +53,7 @@ export class MaterialService {
 
   async findOne(id: number) {
     const material = await this.materialRepository.findOne({
-      where: { material_id: id, is_active: true },
+      where: { material_id: id },
       relations: ['material_group', 'container_type', 'unit', 'supplier'],
     });
 
@@ -53,9 +74,13 @@ export class MaterialService {
     return result;
   }
 
+  async remove(id: number): Promise<void> {
+    await SoftDeleteHelper.remove(this.materialRepository, id, 'material_id', 'ไม่พบวัสดุที่ต้องการลบ');
+  }
 
-
-
+  async restore(id: number): Promise<void> {
+    await SoftDeleteHelper.restore(this.materialRepository, id, 'material_id', 'ไม่พบวัสดุที่ต้องการกู้คืน');
+  }
 
   private createBaseQuery(): SelectQueryBuilder<MaterialMaster> {
     return this.materialRepository.createQueryBuilder('material')

@@ -2,6 +2,7 @@
 import { Bom } from 'src/modules/bom/entities/bom.entity';
 import { ProductType } from '../../product-type/entities/product-type.entity';
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, DeleteDateColumn, ManyToOne, JoinColumn, Unique, CreateDateColumn, OneToMany } from 'typeorm';
+import { ProductPlan } from 'src/modules/product-plan/entities/product-plan.entity';
 
 
 @Entity('product')
@@ -23,14 +24,18 @@ export class Product {
     @JoinColumn({ name: 'product_type_id' })
     product_type: ProductType;
 
-    @Column({ name: 'active', type: 'int', nullable: true, default: 1 })
-    active: number;
+    @ManyToOne(() => ProductPlan, (product_plan) => product_plan.product)
+    @JoinColumn({ name: 'product_plan_id' })
+    product_plan: ProductPlan;
 
-    @CreateDateColumn({ name: 'create_date', nullable: true })
-    create_date: Date;
+    @Column({ name: 'is_active', type: 'boolean', nullable: true, default: true })
+    is_active: boolean;
 
-    @UpdateDateColumn({ name: 'update_date', nullable: true })
-    update_date: Date;
+    @CreateDateColumn({ name: 'created_at', nullable: true })
+    created_at: Date;
+
+    @UpdateDateColumn({ name: 'updated_at', nullable: true })
+    updated_at: Date;
 
     @DeleteDateColumn({ name: 'deleted_at', select: false })
     deleted_at: Date;

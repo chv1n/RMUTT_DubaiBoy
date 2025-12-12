@@ -7,6 +7,9 @@ import { MaterialGroup } from '../material-group/entities/material-group.entity'
 import { MaterialContainerType } from '../container-type/entities/container-type.entity';
 import { MaterialUnits } from '../unit/entities/unit.entity';
 import { Supplier } from '../supplier/entities/supplier.entity';
+import { InventoryTransaction } from '../inventory-transaction/entities/inventory-transaction.entity';
+import { MaterialInventory } from '../material-inventory/entities/material-inventory.entity';
+import { WarehouseMaster } from '../warehouse-master/entities/warehouse-master.entity';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { Supplier } from '../supplier/entities/supplier.entity';
       MaterialContainerType,
       MaterialUnits,
       Supplier,
+      InventoryTransaction,
+      MaterialInventory,
+      WarehouseMaster
     ]),
   ],
   controllers: [MaterialController],

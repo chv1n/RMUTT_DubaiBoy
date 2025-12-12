@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { User, UserActivity, UserSession } from "@/types/user";
+import { User } from "@/types/user";
 import { userService } from "@/services/user.service";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Tabs, Tab } from "@heroui/tabs";
+import { Tabs, Tab } from "@heroui/tabs"; // Keep in case needed later, or remove if strict cleanup. I will remove it.
+// Actually, let's remove Tabs import if we delete usage.
 import { useTranslation } from "react-i18next";
 import { User as HeroUser } from "@heroui/user";
 import { Chip } from "@heroui/chip";
@@ -23,22 +24,16 @@ interface UserProfileProps {
 export const UserProfile = ({ userId }: UserProfileProps) => {
     const { t, i18n } = useTranslation();
     const [user, setUser] = useState<User | null>(null);
-    const [activities, setActivities] = useState<UserActivity[]>([]);
-    const [sessions, setSessions] = useState<UserSession[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditOpen, setIsEditOpen] = useState(false);
 
     const loadData = async () => {
         setLoading(true);
         try {
-            const [userData, activityData, sessionData] = await Promise.all([
-                userService.getUser(userId),
-                userService.getUserActivity(userId),
-                userService.getUserSessions(userId)
+            const [userData] = await Promise.all([
+                userService.getById(userId)
             ]);
             setUser(userData);
-            setActivities(activityData);
-            setSessions(sessionData);
         } catch (error) {
             console.error("Failed to load profile", error);
         } finally {
@@ -50,9 +45,9 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
         loadData();
     }, [userId]);
 
-    const handleEditSuccess = async (data: any) => { // Type relaxed for simplicity
+    const handleEditSuccess = async (data: any) => {
         if (user) {
-            await userService.updateUser(user.id, data);
+            await userService.update(user.id, data);
             setIsEditOpen(false);
             loadData();
         }
@@ -88,12 +83,12 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                         <div className="flex justify-between items-start flex-wrap gap-4">
                             <div>
                                 <h1 className="text-2xl font-bold">
-                                    {user.display_name?.[i18n.language as 'en' | 'th' | 'ja'] || user.username}
+                                    {user.fullname}
                                 </h1>
                                 <p className="text-default-500">{user.email}</p>
                                 <div className="flex gap-2 mt-2">
-                                    <UserStatusBadge status={user.status} />
-                                    {user.roles.map(r => <UserRoleBadge key={r} role={r} />)}
+                                    <UserStatusBadge isActive={user.is_active} />
+                                    <UserRoleBadge role={user.role} />
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -112,120 +107,37 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                 </CardBody>
             </Card>
 
-            {/* Tabs content */}
-            <Tabs aria-label="User Profile Sections" color="primary" variant="underlined">
-                <Tab
-                    key="overview"
-                    title={
-                        <div className="flex items-center space-x-2">
-                            <Info size={16} />
-                            <span>{t('user.profile.overview')}</span>
+            <Card className="w-full">
+                <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
+                    <div>
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Info size={20} />
+                            {t('user.profile.details')}
+                        </h3>
+                        <div className="space-y-4">
+                            <DetailItem label="ID" value={String(user.id)} />
+                            <DetailItem label={t('user.field.username')} value={user.username} />
+                            <DetailItem label={t('user.field.email')} value={user.email} />
+                            <DetailItem label={t('user.field.fullname')} value={user.fullname} />
                         </div>
-                    }
-                >
-                    <Card>
-                        <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-                            <div>
-                                <h3 className="text-lg font-semibold mb-4">{t('user.profile.details')}</h3>
-                                <div className="space-y-4">
-                                    <DetailItem label={t('user.field.username')} value={user.username} />
-                                    <DetailItem label={t('user.field.email')} value={user.email} />
-                                    <DetailItem label={t('user.field.phone')} value={user.phone || '-'} />
-                                    <DetailItem label={t('user.field.department')} value={user.department} />
-                                </div>
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Shield size={20} />
+                            {t('common.settings')}
+                        </h3>
+                        <div className="space-y-4">
+                            <DetailItem label={t('user.field.role')} value={user.role} />
+                            <div className="flex flex-col">
+                                <span className="text-tiny text-default-400 uppercase tracking-wider mb-1">{t('user.field.status')}</span>
+                                <UserStatusBadge isActive={user.is_active} />
                             </div>
-                            <div>
-                                <h3 className="text-lg font-semibold mb-4">{t('common.settings')}</h3>
-                                <div className="space-y-4">
-                                    <DetailItem label={t('user.field.locale')} value={user.locale || 'en'} />
-                                    <DetailItem label={t('user.field.timezone')} value={user.timezone || 'Asia/Bangkok'} />
-                                    <DetailItem label={t('user.field.createdAt')} value={new Date(user.created_at).toLocaleDateString()} />
-                                    <DetailItem label={t('user.field.lastLogin')} value={user.last_login ? new Date(user.last_login).toLocaleString() : '-'} />
-                                </div>
-                                <div className="mt-6">
-                                    <h4 className="font-semibold mb-2">{t('user.profile.bio')}</h4>
-                                    <p className="text-default-500 text-sm whitespace-pre-wrap border p-3 rounded-lg bg-default-50">
-                                        {user.notes || "No notes available."}
-                                    </p>
-                                </div>
-                            </div>
-                        </CardBody>
-                    </Card>
-                </Tab>
-
-                <Tab
-                    key="security"
-                    title={
-                        <div className="flex items-center space-x-2">
-                            <Shield size={16} />
-                            <span>{t('user.profile.security')}</span>
+                            <DetailItem label={t('user.field.createdAt')} value={new Date(user.created_at).toLocaleDateString()} />
+                            {/* <DetailItem label={t('user.field.deletedAt')} value={user.deleted_at ? new Date(user.deleted_at).toLocaleDateString() : '-'} /> */}
                         </div>
-                    }
-                >
-                    <Card>
-                        <CardBody className="p-6">
-                            <h3 className="text-lg font-semibold mb-4">{t('user.profile.sessions')}</h3>
-                            <div className="flex flex-col gap-4">
-                                {sessions.map(session => (
-                                    <div key={session.id} className="flex justify-between items-center p-4 border rounded-lg">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-2 bg-primary-50 rounded-full text-primary">
-                                                {session.device.toLowerCase().includes('mobile') ? <Smartphone /> : <Monitor />}
-                                            </div>
-                                            <div>
-                                                <p className="font-medium">
-                                                    {session.device} - {session.browser}
-                                                    {session.is_current && <Chip size="sm" color="success" className="ml-2" variant="flat">Current</Chip>}
-                                                </p>
-                                                <p className="text-tiny text-default-400">
-                                                    {session.ip_address} • Last active: {new Date(session.last_active).toLocaleString()}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        {!session.is_current && (
-                                            <Button size="sm" variant="light" color="danger">Revoke</Button>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </CardBody>
-                    </Card>
-                </Tab>
-
-                <Tab
-                    key="activity"
-                    title={
-                        <div className="flex items-center space-x-2">
-                            <Activity size={16} />
-                            <span>{t('user.profile.activity')}</span>
-                        </div>
-                    }
-                >
-                    <Card>
-                        <CardBody className="p-6">
-                            <h3 className="text-lg font-semibold mb-4">{t('user.profile.timeline')}</h3>
-                            <div className="flex flex-col gap-6 pl-2"> // Simple timeline
-                                {activities.map((act, idx) => (
-                                    <div key={act.id} className="relative flex gap-4">
-                                        {/* Line */}
-                                        {idx !== activities.length - 1 && (
-                                            <div className="absolute left-[19px] top-8 bottom-[-24px] w-0.5 bg-default-200" />
-                                        )}
-                                        <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary">
-                                            <Activity size={18} />
-                                        </div>
-                                        <div className="flex flex-col gap-1">
-                                            <span className="text-small font-medium">{act.action.replace('_', ' ').toUpperCase()}</span>
-                                            <span className="text-tiny text-default-400">{new Date(act.timestamp).toLocaleString()}</span>
-                                            <p className="text-small text-default-500">{act.details}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardBody>
-                    </Card>
-                </Tab>
-            </Tabs>
+                    </div>
+                </CardBody>
+            </Card>
 
             <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} size="2xl">
                 <ModalContent>
@@ -248,9 +160,9 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
     );
 };
 
-const DetailItem = ({ label, value }: { label: string; value: string }) => (
+const DetailItem = ({ label, value }: { label: string; value: string | undefined | null }) => (
     <div className="flex flex-col">
         <span className="text-tiny text-default-400 uppercase tracking-wider">{label}</span>
-        <span className="text-medium">{value}</span>
+        <span className="text-medium">{value || '-'}</span>
     </div>
 );

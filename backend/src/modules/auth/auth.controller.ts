@@ -21,45 +21,18 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   async login(@Request() req, @Res({ passthrough: true }) res) {
     const { accessToken, refreshToken } = await this.authService.login(req.user);
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 15,
-      sameSite: 'lax',
-      secure: false,
-      path: '/',
-    });
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      sameSite: 'lax',
-      secure: false,
-      path: '/',
-    });
+    this.setCookies(res, accessToken, refreshToken);
     return {
       message: 'Login Successful!!',
-      user: req.user
+      data: req.user
     };
   }
-
 
   @UseGuards(RtGuard)
   @Post('refresh')
   async refresh(@Request() req, @Res({ passthrough: true }) res) {
     const { accessToken, refreshToken } = await this.authService.refresh(req.cookies['refresh_token'], req.user);
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 15,
-      sameSite: 'lax',
-      secure: false,
-      path: '/',
-    });
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      sameSite: 'lax',
-      secure: false,
-      path: '/',
-    });
+    this.setCookies(res, accessToken, refreshToken);
     return {
       message: 'Refresh Successful!!',
     }
@@ -73,8 +46,24 @@ export class AuthController {
     await this.authService.logout(req.user.id)
     return {
       message: 'Logout Successful!!',
-
     }
+  }
+
+  private setCookies(res, accessToken: string, refreshToken: string) {
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 15,
+      sameSite: 'lax',
+      secure: false,
+      path: '/',
+    });
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: 'lax',
+      secure: false,
+      path: '/',
+    });
   }
 
 }

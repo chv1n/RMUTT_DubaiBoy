@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, OneToMany, DeleteDateColumn } from 'typeorm';
 
 @Entity('supplier')
 export class Supplier {
@@ -11,6 +11,7 @@ export class Supplier {
     @Column({ name: 'phone', type: 'varchar', nullable: true })
     phone: string;
 
+
     @Column({ name: 'email', type: 'varchar', nullable: true })
     email: string;
 
@@ -22,4 +23,7 @@ export class Supplier {
 
     @UpdateDateColumn({ name: 'update_date', nullable: true })
     update_date: Date;
+
+    @DeleteDateColumn({ name: 'deleted_at' })
+    deleted_at: Date;
 }
