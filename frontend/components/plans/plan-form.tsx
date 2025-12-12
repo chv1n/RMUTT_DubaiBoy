@@ -119,7 +119,7 @@ export default function PlanForm({ isOpen, onClose, planToEdit }: PlanFormProps)
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="2xl" scrollBehavior="inside">
+        <Modal isOpen={isOpen} onClose={onClose} size="2xl" scrollBehavior="inside" placement="center">
             <ModalContent>
                 <ModalHeader>{planToEdit ? t('plan.edit') : t('plan.create')}</ModalHeader>
                 <ModalBody>

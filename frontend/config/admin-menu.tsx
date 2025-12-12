@@ -43,17 +43,22 @@ export const sidebarItems: MenuItem[] = [
         href: "/super-admin",
     },
     {
-        key: "users",
-        label: "users.title",
-        icon: <Users className="w-5 h-5" />,
+        key: "analytics",
+        label: "common.analytics",
+        icon: <BarChart3 className="w-5 h-5" />,
+        href: "/super-admin/analytics",
+    },
+    {
+        key: "inventory",
+        label: "inventory.title",
+        icon: <ClipboardList className="w-5 h-5" />,
         children: [
-            { key: "dashboard-users", label: "common.dashboard", href: "/super-admin/users" },
-            { key: "all-users", label: "users.list", href: "/super-admin/users/all" },
-            // In a real app, this might go to a separate audit page, but here we can reuse the page with a query param or just a placeholder for now
-            // The user asked for "wording in sidebar".
-            { key: "audit-logs", label: "audit.title", href: "/super-admin/audit-logs" },
+            { key: "dashboard-inventory", label: "common.dashboard", href: "/super-admin/inventory" },
+            { key: "inv-balance", label: "inventory.balance", href: "/super-admin/inventory/balance" },
+            { key: "inv-transactions", label: "inventory.transactions", href: "/super-admin/inventory/transactions" },
         ]
     },
+
     {
         key: "plans",
         label: "plan.title",
@@ -105,26 +110,14 @@ export const sidebarItems: MenuItem[] = [
         ],
     },
     {
-        key: "inventory",
-        label: "inventory.title",
-        icon: <ClipboardList className="w-5 h-5" />,
+        key: "users",
+        label: "users.title",
+        icon: <Users className="w-5 h-5" />,
         children: [
-            { key: "dashboard-inventory", label: "common.dashboard", href: "/super-admin/inventory" },
-            { key: "inv-balance", label: "inventory.balance", href: "/super-admin/inventory/balance" },
-            { key: "inv-transactions", label: "inventory.transactions", href: "/super-admin/inventory/transactions" },
+            { key: "dashboard-users", label: "common.dashboard", href: "/super-admin/users" },
+            { key: "all-users", label: "users.list", href: "/super-admin/users/all" },
+            { key: "audit-logs", label: "audit.title", href: "/super-admin/audit-logs" },
         ]
-    },
-    {
-        key: "analytics",
-        label: "common.analytics",
-        icon: <BarChart3 className="w-5 h-5" />,
-        href: "/super-admin/analytics",
-    },
-    {
-        key: "reports",
-        label: "common.reports",
-        icon: <FileText className="w-5 h-5" />,
-        href: "",
     },
 ];
 

@@ -160,6 +160,7 @@ export const InventoryActionModal = ({
                     title: t('common.success'),
                     color: "success"
                 });
+                window.dispatchEvent(new Event('inventory-updated'));
                 onSuccess();
                 onClose();
             } else {
@@ -181,7 +182,7 @@ export const InventoryActionModal = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+        <Modal isOpen={isOpen} onClose={onClose} size="2xl" placement="center">
             <ModalContent>
                 {(onClose) => (
                     <>

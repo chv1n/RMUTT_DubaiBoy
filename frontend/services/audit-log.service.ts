@@ -23,7 +23,8 @@ export enum AuditEntity {
     Bom = 'Bom',
     ProductPlan = 'ProductPlan',
     PlanList = 'PlanList',
-    Auth = 'Auth'
+    Auth = 'Auth',
+    Product = 'Product'
 }
 
 export interface AuditLog {

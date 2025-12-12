@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { Image } from '@heroui/image';
 import { useQuery } from '@tanstack/react-query';
 import { inventoryService } from '@/services/inventory.service';
-import { MovementHistoryTable } from '@/components/warehouse-detail/MovementHistoryTable';
+import { MovementHistoryTable } from '@/components/warehouses/MovementHistoryTable';
 import { Spinner } from '@heroui/spinner';
 
 interface MaterialDetailProps {

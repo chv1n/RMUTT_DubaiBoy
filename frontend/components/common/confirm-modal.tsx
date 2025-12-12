@@ -42,9 +42,9 @@ export function ConfirmModal({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            backdrop="blur"
             hideCloseButton={isLoading}
             isDismissable={!isLoading}
+            placement="center"
         >
             <ModalContent>
                 {(onClose) => (

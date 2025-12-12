@@ -23,7 +23,7 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({ isOpen
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="3xl" scrollBehavior="inside">
+        <Modal isOpen={isOpen} onClose={onClose} size="3xl" scrollBehavior="inside" placement="center">
             <ModalContent>
                 {(onClose) => (
                     <>
