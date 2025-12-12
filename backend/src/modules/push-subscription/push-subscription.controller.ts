@@ -29,6 +29,7 @@ export class PushSubscriptionController {
     return this.service.findOne(+id);
   }
 
+
   @Delete(':id')
   async remove(@Param('id') id: string) {
     await this.service.remove(+id);

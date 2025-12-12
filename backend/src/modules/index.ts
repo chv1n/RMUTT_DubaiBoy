@@ -15,6 +15,7 @@ import { ProductPlanModule } from "./product-plan/product-plan.module";
 import { PlanListModule } from "./plan-list/plan-list.module";
 import { PushSubscriptionModule } from "./push-subscription/push-subscription.module";
 import { PushLogModule } from "./push-log/push-log.module";
+import { ForecastModule } from "./forecast/forecast.module";
 
 
 export const AppModules = [
@@ -35,6 +36,6 @@ export const AppModules = [
     PlanListModule,
     PushSubscriptionModule,
     PushLogModule,
-
+    ForecastModule,
 ]
 
