@@ -12,7 +12,6 @@ import { MaterialInventoryModule } from "./material-inventory/material-inventory
 import { ProductModule } from "./product/product.module";
 import { ProductTypeModule } from "./product-type/product-type.module";
 import { ProductPlanModule } from "./product-plan/product-plan.module";
-import { PlanListModule } from "./plan-list/plan-list.module";
 import { PushSubscriptionModule } from "./push-subscription/push-subscription.module";
 import { PushLogModule } from "./push-log/push-log.module";
 import { AuditLogModule } from "./audit-log/audit-log.module";
@@ -34,7 +33,6 @@ export const AppModules = [
     ProductModule,
     ProductTypeModule,
     ProductPlanModule,
-    PlanListModule,
     PushSubscriptionModule,
     PushLogModule,
 

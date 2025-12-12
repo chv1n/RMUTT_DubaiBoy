@@ -18,7 +18,6 @@ import { WarehouseMaster } from 'src/modules/warehouse-master/entities/warehouse
 import { User } from 'src/modules/user/entities/user.entity';
 import { Bom } from 'src/modules/bom/entities/bom.entity';
 import { ProductPlan } from 'src/modules/product-plan/entities/product-plan.entity';
-import { PlanList } from 'src/modules/plan-list/entities/plan-list.entity';
 
 @Injectable()
 @EventSubscriber()
@@ -30,7 +29,6 @@ export class AuditLogSubscriber implements EntitySubscriberInterface {
         [User, AuditEntity.USER],
         [Bom, AuditEntity.BOM],
         [ProductPlan, AuditEntity.PRODUCT_PLAN],
-        [PlanList, AuditEntity.PLAN_LIST],
     ]);
 
     constructor(@InjectDataSource() private readonly dataSource: DataSource) {

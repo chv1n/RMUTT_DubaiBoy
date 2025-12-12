@@ -25,6 +25,9 @@ export class MaterialInventory {
     @Column({ name: 'quantity', type: 'int', nullable: false })
     quantity: number;
 
+    @Column({ name: 'reserved_quantity', type: 'int', default: 0 })
+    reserved_quantity: number;
+
     @Column({ name: 'order_number', type: 'varchar', nullable: true })
     order_number: string;
 
