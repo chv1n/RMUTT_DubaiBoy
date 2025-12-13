@@ -3,6 +3,8 @@ import { SupplierService } from './supplier.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { BaseQueryDto } from '../../common/dto/base-query.dto';
+import { Role } from 'src/common/enums';
+import { Auth } from 'src/common/decorators/auth.decorator';
 
 @Controller({
     path: 'suppliers',
@@ -11,6 +13,7 @@ import { BaseQueryDto } from '../../common/dto/base-query.dto';
 export class SupplierController {
     constructor(private readonly service: SupplierService) { }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     @Post()
     async create(@Body() createSupplierDto: CreateSupplierDto) {
         const data = await this.service.create(createSupplierDto);
@@ -20,16 +23,20 @@ export class SupplierController {
         };
     }
 
+
+    @Auth()
     @Get()
     findAll(@Query() query: BaseQueryDto) {
         return this.service.findAll(query);
     }
 
+    @Auth()
     @Get(':id')
     findOne(@Param('id', ParseIntPipe) id: number) {
         return this.service.findOne(id);
     }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     @Put(':id')
     async update(@Param('id', ParseIntPipe) id: number, @Body() updateSupplierDto: UpdateSupplierDto) {
         const data = await this.service.update(id, updateSupplierDto);
@@ -47,6 +54,7 @@ export class SupplierController {
         };
     }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     @Put(':id/restore')
     async restore(@Param('id', ParseIntPipe) id: number) {
         await this.service.restore(id);

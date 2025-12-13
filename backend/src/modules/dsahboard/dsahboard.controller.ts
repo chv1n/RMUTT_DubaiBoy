@@ -9,6 +9,7 @@ import { DashboardQuery } from 'src/common/dto/dashboard-query';
 export class DsahboardController {
   constructor(private readonly dsahboardService: DsahboardService) { }
 
+
   @Get('overview')
   findAll(@Query() query: DashboardQuery) {
     return this.dsahboardService.getOverviewStats(query);
