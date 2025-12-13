@@ -9,6 +9,10 @@ import { AppModules } from './modules';
 import { DsahboardModule } from './modules/dsahboard/dsahboard.module';
 
 import * as Joi from 'joi';
+import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
+import { Roles } from './common/decorators/roles.decorator';
+import { RolesGuard } from './common/guards/roles.guard';
+import { AtGuard } from './common/guards/at.guard';
 
 
 @Module({
