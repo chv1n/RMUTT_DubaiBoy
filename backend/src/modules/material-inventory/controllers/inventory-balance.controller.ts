@@ -75,4 +75,6 @@ export class InventoryBalanceController {
     ) {
         return this.inventoryBalanceService.checkAvailableStock(materialId, warehouseId, quantity);
     }
+
+
 }
