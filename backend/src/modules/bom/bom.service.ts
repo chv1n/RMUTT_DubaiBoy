@@ -10,9 +10,10 @@ import { MaterialMaster } from '../material/entities/material-master.entity';
 import { CrudHelper } from 'src/common/helpers/crud.helper';
 import { ISoftDeletable } from 'src/common/interfaces/soft-deletable.interface';
 import { QueryHelper } from 'src/common/helpers/query.helper';
-import { SoftDeleteHelper } from 'src/common/helpers/soft-delete.helper';
-import { MaterialService } from '../material/material.service';
-import { ProductService } from '../product/product.service';
+import { SoftDeleteHelper } from 'src/common/helpers/soft-delete.helper'
+
+import { ProductService } from '../product/services/product.service';
+import { MaterialService } from '../material/services/material.service';
 
 @Injectable()
 export class BomService implements ISoftDeletable {
@@ -106,12 +107,7 @@ export class BomService implements ISoftDeletable {
     });
   }
 
-  /**
-   * คำนวณวัตถุดิบที่ต้องใช้สำหรับผลิตสินค้าตามจำนวนที่กำหนด
-   * รวม scrap_factor ในการคำนวณด้วย
-   * 
-   * สูตร: required_quantity = usage_per_piece × quantity × (1 + scrap_factor)
-   */
+
   async calculateMaterialRequirement(productId: number, quantity: number) {
     const boms = await this.findByProductId(productId);
 
@@ -123,7 +119,6 @@ export class BomService implements ISoftDeletable {
       const scrapFactor = Number(bom.scrap_factor) || 0;
       const usagePerPiece = Number(bom.usage_per_piece) || 0;
 
-      // คำนวณปริมาณที่ต้องใช้จริง (รวม scrap)
       const netQuantity = usagePerPiece * quantity;
       const scrapQuantity = netQuantity * scrapFactor;
       const requiredQuantity = netQuantity + scrapQuantity;

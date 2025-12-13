@@ -3,15 +3,10 @@ import json
 import os
 import pandas as pd
 import numpy as np
-from xgboost import XGBRegressor
-import pickle
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(BASE_DIR, "models_xgb")
-TIME_STEP = 14
-
-os.makedirs(MODEL_DIR, exist_ok=True)
+ALPHA = 0.2
+MIN_VAL = 10
 
 try:
     raw_input = sys.stdin.read()
@@ -31,55 +26,60 @@ try:
 
     product_ids = sorted(df["ProductID"].unique())
 
-    def create_dataset(df_p):
-        qty = df_p["QuantityProduced"].values
-        X, y = [], []
-        for i in range(len(qty) - TIME_STEP):
-            X.append(qty[i:i+TIME_STEP])
-            y.append(qty[i+TIME_STEP])
-        return np.array(X), np.array(y)
+    def ema_forecast(series, alpha):
+        """ one-step-ahead EMA forecast """
+        ema = series[0]
+        preds = []
+        for t in range(1, len(series)):
+            preds.append(ema)
+            ema = alpha * series[t] + (1 - alpha) * ema
+        return np.array(preds)
 
     trained = []
     metrics = {}
 
     for pid in product_ids:
         df_p = df[df["ProductID"] == pid]
+        qty = df_p["QuantityProduced"].values
 
-        if len(df_p) <= TIME_STEP + 5:
+        if len(qty) < MIN_VAL + 1:
             continue
 
-        X, y = create_dataset(df_p)
+        # 80/20 split
+        split = int(len(qty) * 0.8)
+        train, val = qty[:split], qty[split:]
 
-        # ✅ Train / Validation split (80/20)
-        split_idx = int(len(X) * 0.8)
-        X_train, X_val = X[:split_idx], X[split_idx:]
-        y_train, y_val = y[:split_idx], y[split_idx:]
+        if len(val) < MIN_VAL:
+            continue
 
-        model = XGBRegressor(
-            objective="reg:squarederror",
-            n_estimators=300,
-            max_depth=6,
-            learning_rate=0.05
-        )
-        model.fit(X_train, y_train)
+        # EMA prediction
+        all_series = np.concatenate([train, val])
+        preds = ema_forecast(all_series, ALPHA)
 
-        # ✅ Predict
-        y_pred = model.predict(X_val)
+        # align prediction with validation
+        y_pred = preds[split-1:]
+        y_true = val
 
-        # ✅ Metrics
-        rmse = np.sqrt(mean_squared_error(y_val, y_pred))
-        mae = mean_absolute_error(y_val, y_pred)
-        r2 = r2_score(y_val, y_pred)
-
-        with open(os.path.join(MODEL_DIR, f"model_product_{pid}.pkl"), "wb") as f:
-            pickle.dump(model, f)
+        rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+        mae = mean_absolute_error(y_true, y_pred)
+        r2 = r2_score(y_true, y_pred)
 
         trained.append(int(pid))
+        metrics[int(pid)] = {
+            "model": "EMA",
+            "alpha": ALPHA,
+            "rmse": float(rmse),
+            "mae": float(mae),
+            "r2": float(r2),
+            "train_samples": len(train),
+            "val_samples": len(val)
+        }
 
     print(json.dumps({
         "success": True,
         "trained_models": trained,
         "rows_used": len(df),
+        "metrics": metrics
     }))
 
 except Exception as e:

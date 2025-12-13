@@ -4,12 +4,24 @@ import { CreateBomDto } from './dto/create-bom.dto';
 import { UpdateBomDto } from './dto/update-bom.dto';
 import { GetBomDto } from './dto/get-bom.dto';
 
+import { CalculateBomDto } from './dto/calculate-bom.dto';
+
 @Controller({
   path: 'boms',
   version: '1'
 })
 export class BomController {
   constructor(private readonly bomService: BomService) { }
+
+  @Get('calculate')
+  async calculateMaterialRequirement(@Query() query: CalculateBomDto) {
+    const data = await this.bomService.calculateMaterialRequirement(query.product_id, query.quantity);
+    return {
+      success: true,
+      message: 'คำนวณสำเร็จ',
+      data
+    };
+  }
 
   @Post()
   async create(@Body() createBomDto: CreateBomDto) {

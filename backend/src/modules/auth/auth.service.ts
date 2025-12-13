@@ -1,5 +1,5 @@
 import { Inject, Injectable, UnauthorizedException, Logger } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import Redis from 'ioredis';

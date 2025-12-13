@@ -10,7 +10,7 @@ import { ProductPlanQueryDto } from './dto/product-plan-query.dto';
 import { QueryHelper } from 'src/common/helpers/query.helper';
 import { SoftDeleteHelper } from 'src/common/helpers/soft-delete.helper';
 import { Product } from '../product/entities/product.entity';
-import { ProductService } from '../product/product.service';
+import { ProductService } from '../product/services/product.service';
 import { PlanPriorityEnum } from './enum/plan-priority.enum';
 import { PlanStatusEnum } from './enum/plan-status.enum';
 import { BomService } from '../bom/bom.service';
