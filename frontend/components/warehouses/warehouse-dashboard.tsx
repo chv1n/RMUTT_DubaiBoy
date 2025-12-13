@@ -15,6 +15,8 @@ import { ArrowUpRight, TrendingUp, TrendingDown, Warehouse, Package, DollarSign,
 import { usePrimaryColor } from "@/hooks/use-primary-color";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -22,6 +24,8 @@ export function WarehouseDashboard() {
     const { t } = useTranslation();
     const router = useRouter();
     const primaryColor = usePrimaryColor();
+    const { userRole } = usePermission(); // Add hook
+    const basePath = getRolePath(userRole); // Compute base path
 
     // --- Data Fetching ---
     const { data: stats, isLoading } = useQuery({
@@ -51,7 +55,7 @@ export function WarehouseDashboard() {
                     <Button color="primary" startContent={<ArrowUpRight size={16} />}>
                         {t('common.export')}
                     </Button>
-                    <Button variant="flat" onPress={() => router.push('/super-admin/warehouse/all')}>
+                    <Button variant="flat" onPress={() => router.push(`${basePath}/warehouse/all`)}>
                         {t('warehouses.list')}
                     </Button>
                 </div>

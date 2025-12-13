@@ -18,7 +18,7 @@ const createUserSchema = z.object({
     email: z.string().email("Invalid email address"),
     fullname: z.string().min(1, "Full name is required"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    role: z.enum(["USER", "ADMIN", "SUPER_ADMIN"]),
+    role: z.enum(["USER", "ADMIN", "SUPER_ADMIN", "PRODUCTION_MANAGER", "INVENTORY_MANAGER", "PURCHASE_MANAGER"]),
     department: z.string().optional(),
     is_active: z.boolean().default(true),
 });
@@ -41,6 +41,9 @@ const ROLES: { key: UserRole; label: string }[] = [
     { key: "USER", label: "User" },
     { key: "ADMIN", label: "Admin" },
     { key: "SUPER_ADMIN", label: "Super Admin" },
+    { key: "PRODUCTION_MANAGER", label: "Production Manager" },
+    { key: "INVENTORY_MANAGER", label: "Inventory Manager" },
+    { key: "PURCHASE_MANAGER", label: "Purchase Manager" },
 ];
 
 export const UserForm = ({ initialData, onSubmit, onCancel, isLoading }: UserFormProps) => {

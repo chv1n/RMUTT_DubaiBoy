@@ -41,7 +41,6 @@
         "date": "Date",
         "user": "User",
         "action": "Action",
-        "action": "Action",
         "detail": "Details",
         "noData": "No data available"
     },

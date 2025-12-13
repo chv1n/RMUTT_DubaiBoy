@@ -456,11 +456,38 @@ class PlanService {
         }
 
         try {
-            const response = await apiClient.get<import('@/types/api').ApiResponse<import('@/types/plan').PlanStats>>('/product-plans/report/summary'); // Fixed endpoint to match spec
-            return response.data;
+            // Using 'any' for response data here because the backend returns snake_case structure
+            // which likely doesn't match a frontend type definition that might expect camelCase.
+            // We need to map it manually.
+            const response = await apiClient.get<any>('/product-plans/report/summary');
+            const data = response.data; // This is IReportSummary from backend (snake_case)
+
+            // Map backend IReportSummary to Frontend PlanStats
+            // Backend fields: total_plans, completed_plans, cancelled_plans, production_plans, pending_plans, total_planned_quantity
+
+            const stats: import('@/types/plan').PlanStats = {
+                totalPlans: data.total_plans || 0,
+                activePlans: (data.production_plans || 0) + (data.pending_plans || 0),
+                completedPlans: data.completed_plans || 0,
+                pendingPlans: data.pending_plans || 0,
+                totalProductionTarget: data.total_planned_quantity || 0,
+
+                // Fields missing from backend summary, defaulting for now
+                onTimeRate: 95, // Mock default or 0
+                progress: [], // Backend doesn't return per-plan progress in summary yet
+                statusDistribution: [
+                    { name: 'COMPLETED', value: data.completed_plans || 0, color: '#10b981' },
+                    { name: 'PRODUCTION', value: data.production_plans || 0, color: '#3b82f6' },
+                    { name: 'PENDING', value: data.pending_plans || 0, color: '#f59e0b' },
+                    { name: 'CANCELLED', value: data.cancelled_plans || 0, color: '#ef4444' },
+                ].filter(item => item.value > 0)
+            };
+
+            return stats;
         } catch (error) {
             console.warn("API plan stats failed", error);
-            return MOCK_STORE.getStats(); // Fallback to mock if API fails during dev
+            // Fallback to mock if API fails/errors to prevent UI crash
+            return MOCK_STORE.getStats();
         }
     }
 

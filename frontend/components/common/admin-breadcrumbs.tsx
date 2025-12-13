@@ -10,7 +10,10 @@ export function AdminBreadcrumbs() {
     const pathname = usePathname();
     const { t } = useTranslation();
 
-    if (pathname === "/super-admin") return null;
+    const ROOTS = ['super-admin', 'admin', 'user', 'inventory-manager', 'prouction-manager', 'purchase-maneger'];
+
+    // If we are at any root, don't show breadcrumbs (or show empty?)
+    if (ROOTS.some(r => pathname === `/${r}`)) return null;
 
     const segments = pathname.split("/").filter((segment) => segment !== "");
 
@@ -18,20 +21,20 @@ export function AdminBreadcrumbs() {
     const getSegmentName = (segment: string, index: number, allSegments: string[]) => {
         // Handle IDs (numeric or long strings)
         if (!isNaN(Number(segment)) || segment.length > 20) {
-            // If it's the last segment and it's an ID, it's likely "Detail"
-            // If it's followed by "edit", it's the item being edited
-            return t("common.detail"); // Or just show the ID: segment
+            return t("common.detail");
+        }
+
+        if (ROOTS.includes(segment)) {
+            return t("common.dashboard");
         }
 
         switch (segment) {
-            case "super-admin":
-                return t("common.dashboard");
             case "materials":
                 return t("common.materials");
             case "suppliers":
                 return t("suppliers.title");
             case "all":
-                return t("materials.list"); // Or generic list
+                return t("materials.list");
             case "new":
                 return t("common.add");
             case "edit":
@@ -41,7 +44,6 @@ export function AdminBreadcrumbs() {
             case "container-types":
                 return t("materials.containerTypes");
             default:
-                // Try to translate generic keys or capitalize
                 return segment.charAt(0).toUpperCase() + segment.slice(1);
         }
     };

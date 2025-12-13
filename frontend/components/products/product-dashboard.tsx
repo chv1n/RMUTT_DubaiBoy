@@ -15,12 +15,16 @@ import { ArrowUpRight, TrendingUp, TrendingDown, Package, CheckCircle, PlusCircl
 import { usePrimaryColor } from "@/hooks/use-primary-color";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export function ProductDashboard() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const primaryColor = usePrimaryColor();
 
     // --- Data Fetching ---
@@ -56,7 +60,7 @@ export function ProductDashboard() {
                     <Button color="primary" startContent={<ArrowUpRight size={16} />}>
                         {t('common.export')}
                     </Button>
-                    <Button variant="flat" onPress={() => router.push('/super-admin/products/all')}>
+                    <Button variant="flat" onPress={() => router.push(`${basePath}/products/all`)}>
                         {t('products.list')}
                     </Button>
                 </div>

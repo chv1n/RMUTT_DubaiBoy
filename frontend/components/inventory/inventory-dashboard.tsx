@@ -15,10 +15,14 @@ import { ArrowUpRight, TrendingUp, TrendingDown, Package, Activity, AlertCircle,
 import { usePrimaryColor } from "@/hooks/use-primary-color";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 export function InventoryDashboard() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const primaryColor = usePrimaryColor();
 
     // --- Data Fetching ---
@@ -49,7 +53,7 @@ export function InventoryDashboard() {
                     <Button color="primary" startContent={<ArrowUpRight size={16} />}>
                         {t('common.export')}
                     </Button>
-                    <Button variant="flat" onPress={() => router.push('/super-admin/inventory/balance')}>
+                    <Button variant="flat" onPress={() => router.push(`${basePath}/inventory/balance`)}>
                         {t('inventory.balance')}
                     </Button>
                 </div>
