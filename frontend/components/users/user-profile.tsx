@@ -15,7 +15,7 @@ import { Skeleton } from "@heroui/skeleton";
 import { Edit, Ban, Key, Activity, Shield, Info, Smartphone, Monitor } from "lucide-react";
 import { UserStatusBadge, UserRoleBadge } from "./user-badges";
 import { UserForm } from "./user-form";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 
 interface UserProfileProps {
     userId: string;
@@ -26,6 +26,7 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const loadData = async () => {
         setLoading(true);
@@ -47,9 +48,16 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
 
     const handleEditSuccess = async (data: any) => {
         if (user) {
-            await userService.update(user.id, data);
-            setIsEditOpen(false);
-            loadData();
+            setIsSaving(true);
+            try {
+                await userService.update(user.id, data);
+                setIsEditOpen(false);
+                loadData();
+            } catch (error) {
+                console.error("Failed to update user", error);
+            } finally {
+                setIsSaving(false);
+            }
         }
     };
 
@@ -76,7 +84,10 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                         description={""}
                         avatarProps={{
                             src: user.avatar_url,
-                            className: "w-24 h-24 text-large"
+                            name: (user.fullname || user.username || "U").substring(0, 2).toUpperCase(),
+                            className: "w-24 h-24 text-large",
+                            isBordered: true,
+                            color: "primary"
                         }}
                     />
                     <div className="flex flex-col gap-2 flex-grow">
@@ -92,7 +103,7 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                                 </div>
                             </div>
                             <div className="flex gap-2">
-                                <Button startContent={<Edit size={16} />} onPress={() => setIsEditOpen(true)}>
+                                <Button color="primary" startContent={<Edit size={16} />} onPress={() => setIsEditOpen(true)}>
                                     {t('user.edit')}
                                 </Button>
                                 <Button isIconOnly variant="flat" color="warning">
@@ -119,6 +130,8 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                             <DetailItem label={t('user.field.username')} value={user.username} />
                             <DetailItem label={t('user.field.email')} value={user.email} />
                             <DetailItem label={t('user.field.fullname')} value={user.fullname} />
+                            <DetailItem label="Phone" value={user.phone} />
+                            <DetailItem label="Department" value={user.department} />
                         </div>
                     </div>
                     <div>
@@ -133,7 +146,6 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                                 <UserStatusBadge isActive={user.is_active} />
                             </div>
                             <DetailItem label={t('user.field.createdAt')} value={new Date(user.created_at).toLocaleDateString()} />
-                            {/* <DetailItem label={t('user.field.deletedAt')} value={user.deleted_at ? new Date(user.deleted_at).toLocaleDateString() : '-'} /> */}
                         </div>
                     </div>
                 </CardBody>
@@ -149,9 +161,17 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                                     initialData={user}
                                     onSubmit={handleEditSuccess}
                                     onCancel={onClose}
-                                    isLoading={false}
+                                    isLoading={isSaving}
                                 />
                             </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="flat" onPress={onClose}>
+                                    {t("common.cancel")}
+                                </Button>
+                                <Button color="primary" type="submit" form="user-form" isLoading={isSaving}>
+                                    {t("common.save")}
+                                </Button>
+                            </ModalFooter>
                         </>
                     )}
                 </ModalContent>
