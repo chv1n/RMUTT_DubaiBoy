@@ -19,8 +19,9 @@ interface PlanCardProps {
 }
 
 const statusColorMap: Record<string, "success" | "danger" | "warning" | "default" | "primary" | "secondary"> = {
-    PENDING: "default",
-    IN_PROGRESS: "primary",
+    DRAFT: "default",
+    PENDING: "warning",
+    PRODUCTION: "primary",
     COMPLETED: "success",
     CANCELLED: "danger"
 };
