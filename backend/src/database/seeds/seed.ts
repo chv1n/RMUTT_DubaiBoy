@@ -3,12 +3,16 @@ import { MaterialGroup } from '../../modules/material-group/entities/material-gr
 import { MaterialUnits } from '../../modules/unit/entities/unit.entity';
 import { MaterialContainerType } from '../../modules/container-type/entities/container-type.entity';
 import { Supplier } from '../../modules/supplier/entities/supplier.entity';
-import { User } from '../../modules/user/entities/user.entity'; // Import User entity
-import { Role } from '../../common/enums/role.enum'; // Import Role enum
+import { User } from '../../modules/user/entities/user.entity';
+import { Role } from '../../common/enums/role.enum';
 import { Product } from '../../modules/product/entities/product.entity';
 import { ProductType } from '../../modules/product-type/entities/product-type.entity';
 import { WarehouseMaster } from '../../modules/warehouse-master/entities/warehouse-master.entity';
 import { MaterialMaster } from '../../modules/material/entities/material-master.entity';
+import { Bom } from '../../modules/bom/entities/bom.entity';
+import { ProductPlan } from '../../modules/product-plan/entities/product-plan.entity';
+import { PlanStatusEnum } from '../../modules/product-plan/enum/plan-status.enum';
+import { PlanPriorityEnum } from '../../modules/product-plan/enum/plan-priority.enum';
 
 async function seed() {
     try {
@@ -143,13 +147,12 @@ async function seed() {
 
         // Seed Products
         const productRepo = AppDataSource.getRepository(Product);
-        // We need to fetch the types to link them, assuming they were just seeded or exist
         const finishedType = await productTypeRepo.findOneBy({ type_name: 'Finished Goods' });
         const semiType = await productTypeRepo.findOneBy({ type_name: 'Semi-Finished Goods' });
 
         if (finishedType && semiType) {
             const products = [
-                { product_name: '300mm Polished Wafer', product_type: finishedType, active: 1 },
+                { product_name: '300mm Polished Wafer', product_type: semiType, active: 1 }, // Changed to Semi
                 { product_name: 'Patterned Wafer', product_type: semiType, active: 1 },
                 { product_name: 'Packaged Chip Type A', product_type: finishedType, active: 1 },
                 { product_name: 'Solar Cell Unit', product_type: finishedType, active: 1 },
@@ -240,8 +243,6 @@ async function seed() {
                 const newUser = userRepo.create(userData);
                 await userRepo.save(newUser);
                 console.log(`Seeded User: ${userData.username} (${userData.role})`);
-            } else {
-                console.log(`User already exists: ${userData.username}`);
             }
         }
 
@@ -437,6 +438,142 @@ async function seed() {
                     console.log(`Seeded Material: ${matData.material_name}`);
                 }
             }
+
+            // --- Seed BOMs ---
+            console.log("Seeding BOMs...");
+            const bomRepo = AppDataSource.getRepository(Bom);
+            const polishedWafer = await productRepo.findOneBy({ product_name: '300mm Polished Wafer' });
+            const patternedWafer = await productRepo.findOneBy({ product_name: 'Patterned Wafer' });
+            const packagedChip = await productRepo.findOneBy({ product_name: 'Packaged Chip Type A' });
+
+            const primeWaferMat = await materialRepo.findOneBy({ material_name: '300mm Silicon Wafer (Prime)' });
+            const slurryMat = await materialRepo.findOneBy({ material_name: 'CMP Slurry (Oxide)' });
+            const prMat = await materialRepo.findOneBy({ material_name: 'Photoresist PR-193nm' });
+            const copperTargetMat = await materialRepo.findOneBy({ material_name: 'Copper Target (450mm)' });
+
+            const bomsToSeed: Partial<Bom>[] = [];
+
+            // BOM for Polished Wafer
+            if (polishedWafer && primeWaferMat && slurryMat) {
+                bomsToSeed.push(
+                    { product: polishedWafer, material: primeWaferMat, unit: waferUnit, usage_per_piece: 1, scrap_factor: 0.05, active: 1, version: '1.0' as any },
+                    { product: polishedWafer, material: slurryMat, unit: literUnit, usage_per_piece: 0.02, scrap_factor: 0.1, active: 1, version: '1.0' as any }
+                );
+            }
+
+            // BOM for Patterned Wafer (Using PR)
+            if (patternedWafer && prMat) {
+                bomsToSeed.push(
+                    { product: patternedWafer, material: prMat, unit: literUnit, usage_per_piece: 0.005, scrap_factor: 0.02, active: 1, version: '1.0' as any }
+                );
+            }
+
+            // BOM for Packaged Chip (Using Copper Target)
+            if (packagedChip && copperTargetMat) {
+                bomsToSeed.push(
+                    { product: packagedChip, material: copperTargetMat, unit: pieceUnit, usage_per_piece: 0.0001, scrap_factor: 0.01, active: 1, version: '1.0' as any }
+                );
+            }
+
+            for (const bomData of bomsToSeed) {
+                const exists = await bomRepo.findOneBy({ product: { product_id: bomData.product?.product_id }, material: { material_id: bomData.material?.material_id } });
+                if (!exists) {
+                    await bomRepo.save(bomRepo.create(bomData as any));
+                    console.log(`Seeded BOM for: ${bomData.product?.product_name} - ${bomData.material?.material_name}`);
+                }
+            }
+
+            // --- Seed Product Plans ---
+            console.log("Seeding Plans...");
+            const planRepo = AppDataSource.getRepository(ProductPlan);
+
+            const today = new Date();
+            const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+            const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 7);
+            const lastMonth = new Date(today); lastMonth.setMonth(today.getMonth() - 1);
+            const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+
+            const plans: Partial<ProductPlan>[] = [];
+
+            if (polishedWafer && patternedWafer && packagedChip) {
+                plans.push(
+                    // PENDING Plans
+                    {
+                        plan_name: 'Q1 Wafer Polishing Run',
+                        product: polishedWafer,
+                        input_quantity: 5000,
+                        start_date: tomorrow,
+                        end_date: nextWeek,
+                        plan_status: PlanStatusEnum.PENDING,
+                        plan_priority: PlanPriorityEnum.HIGH,
+                        estimated_cost: 25000000.00,
+                        created_at: yesterday
+                    },
+                    {
+                        plan_name: 'Patterning Test Batch',
+                        product: patternedWafer,
+                        input_quantity: 100,
+                        start_date: today,
+                        end_date: tomorrow,
+                        plan_status: PlanStatusEnum.DRAFT, // Still in draft
+                        plan_priority: PlanPriorityEnum.MEDIUM,
+                        estimated_cost: 50000.00,
+                        created_at: yesterday
+                    },
+                    // IN PROGRESS Plans
+                    {
+                        plan_name: 'Urgent Chip Packaging',
+                        product: packagedChip,
+                        input_quantity: 2000,
+                        start_date: yesterday,
+                        end_date: tomorrow,
+                        plan_status: PlanStatusEnum.PRODUCTION,
+                        plan_priority: PlanPriorityEnum.HIGH,
+                        estimated_cost: 1000000.00,
+                        started_at: yesterday,
+                        created_at: lastMonth
+                    },
+                    // COMPLETED Plans
+                    {
+                        plan_name: 'Last Month Standard Run',
+                        product: polishedWafer,
+                        input_quantity: 10000,
+                        actual_produced_quantity: 9980,
+                        start_date: lastMonth,
+                        end_date: yesterday,
+                        plan_status: PlanStatusEnum.COMPLETED,
+                        plan_priority: PlanPriorityEnum.MEDIUM,
+                        estimated_cost: 50000000.00,
+                        actual_cost: 49500000.00,
+                        started_at: lastMonth,
+                        completed_at: yesterday,
+                        created_at: lastMonth
+                    },
+                    // CANCELLED Plans
+                    {
+                        plan_name: 'Faulty Experiment Plan',
+                        product: patternedWafer,
+                        input_quantity: 50,
+                        start_date: lastMonth,
+                        end_date: lastMonth,
+                        plan_status: PlanStatusEnum.CANCELLED,
+                        plan_priority: PlanPriorityEnum.LOW,
+                        estimated_cost: 10000.00,
+                        cancelled_at: lastMonth,
+                        cancel_reason: "Equipment failure on line 2",
+                        created_at: lastMonth
+                    }
+                );
+            }
+
+            for (const planData of plans) {
+                const exists = await planRepo.findOneBy({ plan_name: planData.plan_name });
+                if (!exists) {
+                    await planRepo.save(planRepo.create(planData as any));
+                    console.log(`Seeded Plan: ${planData.plan_name}`);
+                }
+            }
+
         } else {
             console.warn('Skipping Material seeding due to missing dependencies.');
         }

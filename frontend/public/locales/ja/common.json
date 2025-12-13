@@ -37,7 +37,9 @@
         "reports": "レポート",
         "help": "ヘルプとサポート",
         "customize": "カスタマイズ",
-        "detail": "詳細"
+        "customize": "カスタマイズ",
+        "detail": "詳細",
+        "noData": "データなし"
     },
     "materials": {
         "title": "資材管理",
@@ -218,7 +220,27 @@
             "approved": "計画が承認されました",
             "rejected": "計画が拒否されました",
             "import_success": "インポート完了: 成功 {{success}}, 失敗 {{failed}}"
-        }
+        },
+        "confirmTitle": "確認と材料の引当",
+        "confirmMessage": "確認する前に十分な材料在庫があることを確認してください。",
+        "completeTitle": "生産完了",
+        "cancelTitle": "計画キャンセル",
+        "reason": "理由",
+        "actual_qty": "実際の数量",
+        "confirmPlan": "計画を確認",
+        "startPlan": "計画開始",
+        "complete": "完了",
+        "cancel": "キャンセル",
+        "startPlanTitle": "生産開始",
+        "startPlanMessage": "生産を開始してもよろしいですか？ これにより、時間と材料使用量の追跡が正式に開始されます。",
+        "deletePlanTitle": "計画を削除",
+        "deletePlanMessage": "本当にこの計画を削除しますか？ この操作は元に戻せません。",
+        "completeMessage": "生産完了を確認します。余剰材料は在庫に戻されます。",
+        "actualProduced": "実際の生産数量",
+        "target": "目標",
+        "warningExceeds": "警告：目標超過",
+        "actual": "実際の生産数",
+        "cost": "コスト"
     },
     "units": {
         "title": "単位管理",

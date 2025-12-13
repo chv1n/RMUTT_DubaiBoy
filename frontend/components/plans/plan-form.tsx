@@ -22,7 +22,7 @@ const planSchema = z.object({
     start_date: z.string().min(1, "Start date is required"),
     end_date: z.string().min(1, "End date is required"),
     priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as const),
-    status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] as const).optional()
+    status: z.enum(['DRAFT', 'PENDING', 'PRODUCTION', 'COMPLETED', 'CANCELLED'] as const).optional()
 });
 
 type PlanFormData = z.infer<typeof planSchema>;
@@ -70,8 +70,8 @@ export default function PlanForm({ isOpen, onClose, planToEdit }: PlanFormProps)
                 plan_name: planToEdit.name,
                 plan_description: planToEdit.description || '',
                 input_quantity: planToEdit.quantity,
-                start_date: planToEdit.startDate ? new Date(planToEdit.startDate).toISOString().split('T')[0] : '',
-                end_date: planToEdit.endDate ? new Date(planToEdit.endDate).toISOString().split('T')[0] : '',
+                start_date: planToEdit.startDate,
+                end_date: planToEdit.endDate,
                 priority: planToEdit.priority,
                 status: planToEdit.status
             });
@@ -84,7 +84,7 @@ export default function PlanForm({ isOpen, onClose, planToEdit }: PlanFormProps)
                 start_date: new Date().toISOString().split('T')[0],
                 end_date: new Date().toISOString().split('T')[0],
                 priority: 'MEDIUM',
-                status: 'PENDING'
+                status: 'DRAFT'
             });
         }
     }, [planToEdit, reset, isOpen]);
@@ -112,7 +112,7 @@ export default function PlanForm({ isOpen, onClose, planToEdit }: PlanFormProps)
                 start_date: data.start_date,
                 end_date: data.end_date,
                 priority: data.priority,
-                status: 'PENDING' // Default for new
+                status: 'DRAFT' // Default for new
             };
             createMutation.mutate(payload, { onSuccess: onClose });
         }
@@ -227,8 +227,9 @@ export default function PlanForm({ isOpen, onClose, planToEdit }: PlanFormProps)
                                         label="Status"
                                         onSelectionChange={(keys) => field.onChange(Array.from(keys)[0])}
                                     >
+                                        <SelectItem key="DRAFT">Draft</SelectItem>
                                         <SelectItem key="PENDING">Pending</SelectItem>
-                                        <SelectItem key="IN_PROGRESS">In Progress</SelectItem>
+                                        <SelectItem key="PRODUCTION">Production</SelectItem>
                                         <SelectItem key="COMPLETED">Completed</SelectItem>
                                         <SelectItem key="CANCELLED">Cancelled</SelectItem>
                                     </Select>
