@@ -2,45 +2,37 @@ import sys
 import json
 import numpy as np
 import pandas as pd
-import pickle
-import os
 
-TIME_STEP = 14
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "models_xgb"))
+ALPHA = 0.2
+MIN_HISTORY = 10
 
 
-def load_model(pid):
-    path = os.path.join(MODEL_DIR, f"model_product_{pid}.pkl")
-    if not os.path.exists(path):
-        raise Exception(f"Model not found: {path}")
+def ema_series(values, alpha):
+    """คำนวณ EMA ทั้ง series"""
+    ema_vals = [values[0]]
+    for v in values[1:]:
+        ema_vals.append(alpha * v + (1 - alpha) * ema_vals[-1])
+    return ema_vals
 
-    with open(path, "rb") as f:
-        return pickle.load(f)
 
-
-# ✅ ต้องอยู่นอก forecast
-def estimate_confidence(model, history):
-    if len(history) <= TIME_STEP:
+def estimate_confidence_ema(values, alpha):
+    """
+    คำนวณ std ของ residuals จาก EMA
+    ใช้เป็น uncertainty
+    """
+    if len(values) < MIN_HISTORY:
         return None
 
-    residuals = []
+    ema_vals = ema_series(values, alpha)
+    residuals = np.array(values) - np.array(ema_vals)
 
-    for i in range(TIME_STEP, len(history)):
-        seq = history[i - TIME_STEP:i]
-        x = np.array(seq).reshape(1, -1)
-        pred = model.predict(x)[0]
-        actual = history[i]
-        residuals.append(actual - pred)
-
-    if not residuals:
+    if len(residuals) < 2:
         return None
 
-    return float(np.std(residuals))
+    return float(np.std(residuals, ddof=1))
 
 
-def forecast(pid, history, steps):
+def forecast_ema(history, steps, alpha):
     df = pd.DataFrame(history)
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     df = df.dropna(subset=["Date"])
@@ -49,22 +41,22 @@ def forecast(pid, history, steps):
 
     qty = df["Quantity"].tolist()
 
-    if len(qty) < TIME_STEP:
-        raise Exception(f"Not enough data: need {TIME_STEP}, got {len(qty)}")
+    if len(qty) < MIN_HISTORY:
+        raise Exception(f"Not enough data: need ≥ {MIN_HISTORY}, got {len(qty)}")
 
-    model = load_model(pid)
+    # ✅ คำนวณ EMA จาก history ทั้งหมด
+    ema_vals = ema_series(qty, alpha)
+    last_ema = ema_vals[-1]
 
-    # ✅ ตอนนี้เรียกได้แล้ว
-    std = estimate_confidence(model, qty)
+    # ✅ uncertainty
+    std = estimate_confidence_ema(qty, alpha)
 
-    seq = qty[-TIME_STEP:]
     preds = []
     intervals_68 = []
     intervals_95 = []
 
     for _ in range(steps):
-        x = np.array(seq).reshape(1, -1)
-        pred = float(model.predict(x)[0])
+        pred = float(last_ema)
         preds.append(pred)
 
         if std is not None:
@@ -77,7 +69,8 @@ def forecast(pid, history, steps):
                 "upper": pred + 1.96 * std
             })
 
-        seq = seq[1:] + [pred]
+        # EMA update (ใช้ค่าที่พยากรณ์เอง)
+        last_ema = alpha * pred + (1 - alpha) * last_ema
 
     return {
         "predictions": preds,
@@ -85,16 +78,17 @@ def forecast(pid, history, steps):
             "std": std,
             "interval_68": intervals_68,
             "interval_95": intervals_95
-        }
+        },
+        "model": "EMA",
+        "alpha": alpha
     }
 
 
 if __name__ == "__main__":
     data = json.loads(sys.stdin.read())
 
-    pid = data["productId"]
     history = data["history"]
     days = data["days"]
 
-    result = forecast(pid, history, days)
+    result = forecast_ema(history, days, ALPHA)
     print(json.dumps(result))

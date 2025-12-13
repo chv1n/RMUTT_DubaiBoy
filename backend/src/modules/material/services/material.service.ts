@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ISoftDeletable } from '../../common/interfaces/soft-deletable.interface';
+import { ISoftDeletable } from '../../../common/interfaces/soft-deletable.interface';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder, LessThan, MoreThan } from 'typeorm';
-import { MaterialMaster } from './entities/material-master.entity';
-import { CreateMaterialDto } from './dto/create-material.dto';
-import { UpdateMaterialDto } from './dto/update-material.dto';
-import { MaterialQueryDto } from './dto/material-query.dto';
-import { SoftDeleteHelper } from '../../common/helpers/soft-delete.helper';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { MaterialMaster } from '../entities/material-master.entity';
+import { CreateMaterialDto } from '../dto/create-material.dto';
+import { UpdateMaterialDto } from '../dto/update-material.dto';
+import { MaterialQueryDto } from '../dto/material-query.dto';
+import { SoftDeleteHelper } from '../../../common/helpers/soft-delete.helper';
 
-import { MaterialInventory } from '../material-inventory/entities/material-inventory.entity';
-import { WarehouseMaster } from '../warehouse-master/entities/warehouse-master.entity';
+import { MaterialInventory } from '../../material-inventory/entities/material-inventory.entity';
+import { WarehouseMaster } from '../../warehouse-master/entities/warehouse-master.entity';
 
 @Injectable()
 export class MaterialService implements ISoftDeletable {
@@ -155,3 +155,6 @@ export class MaterialService implements ISoftDeletable {
     };
   }
 }
+
+
+

@@ -6,7 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AppModules } from './modules';
-import { DsahboardModule } from './modules/dsahboard/dsahboard.module';
+
 
 import * as Joi from 'joi';
 import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
@@ -43,7 +43,6 @@ import { AtGuard } from './common/guards/at.guard';
       limit: 100,
     }]),
     ...AppModules,
-    DsahboardModule,
 
 
 

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ProductPlanService } from './product-plan.service';
-import { ProductPlanController } from './product-plan.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductPlan } from './entities/product-plan.entity';
 import { PlanMaterialAllocation } from './entities/plan-material-allocation.entity';
@@ -13,6 +12,9 @@ import { MaterialInventory } from '../material-inventory/entities/material-inven
 import { StockReservationService } from './services/stock-reservation.service';
 import { PlanWorkflowService } from './services/plan-workflow.service';
 import { PlanReportService } from './services/plan-report.service';
+import { ProductPlanController } from './controlles/product-plan.controller';
+import { PlanDashboardController } from './controlles/dashboard.controller';
+import { DashboardPlanService } from './services/dash-board.service';
 
 @Module({
   imports: [
@@ -23,12 +25,13 @@ import { PlanReportService } from './services/plan-report.service';
     MaterialModule,
     AuditLogModule,
   ],
-  controllers: [ProductPlanController],
+  controllers: [ProductPlanController, PlanDashboardController],
   providers: [
     ProductPlanService,
     StockReservationService,
     PlanWorkflowService,
     PlanReportService,
+    DashboardPlanService,
   ],
   exports: [ProductPlanService, PlanWorkflowService],
 })

@@ -6,6 +6,8 @@ import { GetBomDto } from './dto/get-bom.dto';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { Role } from 'src/common/enums';
 
+import { CalculateBomDto } from './dto/calculate-bom.dto';
+
 @Controller({
   path: 'boms',
   version: '1'
@@ -13,7 +15,16 @@ import { Role } from 'src/common/enums';
 export class BomController {
   constructor(private readonly bomService: BomService) { }
 
-  @Auth(Role.ADMIN)
+  @Get('calculate')
+  async calculateMaterialRequirement(@Query() query: CalculateBomDto) {
+    const data = await this.bomService.calculateMaterialRequirement(query.product_id, query.quantity);
+    return {
+      success: true,
+      message: 'คำนวณสำเร็จ',
+      data
+    };
+  }
+
   @Post()
   async create(@Body() createBomDto: CreateBomDto) {
     const data = await this.bomService.create(createBomDto);
