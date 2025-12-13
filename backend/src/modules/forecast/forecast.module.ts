@@ -3,11 +3,10 @@ import { ForecastService } from './forecast.service';
 import { ForecastController } from './forecast.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductPlan } from '../product-plan/entities/product-plan.entity';
-import { PlanList } from '../plan-list/entities/plan-list.entity';
 import { Product } from '../product/entities/product.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProductPlan, PlanList, Product])],
+  imports: [TypeOrmModule.forFeature([ProductPlan, Product])],
   controllers: [ForecastController],
   providers: [ForecastService],
 })

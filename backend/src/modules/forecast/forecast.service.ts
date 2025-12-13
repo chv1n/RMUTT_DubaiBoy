@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
 import { spawn } from "child_process";
-import { Repository } from "typeorm";
+import { Between, Repository } from "typeorm";
 import { ProductPlan } from "../product-plan/entities/product-plan.entity";
 import { Status } from 'src/common/enums/status.enum';
-import { PlanList } from '../plan-list/entities/plan-list.entity';
 import * as fs from "fs";
 import * as json from "json";
 import * as sys from "sys";
 import { Product } from '../product/entities/product.entity';
+import * as path from "path";
 
 
 
@@ -16,35 +16,54 @@ import { Product } from '../product/entities/product.entity';
 export class ForecastService {
 
   constructor(
-    @InjectRepository(PlanList) private planProductRepository: Repository<PlanList>,
     @InjectRepository(ProductPlan) private productPlanRepository: Repository<ProductPlan>,
     @InjectRepository(Product) private productRepository: Repository<Product>
   ) { }
 
 
   async retrainMonthly() {
-    const newData: PlanList[] = await this.planProductRepository.find({
-      relations: {
-        plan: true,
-      },
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 14);
+
+    const newData = await this.productPlanRepository.find({
       where: {
-        status: Status.COMPLETED,
+        // plan_status: Status.COMPLETED,
+        updated_at: Between(startDate, endDate),
       },
       order: { updated_at: "asc" },
     });
 
-    const py = spawn("python", ["./src/modules/forecast/python/train_update.py"]);
+    if (!newData.length) {
+      throw new NotFoundException("No data for retraining");
+    }
+
+    const scriptPath = path.join(
+      process.cwd(),
+      "src/modules/forecast/python/train-update.py"
+    );
+
+    const py = spawn("python", [scriptPath]);
 
     py.stdin.write(JSON.stringify(newData));
     py.stdin.end();
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let result = "";
 
       py.stdout.on("data", (d) => (result += d.toString()));
       py.stderr.on("data", (err) => reject(err.toString()));
-      py.on("close", () => resolve(JSON.parse(result)));
 
+      py.on("close", () => {
+        if (!result) {
+          return reject("Python returned empty output");
+        }
+        try {
+          resolve(JSON.parse(result));
+        } catch {
+          reject("Invalid JSON from python: " + result);
+        }
+      });
     });
   }
 
@@ -127,6 +146,9 @@ export class ForecastService {
       total_usage: number;
     }[] = [];
 
+    const confidence = pythonOutput?.confidence;
+
+
     if (product.boms) {
       product.boms.forEach((bom) => {
         const usagePerPiece = bom.usage_per_piece; // อัตราการใช้ต่อ 1 ชิ้น
@@ -149,6 +171,7 @@ export class ForecastService {
     return {
       predictions,
       materialUsage,
+      confidence,
       product,
       product_type: product.product_type,
     };
