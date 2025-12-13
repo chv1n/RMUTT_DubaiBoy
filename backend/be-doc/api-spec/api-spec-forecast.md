@@ -19,12 +19,18 @@ Response จะขึ้นอยู่กับ Output ของ Python Script 
 
 ```json
 {
-    "status": "success",
-    "message": "Model retrained successfully",
-    "metrics": {
-        "mse": 0.12,
-        "mae": 0.08
+    {
+    "success": true,
+    "message": "สำเร็จ",
+    "data": {
+        "success": true,
+        "trained_models": [
+            29,
+            37
+        ],
+        "rows_used": 87
     }
+}
 }
 ```
 *(ตัวอย่าง Response อาจแตกต่างไปตาม Implementation ของ Python Script)*
