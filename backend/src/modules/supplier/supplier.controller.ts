@@ -13,7 +13,7 @@ import { Auth } from 'src/common/decorators/auth.decorator';
 export class SupplierController {
     constructor(private readonly service: SupplierService) { }
 
-    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+    @Auth(Role.PURCHASE_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
     @Post()
     async create(@Body() createSupplierDto: CreateSupplierDto) {
         const data = await this.service.create(createSupplierDto);
@@ -36,7 +36,7 @@ export class SupplierController {
         return this.service.findOne(id);
     }
 
-    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+    @Auth(Role.PURCHASE_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
     @Put(':id')
     async update(@Param('id', ParseIntPipe) id: number, @Body() updateSupplierDto: UpdateSupplierDto) {
         const data = await this.service.update(id, updateSupplierDto);
@@ -46,6 +46,7 @@ export class SupplierController {
         };
     }
 
+    @Auth(Role.PURCHASE_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
     @Delete(':id')
     async remove(@Param('id', ParseIntPipe) id: number) {
         await this.service.remove(id);
@@ -54,7 +55,7 @@ export class SupplierController {
         };
     }
 
-    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+    @Auth(Role.PURCHASE_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
     @Put(':id/restore')
     async restore(@Param('id', ParseIntPipe) id: number) {
         await this.service.restore(id);

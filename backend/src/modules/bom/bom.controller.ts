@@ -13,7 +13,7 @@ import { Role } from 'src/common/enums';
 export class BomController {
   constructor(private readonly bomService: BomService) { }
 
-  @Auth(Role.ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Post()
   async create(@Body() createBomDto: CreateBomDto) {
     const data = await this.bomService.create(createBomDto);
@@ -35,7 +35,7 @@ export class BomController {
     return this.bomService.findOne(id);
   }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateBomDto: UpdateBomDto) {
     await this.bomService.update(id, updateBomDto);
@@ -44,7 +44,7 @@ export class BomController {
     };
   }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.bomService.remove(id);
@@ -53,7 +53,7 @@ export class BomController {
     };
   }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Put(':id/restore')
   async restore(@Param('id', ParseIntPipe) id: number) {
     await this.bomService.restore(id);

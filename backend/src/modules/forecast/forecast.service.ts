@@ -5,8 +5,6 @@ import { Between, Repository } from "typeorm";
 import { ProductPlan } from "../product-plan/entities/product-plan.entity";
 import { Status } from 'src/common/enums/status.enum';
 import * as fs from "fs";
-import * as json from "json";
-import * as sys from "sys";
 import { Product } from '../product/entities/product.entity';
 import * as path from "path";
 

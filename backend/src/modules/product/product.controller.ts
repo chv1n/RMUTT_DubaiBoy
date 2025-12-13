@@ -15,7 +15,7 @@ export class ProductController {
     private readonly service: ProductService
   ) { }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Post()
   async create(@Body() createProductDto: CreateProductDto) {
     const data = await this.service.create(createProductDto);
@@ -37,13 +37,13 @@ export class ProductController {
     return this.service.findOne(id);
   }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Put(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto) {
     return this.service.update(id, updateProductDto);
   }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.service.remove(id);
@@ -52,7 +52,7 @@ export class ProductController {
     };
   }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Put(':id/restore')
   async restore(@Param('id', ParseIntPipe) id: number) {
     await this.service.restore(id);

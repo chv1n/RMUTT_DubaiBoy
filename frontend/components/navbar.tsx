@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -26,9 +28,12 @@ import {
   Logo,
 } from "@/components/icons";
 import { useTranslation } from "@/components/providers/language-provider";
+import { NotificationBell } from "@/components/notifications";
 
 export const Navbar = () => {
   const { t } = useTranslation();
+  // TODO: Get actual token from your auth context
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
   const searchInput = (
     <Input
@@ -86,6 +91,7 @@ export const Navbar = () => {
           <Link isExternal aria-label="Github" href={siteConfig.links.github}>
             <GithubIcon className="text-default-500" />
           </Link>
+          <NotificationBell token={token || undefined} />
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
@@ -95,6 +101,7 @@ export const Navbar = () => {
         <Link isExternal aria-label="Github" href={siteConfig.links.github}>
           <GithubIcon className="text-default-500" />
         </Link>
+        <NotificationBell token={token || undefined} />
         <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>

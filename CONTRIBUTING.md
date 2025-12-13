@@ -45,6 +45,7 @@
 * ต้องส่ง "ข้อมูลของสิ่งที่เพิ่งสร้างหรืออัพเดตเสร็จ" กลับไปด้วยเสมอ
 {
   "success": true,
+  "message" : "Success"
   "data": {
     "id": "123",
     "name": "Test User"
@@ -55,6 +56,7 @@
 ตัวอย่าง:
 {
   "success": true,
+  "message" : "Success"
   "data": [
     { "id": "123", "name": "Test User 1" },
     { "id": "124", "name": "Test User 2" }

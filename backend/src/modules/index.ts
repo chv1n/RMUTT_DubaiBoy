@@ -16,6 +16,7 @@ import { PushSubscriptionModule } from "./push-subscription/push-subscription.mo
 import { PushLogModule } from "./push-log/push-log.module";
 import { ForecastModule } from "./forecast/forecast.module";
 import { AuditLogModule } from "./audit-log/audit-log.module";
+import { NotificationModule } from "./notification/notification.module";
 
 
 export const AppModules = [
@@ -37,5 +38,6 @@ export const AppModules = [
     PushSubscriptionModule,
     PushLogModule,
     ForecastModule,
+    NotificationModule,
 ]
 

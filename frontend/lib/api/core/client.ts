@@ -75,5 +75,5 @@ class HttpClient {
 
 // Export a singleton instance or a factory
 export const apiClient = new HttpClient(
-  process.env.NEXT_PUBLIC_API_URL || 'https://dummyjson.com'
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'
 );

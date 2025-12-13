@@ -25,7 +25,7 @@ export class ProductPlanController {
 
   // =============== CRUD Endpoints ===============
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Post()
   async create(@Body() createProductPlanDto: CreateProductPlanDto) {
     const data = await this.productPlanService.create(createProductPlanDto);
@@ -100,6 +100,7 @@ export class ProductPlanController {
   /**
    * Preview Plan - คำนวณวัสดุ + ต้นทุน + แสดง stock แต่ละ warehouse
    */
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Get(':id/preview')
   async previewPlan(@Param('id', ParseIntPipe) id: number) {
     const data = await this.planWorkflowService.previewPlan(id);
@@ -112,6 +113,7 @@ export class ProductPlanController {
   /**
    * Confirm Plan - ยืนยัน + จอง stock ตาม allocations ที่ user เลือก
    */
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Post(':id/confirm')
   async confirmPlan(
     @Param('id', ParseIntPipe) id: number,
@@ -127,6 +129,7 @@ export class ProductPlanController {
   /**
    * Start Production - เริ่มผลิต + ตัด stock จริง
    */
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Post(':id/start')
   async startProduction(@Param('id', ParseIntPipe) id: number) {
     const data = await this.planWorkflowService.startProduction(id);
@@ -139,6 +142,7 @@ export class ProductPlanController {
   /**
    * Complete Plan - เสร็จสิ้น + กรอก actual + คืนวัสดุเหลือ
    */
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Post(':id/complete')
   async completePlan(
     @Param('id', ParseIntPipe) id: number,
@@ -154,6 +158,7 @@ export class ProductPlanController {
   /**
    * Cancel Plan - ยกเลิก + คืน stock
    */
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Post(':id/cancel')
   async cancelPlan(
     @Param('id', ParseIntPipe) id: number,

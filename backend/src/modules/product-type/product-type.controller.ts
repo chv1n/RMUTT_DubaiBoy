@@ -19,7 +19,7 @@ export class ProductTypeController {
     private readonly productTypeRepository: Repository<ProductType>,
     private readonly service: ProductTypeService) { }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Post()
   async create(@Body() createProductTypeDto: CreateProductTypeDto) {
     const data = await this.service.create(createProductTypeDto);
@@ -41,7 +41,7 @@ export class ProductTypeController {
     return this.productTypeRepository.findBy({ product_type_id: id });
   }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateProductTypeDto: UpdateProductTypeDto) {
     const data = await this.service.update(id, updateProductTypeDto);
@@ -50,7 +50,7 @@ export class ProductTypeController {
       data
     };
   }
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.service.remove(id);
@@ -59,7 +59,7 @@ export class ProductTypeController {
     };
   }
 
-  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(Role.PRODUCTION_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
   @Put(':id/restore')
   async restore(@Param('id', ParseIntPipe) id: number) {
     await this.service.restore(id);

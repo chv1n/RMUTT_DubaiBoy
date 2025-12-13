@@ -29,20 +29,20 @@ export class UserController {
   }
 
 
-  @UseGuards(AtGuard)
+  @Auth(Role.SUPER_ADMIN)
   @Get()
   findAll(@Query() query: BaseQueryDto) {
     return this.userService.findAll(query);
   }
 
   @Get('admin-only')
-  @Auth(Role.ADMIN)
+  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
   adminOnly() {
     return 'This is admin only';
   }
 
   @Get('super-admin-only')
-  @Auth(Role.ADMIN)
+  @Auth(Role.SUPER_ADMIN)
   superAdminOnly() {
     return 'This is super admin only';
   }
@@ -73,6 +73,7 @@ export class UserController {
     };
   }
 
+  @Auth(Role.SUPER_ADMIN)
   @Put(':id/restore')
   async restore(@Param('id', ParseIntPipe) id: number) {
     await this.userService.restore(id);

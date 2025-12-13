@@ -3,11 +3,12 @@
 import React from "react";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
-import { Search, Bell, Settings, Menu } from "lucide-react";
+import { Search, Settings, Menu } from "lucide-react";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import { useTranslation } from "@/components/providers/language-provider";
+import { NotificationBell } from "@/components/notifications";
 
 
 type AdminHeaderProps = {
@@ -17,6 +18,7 @@ type AdminHeaderProps = {
 export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
     // const { toggleMobileSidebar } = useSidebar(); // Removed internal hook usage
     const { locale, setLocale } = useTranslation();
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
     return (
         <header className="h-16    bg-background  backdrop-blur-lg flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
@@ -45,9 +47,7 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
-                <Button isIconOnly variant="light" size="sm" radius="full" className="hidden sm:flex">
-                    <Bell size={20} className="text-default-500" />
-                </Button>
+                <NotificationBell token={token || undefined} />
                 <Button isIconOnly variant="light" size="sm" radius="full" className="hidden sm:flex">
                     <Settings size={20} className="text-default-500" />
                 </Button>
