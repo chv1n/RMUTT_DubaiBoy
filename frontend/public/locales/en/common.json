@@ -488,6 +488,29 @@
         "predictedWeek": "Predicted (7 Days)",
         "stockStatus": "Status"
     },
+    "forecast": {
+        "title": "AI Production Forecast",
+        "subtitle": "Analyze production trends and predict material consumption using Advanced AI models.",
+        "modelStatus": "Model Status",
+        "training": "Training...",
+        "active": "Active",
+        "retrain": "Retrain Model",
+        "configuration": "Configuration",
+        "selectProduct": "Select Product",
+        "horizon": "Forecast Horizon",
+        "days": "Days",
+        "generate": "Generate Forecast",
+        "forecastedProduction": "Forecasted Production",
+        "confidenceScore": "Confidence Score (Std Dev)",
+        "confidenceInterval": "Production Confidence Interval",
+        "materialRequirements": "Estimated Material Requirements",
+        "ready": "Ready to Analyze",
+        "readyMessage": "Select a product from the left configuration panel and click 'Generate Forecast' to see AI-driven predictions.",
+        "meanPrediction": "Mean Prediction",
+        "interval95": "95% Confidence Interval",
+        "costDistribution": "Estimated Cost Distribution",
+        "totalEstimatedCost": "Total Estimated Cost"
+    },
     "audit": {
         "title": "Audit Logs",
         "subtitle": "Track system changes and user activities"

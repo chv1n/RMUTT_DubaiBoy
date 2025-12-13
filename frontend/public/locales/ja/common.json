@@ -37,7 +37,6 @@
         "reports": "レポート",
         "help": "ヘルプとサポート",
         "customize": "カスタマイズ",
-        "customize": "カスタマイズ",
         "detail": "詳細",
         "noData": "データなし"
     },
@@ -440,6 +439,29 @@
         "overview": "概要",
         "predictedWeek": "予測 (7日間)",
         "stockStatus": "ステータス"
+    },
+    "forecast": {
+        "title": "AI生産予測",
+        "subtitle": "高度なAIモデルを使用して生産傾向を分析し、資材消費を予測します。",
+        "modelStatus": "モデルステータス",
+        "training": "トレーニング中...",
+        "active": "アクティブ",
+        "retrain": "モデルを再トレーニング",
+        "configuration": "設定",
+        "selectProduct": "製品を選択",
+        "horizon": "予測期間",
+        "days": "日",
+        "generate": "予測を生成",
+        "forecastedProduction": "予測生産量",
+        "confidenceScore": "信頼度スコア (標準偏差)",
+        "confidenceInterval": "生産信頼区間",
+        "materialRequirements": "推定資材所要量",
+        "ready": "分析の準備完了",
+        "readyMessage": "左側の設定パネルから製品を選択し、「予測を生成」をクリックしてAIによる予測を確認してください。",
+        "meanPrediction": "平均予測",
+        "interval95": "95% 信頼区間",
+        "costDistribution": "推定コスト配分",
+        "totalEstimatedCost": "総推定コスト"
     },
     "audit": {
         "title": "監査ログ",
