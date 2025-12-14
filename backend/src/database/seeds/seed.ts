@@ -13,6 +13,9 @@ import { Bom } from '../../modules/bom/entities/bom.entity';
 import { ProductPlan } from '../../modules/product-plan/entities/product-plan.entity';
 import { PlanStatusEnum } from '../../modules/product-plan/enum/plan-status.enum';
 import { PlanPriorityEnum } from '../../modules/product-plan/enum/plan-priority.enum';
+import { InventoryTransaction } from '../../modules/inventory-transaction/entities/inventory-transaction.entity';
+import { MaterialInventory } from '../../modules/material-inventory/entities/material-inventory.entity';
+import { Between } from 'typeorm';
 
 async function seed() {
     try {
@@ -577,6 +580,9 @@ async function seed() {
         } else {
             console.warn('Skipping Material seeding due to missing dependencies.');
         }
+        // --- Demo Data Generation (6 Months History) ---
+        console.log('Generating 6 Months Historical Data...');
+        await generateHistoricalData();
 
         console.log('Seeding completed successfully.');
     } catch (error) {
@@ -584,6 +590,91 @@ async function seed() {
     } finally {
         await AppDataSource.destroy();
     }
+}
+
+async function generateHistoricalData() {
+    const transactionRepo = AppDataSource.getRepository(InventoryTransaction);
+    const inventoryRepo = AppDataSource.getRepository(MaterialInventory);
+    const materialRepo = AppDataSource.getRepository(MaterialMaster);
+    const warehouseRepo = AppDataSource.getRepository(WarehouseMaster);
+
+    const materials = await materialRepo.find();
+    const warehouses = await warehouseRepo.find();
+
+    if (materials.length === 0 || warehouses.length === 0) {
+        console.log("Skipping historical data: No materials or warehouses found.");
+        return;
+    }
+
+    const today = new Date();
+    const startDate = new Date();
+    startDate.setMonth(today.getMonth() - 6);
+
+    const mainWarehouse = warehouses[0]; // Assume first is main
+
+    // 1. Ensure Inventory Exists for Materials
+    const inventories: MaterialInventory[] = [];
+    for (const mat of materials) {
+        let inv = await inventoryRepo.findOne({
+            where: { material: { material_id: mat.material_id }, warehouse: { id: mainWarehouse.id } }
+        });
+
+        if (!inv) {
+            inv = inventoryRepo.create({
+                material: mat,
+                warehouse: mainWarehouse,
+                quantity: Math.floor(Math.random() * 500) + 100, // Initial Base
+                reserved_quantity: 0,
+                order_number: `INIT-${mat.material_id}`,
+                mfg_date: new Date(),
+                exp_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+            });
+            await inventoryRepo.save(inv);
+        }
+        inventories.push(inv);
+    }
+
+    // 2. Generate Daily Transactions
+    const transactions: any[] = [];
+    const loopDate = new Date(startDate);
+
+    while (loopDate <= today) {
+        // Randomly select some materials to have transactions today
+        const dailyActiveMaterials = inventories.sort(() => 0.5 - Math.random()).slice(0, Math.floor(inventories.length * 0.3));
+
+        for (const inv of dailyActiveMaterials) {
+            // Decide Inbound vs Outbound
+            // 40% Inbound, 60% Outbound (Consumption)
+            const isInbound = Math.random() > 0.6;
+            const qty = Math.floor(Math.random() * 50) + 1;
+            const change = isInbound ? qty : -qty;
+
+            // Only allow outbound if enough stock (logic proxy)
+            // Ideally we track running stock, but for seed we just generate records.
+            // Dashboard calculates trends from these records.
+
+            transactions.push({
+                materialInventory: inv,
+                warehouse: mainWarehouse,
+                transaction_type: isInbound ? 'PURCHASE' : 'PRODUCTION_ISSUE',
+                transaction_date: new Date(loopDate), // Clone date
+                quantity_change: change,
+                reference_number: `REF-${loopDate.getTime()}-${Math.floor(Math.random() * 1000)}`,
+                reason_remarks: isInbound ? 'Restock' : 'Used in production'
+            });
+        }
+
+        loopDate.setDate(loopDate.getDate() + 1);
+    }
+
+    // Batch insert transactions for performance
+    // Chunking to avoid memory issues
+    const chunkSize = 100;
+    for (let i = 0; i < transactions.length; i += chunkSize) {
+        const chunk = transactions.slice(i, i + chunkSize);
+        await transactionRepo.save(transactionRepo.create(chunk));
+    }
+    console.log(`Generated ${transactions.length} historical transactions.`);
 }
 
 seed();
