@@ -585,6 +585,27 @@
     "audit": {
         "title": "Audit Logs",
         "subtitle": "Track system changes and user activities"
+    },
+    "smartDashboard": {
+        "title": "Smart Factory Dashboard",
+        "subtitle": "Real-time AI monitoring & material analytics",
+        "totalMaterials": "Total Materials",
+        "lowStockMaterials": "Low Stock Items",
+        "criticalAlerts": "Critical Alerts",
+        "totalStockValue": "Total Stock Value",
+        "activePlans": "Active Plans",
+        "stockTrend": "Stock Value Trend",
+        "plansAtRisk": "Plans At Risk",
+        "alerts": "System Alerts",
+        "lowStockList": "Critical Low Stock",
+        "reorderPoint": "Reorder Point",
+        "shortage": "Shortage",
+        "required": "Required",
+        "available": "Available",
+        "status": "Status",
+        "risk": "Risk",
+        "warning": "Warning",
+        "normal": "Normal"
     }
 
 }

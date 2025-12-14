@@ -526,6 +526,27 @@
     "audit": {
         "title": "監査ログ",
         "subtitle": "システムの変更とユーザーアクティビティを追跡"
+    },
+    "smartDashboard": {
+        "title": "スマート工場ダッシュボード",
+        "subtitle": "リアルタイムAI監視と資材分析",
+        "totalMaterials": "総材料数",
+        "lowStockMaterials": "在庫不足品目",
+        "criticalAlerts": "重要アラート",
+        "totalStockValue": "総在庫価値",
+        "activePlans": "進行中の計画",
+        "stockTrend": "在庫価値トレンド",
+        "plansAtRisk": "リスクのある計画",
+        "alerts": "システムアラート",
+        "lowStockList": "在庫不足リスト",
+        "reorderPoint": "発注点",
+        "shortage": "不足",
+        "required": "必要数",
+        "available": "在庫数",
+        "status": "ステータス",
+        "risk": "リスク",
+        "warning": "警告",
+        "normal": "正常"
     }
 
 }

@@ -493,6 +493,27 @@
     "audit": {
         "title": "บันทึกการตรวจสอบ",
         "subtitle": "ติดตามการเปลี่ยนแปลงของระบบและกิจกรรมผู้ใช้"
+    },
+    "smartDashboard": {
+        "title": "แดชบอร์ด Smart Factory",
+        "subtitle": "การติดตามด้วย AI และวิเคราะห์วัตถุดิบ",
+        "totalMaterials": "จำนวนวัสดุทั้งหมด",
+        "lowStockMaterials": "วัสดุใกล้หมด",
+        "criticalAlerts": "แจ้งเตือนวิกฤต",
+        "totalStockValue": "มูลค่าสต็อกรวม",
+        "activePlans": "แผนผลิตที่กำลังทำ",
+        "stockTrend": "แนวโน้มมูลค่าสต็อก",
+        "plansAtRisk": "แผนมีความเสี่ยง",
+        "alerts": "แจ้งเตือนระบบ",
+        "lowStockList": "รายการวัสดุวิกฤต",
+        "reorderPoint": "จุดสั่งซื้อ",
+        "shortage": "ขาดแคลน",
+        "required": "ต้องการ",
+        "available": "มีอยู่",
+        "status": "สถานะ",
+        "risk": "เสี่ยง",
+        "warning": "เตือน",
+        "normal": "ปกติ"
     }
 
 }

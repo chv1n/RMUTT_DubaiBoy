@@ -1,251 +1,352 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { useTranslation } from "@/components/providers/language-provider";
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    LineChart, Line, AreaChart, Area
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import {
-    Users, Package, AlertTriangle, TrendingUp, Activity,
-    Calendar, ArrowRight, DollarSign, Box
+    Activity, AlertTriangle, Package, Layers,
+    Wallet, AlertCircle
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Chip } from "@heroui/chip";
 import { Spinner } from "@heroui/spinner";
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from "@heroui/table";
+import { dashboardService } from "@/services/dashboard.service";
+import { DashboardOverview } from "@/types/dashboard";
 import { usePermission } from "@/hooks/use-permission";
 import { getRolePath } from "@/lib/role-path";
-
-// Mock Data for now - In real app, fetch from multiple services or a dedicated dashboard endpoint
-const mockData = {
-    users: { total: 1254, active: 980, change: 12 },
-    materials: { total: 567, lowStock: 23, change: 5 },
-    plans: { active: 8, completed: 145, onTime: 94 },
-    inventory: { totalValue: 4500000, movements: 1250 },
-    revenueTrend: [
-        { name: 'Jan', revenue: 4000, expenses: 2400 },
-        { name: 'Feb', revenue: 3000, expenses: 1398 },
-        { name: 'Mar', revenue: 2000, expenses: 9800 },
-        { name: 'Apr', revenue: 2780, expenses: 3908 },
-        { name: 'May', revenue: 1890, expenses: 4800 },
-        { name: 'Jun', revenue: 2390, expenses: 3800 },
-    ],
-    recentActivities: [
-        { id: 1, text: "New production plan 'Q3 Batch' approved", time: "10 min ago", type: "success" },
-        { id: 2, text: "Low stock alert: 'Aluminum Rod 5mm'", time: "45 min ago", type: "warning" },
-        { id: 3, text: "User 'John Doe' updated inventory", time: "2 hours ago", type: "info" },
-        { id: 4, text: "Shipment #SH-2024-001 received", time: "5 hours ago", type: "success" },
-    ]
-};
 
 export default function MainDashboard() {
     const { t } = useTranslation();
     const router = useRouter();
     const { userRole } = usePermission();
     const basePath = getRolePath(userRole);
-    const [isLoading, setIsLoading] = React.useState(true);
+    const [data, setData] = useState<DashboardOverview | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    React.useEffect(() => {
-        // Simulate loading
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const overview = await dashboardService.getDashboardOverview();
+                setData(overview);
+            } catch (error) {
+                console.error("Failed to load dashboard data", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
     }, []);
 
-    if (isLoading) return (
-        <div className="flex h-96 w-full justify-center items-center">
+    if (isLoading || !data) return (
+        <div className="flex h-96 w-full justify-center items-center flex-col gap-4">
             <Spinner size="lg" color="primary" />
+            <p className="text-default-500 animate-pulse">{t("common.loading")}</p>
         </div>
     );
 
+    const { smartStats, alerts, lowStock, plansAtRisk, stockTrend } = data;
+
     return (
         <div className="space-y-6 pb-10">
-            {/* Branded Page Header */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-900 via-primary-800 to-black p-8 shadow-large">
-                <div className="absolute top-0 right-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-primary-500/20 blur-3xl"></div>
-                <div className="absolute bottom-0 left-0 -mb-10 -ml-10 h-40 w-40 rounded-full bg-secondary-500/20 blur-2xl"></div>
-
-                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-2">
-                            Material
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary-400 to-primary-200">
-                                Core
-                            </span>
-                        </h1>
-                        <p className="text-primary-100 text-lg max-w-xl">
-                            {t("dashboard.welcomeMessage")}
-                        </p>
-                    </div>
-                    <div className="hidden md:block">
-                        <Button
-                            className="bg-white/10 backdrop-blur-md text-white border border-white/20 shadow-lg"
-                            size="lg"
-                            variant="flat"
-                            onPress={() => router.push(`${basePath}/analytics`)}
-                            startContent={<Activity className="text-secondary-300" />}
-                        >
-                            {t("common.analytics")}
-                        </Button>
-                    </div>
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-default-900">{t("smartDashboard.title")}</h1>
+                    <p className="text-small text-default-500">{t("smartDashboard.subtitle")}</p>
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        color="primary"
+                        variant="solid"
+                        startContent={<Activity size={16} />}
+                        onPress={() => router.push(`${basePath}/analytics`)}
+                    >
+                        {t('common.analytics')}
+                    </Button>
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 mb-2 px-2">
-                <h2 className="text-xl font-bold text-default-700">{t("common.dashboard")}</h2>
+            {/* KPI Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <KPICard
+                    title={t("smartDashboard.totalMaterials")}
+                    value={smartStats.total_materials.toLocaleString()}
+                    subtext="Total items"
+                    icon={<Package size={24} className="text-primary" />}
+                    trend={0}
+                    trendLabel=""
+                    color="primary"
+                />
+                <KPICard
+                    title={t("smartDashboard.lowStockMaterials")}
+                    value={smartStats.low_stock_materials}
+                    subtext="Action Needed"
+                    icon={<AlertTriangle size={24} className="text-warning" />}
+                    trend={0}
+                    trendLabel=""
+                    color="warning"
+                />
+                <KPICard
+                    title={t("smartDashboard.criticalAlerts")}
+                    value={smartStats.critical_alerts}
+                    subtext="System Health"
+                    icon={<AlertCircle size={24} className="text-danger" />}
+                    trend={0}
+                    trendLabel=""
+                    color="danger"
+                />
+                <KPICard
+                    title={t("smartDashboard.totalStockValue")}
+                    value={`฿${(smartStats.total_stock_value / 1000000).toFixed(1)}M`}
+                    subtext="Inventory Value"
+                    icon={<Wallet size={24} className="text-success" />}
+                    trend={0}
+                    trendLabel="vs last month"
+                    color="success"
+                />
+                <KPICard
+                    title={t("smartDashboard.activePlans")}
+                    value={smartStats.active_production_plans}
+                    subtext="Production"
+                    icon={<Layers size={24} className="text-secondary" />}
+                    trend={0}
+                    trendLabel=""
+                    color="secondary"
+                />
             </div>
 
-            {/* Top Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard
-                    title={t("user.totalUsers")}
-                    value={mockData.users.total.toLocaleString()}
-                    change={`${mockData.users.change}%`}
-                    icon={<Users className="text-primary" />}
-                    onClick={() => router.push(`${basePath}/users`)}
-                    subtext={t("user.subtext.active")}
-                />
-                <StatCard
-                    title={t("materials.activeMaterials")}
-                    value={mockData.materials.total.toLocaleString()}
-                    change={`${mockData.materials.change}%`}
-                    icon={<Package className="text-secondary" />}
-                    onClick={() => router.push(`${basePath}/materials`)}
-                    subtext="Items stored"
-                />
-                <StatCard
-                    title={t("materials.lowStock")}
-                    value={mockData.materials.lowStock}
-                    change="-2%"
-                    icon={<AlertTriangle className="text-warning" />}
-                    negative={true}
-                    onClick={() => router.push(`${basePath}/inventory/balance`)}
-                    subtext="Requires attention"
-                />
-                <StatCard
-                    title={t("plan.onTimeRate")}
-                    value={`${mockData.plans.onTime}%`}
-                    change="+1.5%"
-                    icon={<Activity className="text-success" />}
-                    onClick={() => router.push(`${basePath}/plans`)}
-                    subtext="Production efficiency"
-                />
-            </div>
-
-            {/* Main Content Grid */}
+            {/* Main Content Area */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Main Revenue/Trend Chart */}
-                <Card className="lg:col-span-2 shadow-sm border border-default-100 p-2">
-                    <CardHeader className="flex justify-between items-center px-4 pt-4">
-                        <div>
-                            <h4 className="font-bold text-large text-default-700">{t("dashboard.overviewTrend")}</h4>
-                            <p className="text-small text-default-500">{t("dashboard.performanceSummary")}</p>
-                        </div>
-                    </CardHeader>
-                    <CardBody className="overflow-hidden">
-                        <div className="h-[350px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={mockData.revenueTrend}>
-                                    <defs>
-                                        <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                    />
-                                    <Area type="monotone" dataKey="revenue" stroke="#8884d8" fillOpacity={1} fill="url(#colorRev)" />
-                                    <Area type="monotone" dataKey="expenses" stroke="#82ca9d" fillOpacity={0.3} fill="#82ca9d" />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardBody>
-                </Card>
+                {/* Left Column (2/3): Chart & Plans */}
+                <div className="lg:col-span-2 space-y-6">
 
-                {/* Right Column: Recent Activity & Quick Actions */}
-                <div className="flex flex-col gap-6">
-                    {/* Activity Feed */}
-                    <Card className="shadow-sm border border-default-100 flex-1">
-                        <CardHeader className="px-6 pt-6 pb-2">
-                            <h4 className="font-bold text-large text-default-700">{t("dashboard.recentActivity")}</h4>
+                    {/* Stock Value Trend Chart */}
+                    <Card className="shadow-sm border border-default-100 bg-background h-[400px]">
+                        <CardHeader className="flex justify-between items-center px-6 py-4 border-b border-default-100">
+                            <div>
+                                <h4 className="font-bold text-large text-default-700 flex items-center gap-2">
+                                    {t("smartDashboard.stockTrend")}
+                                </h4>
+                                <p className="text-small text-default-500">Last 30 Days Value Analysis</p>
+                            </div>
                         </CardHeader>
-                        <CardBody className="px-6 pb-6">
+                        <CardBody className="px-4 py-6">
+                            <div className="h-full w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={stockTrend.datasets}>
+                                        <defs>
+                                            <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#006FEE" stopOpacity={0.8} />
+                                                <stop offset="95%" stopColor="#006FEE" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                        <XAxis
+                                            dataKey="date"
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: '#6B7280', fontSize: 12 }}
+                                            dy={10}
+                                            tickFormatter={(date) => new Date(date).getDate().toString()}
+                                        />
+                                        <YAxis
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: '#6B7280', fontSize: 12 }}
+                                            tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`}
+                                        />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                            formatter={(val: number) => [`฿${val.toLocaleString()}`, 'Value']}
+                                            labelFormatter={(label) => new Date(label).toLocaleDateString()}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="value"
+                                            stroke="#006FEE"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorVal)"
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </CardBody>
+                    </Card>
+
+                    {/* Plans At Risk List */}
+                    <Card className="shadow-sm border border-default-100 bg-background">
+                        <CardHeader className="flex justify-between items-center px-6 py-4 border-b border-default-100">
+                            <div>
+                                <h4 className="font-bold text-large text-default-700">{t("smartDashboard.plansAtRisk")}</h4>
+                                <p className="text-small text-default-500">Production plans requiring attention</p>
+                            </div>
+                            <Chip size="sm" variant="flat" color="danger">{plansAtRisk.length} At Risk</Chip>
+                        </CardHeader>
+                        <CardBody className="px-6 py-4">
                             <div className="space-y-4">
-                                {mockData.recentActivities.map((activity) => (
-                                    <div key={activity.id} className="flex gap-3 items-start border-l-2 border-default-200 pl-3 py-1">
-                                        <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${activity.type === 'success' ? 'bg-success' :
-                                            activity.type === 'warning' ? 'bg-warning' : 'bg-primary'
-                                            }`} />
+                                {plansAtRisk.length === 0 ? (
+                                    <div className="text-center py-8 text-default-400">No plans at risk.</div>
+                                ) : plansAtRisk.map((plan) => (
+                                    <div key={plan.plan_id} className="p-4 rounded-xl border border-default-200 hover:border-default-300 transition-colors bg-default-50/50 flex flex-col sm:flex-row justify-between gap-4">
                                         <div>
-                                            <p className="text-small text-default-900 font-medium">{activity.text}</p>
-                                            <p className="text-tiny text-default-400">{activity.time}</p>
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <h5 className="font-bold text-default-900">{plan.plan_name}</h5>
+                                                <Chip size="sm" color="danger" variant="dot" className="border-0 pl-0">
+                                                    {plan.overall_status}
+                                                </Chip>
+                                            </div>
+                                            <p className="text-small text-default-500 mb-2">{plan.product_name}</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {plan.risk_materials.map((mat, idx) => (
+                                                    <Chip key={idx} size="sm" color="danger" variant="flat" className="h-6">
+                                                        {mat.material_name}: {mat.available_qty}/{mat.required_qty}
+                                                    </Chip>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end justify-center min-w-[120px] gap-2">
+                                            <span className="text-small text-default-500">
+                                                Start: {new Date(plan.start_date).toLocaleDateString()}
+                                            </span>
+                                            <Button size="sm" color="danger" variant="flat" className="font-medium">
+                                                View Plan
+                                            </Button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <Button variant="light" color="primary" className="w-full mt-4" endContent={<ArrowRight size={16} />}>
-                                {t("common.viewAll")}
-                            </Button>
                         </CardBody>
                     </Card>
 
-                    {/* Quick Access */}
-                    <Card className="shadow-sm border border-default-100 bg-primary-50">
-                        <CardBody className="p-6">
-                            <h4 className="font-bold text-default-700 mb-4">{t("dashboard.quickActions")}</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                                <Button className="bg-white text-primary font-medium shadow-sm" startContent={<Box size={18} />}>
-                                    Inventory
-                                </Button>
-                                <Button className="bg-white text-primary font-medium shadow-sm" startContent={<Calendar size={18} />}>
-                                    Plans
-                                </Button>
-                                <Button className="bg-white text-primary font-medium shadow-sm" startContent={<Users size={18} />}>
-                                    Users
-                                </Button>
-                                <Button className="bg-white text-primary font-medium shadow-sm" startContent={<DollarSign size={18} />}>
-                                    Reports
-                                </Button>
+                </div>
+
+                {/* Right Column (1/3): Alerts & Low Stock */}
+                <div className="space-y-6">
+
+                    {/* System Alerts */}
+                    <Card className="shadow-sm border border-default-100 bg-background">
+                        <CardHeader className="flex justify-between items-center px-6 py-4 border-b border-default-100">
+                            <div>
+                                <h4 className="font-bold text-large text-default-700">{t("smartDashboard.alerts")}</h4>
+                                <p className="text-small text-default-500">Recent notifications</p>
+                            </div>
+                        </CardHeader>
+                        <CardBody className="px-2 py-2">
+                            <div className="flex flex-col">
+                                {alerts.map((alert) => (
+                                    <div key={alert.id} className="flex gap-3 p-3 hover:bg-default-100 rounded-lg cursor-pointer transition-colors border-b border-dashed border-default-100 last:border-0">
+                                        <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${alert.severity === 'HIGH' ? 'bg-danger' :
+                                                alert.severity === 'MEDIUM' ? 'bg-warning' : 'bg-primary'
+                                            }`} />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-small font-semibold text-default-900">{alert.type}</span>
+                                                <span className="text-[10px] text-default-400">
+                                                    {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                            <p className="text-small text-default-600 mt-0.5">{alert.message}</p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </CardBody>
+                        <div className="p-4 pt-0">
+                            <Button fullWidth variant="light" size="sm" color="primary">
+                                {t("common.viewAll")}
+                            </Button>
+                        </div>
                     </Card>
+
+                    {/* Critical Low Stock */}
+                    <Card className="shadow-sm border border-default-100 bg-background flex-1">
+                        <CardHeader className="flex justify-between items-center px-6 py-4 border-b border-default-100">
+                            <div>
+                                <h4 className="font-bold text-large text-default-700">{t("smartDashboard.lowStockList")}</h4>
+                                <p className="text-small text-default-500">Critical items</p>
+                            </div>
+                        </CardHeader>
+                        <Table hideHeader removeWrapper aria-label="Low stock items">
+                            <TableHeader>
+                                <TableColumn>ITEM</TableColumn>
+                                <TableColumn align="end">QTY</TableColumn>
+                            </TableHeader>
+                            <TableBody items={lowStock} emptyContent="No low stock items.">
+                                {(item) => (
+                                    <TableRow key={item.material_id}>
+                                        <TableCell>
+                                            <div className="flex flex-col">
+                                                <span className="text-small font-semibold text-default-900">{item.material_name}</span>
+                                                <span className="text-tiny text-default-500">{item.warehouse}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-small font-bold text-danger">{item.current_qty} {item.unit}</span>
+                                                <span className="text-[10px] text-default-400">Min: {item.reorder_point}</span>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </Card>
+
                 </div>
             </div>
         </div>
     );
 }
 
-const StatCard = ({ title, value, change, icon, negative, onClick, subtext }: any) => (
-    <Card
-        isPressable={!!onClick}
-        onPress={onClick}
-        className="shadow-sm border border-default-100 hover:border-primary-200 transition-colors"
-    >
-        <CardBody className="p-6">
-            <div className="flex justify-between items-start mb-2">
-                <div className="p-3 bg-default-50 rounded-xl">{icon}</div>
-                {change && (
-                    <Chip
-                        size="sm"
-                        variant="flat"
-                        color={negative ? "danger" : "success"}
-                        startContent={negative ? <TrendingUp className="rotate-180" size={12} /> : <TrendingUp size={12} />}
-                    >
-                        {change}
-                    </Chip>
-                )}
-            </div>
-            <div>
-                <h3 className="text-2xl font-bold text-default-900">{value}</h3>
-                <p className="text-small font-medium text-default-500 mt-1">{title}</p>
-                {subtext && <p className="text-tiny text-default-400">{subtext}</p>}
-            </div>
-        </CardBody>
-    </Card>
-);
+// Reusable KPI Card Standardized
+interface KPICardProps {
+    title: string;
+    value: string | number;
+    subtext: string;
+    icon: React.ReactNode;
+    trend: number;
+    trendLabel: string;
+    color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger";
+}
+
+const KPICard = ({ title, value, subtext, icon, trend, trendLabel, color = "default" }: KPICardProps) => {
+    const isPositive = trend > 0;
+
+    // Map standard colors for icons
+    const colorMap: Record<string, string> = {
+        default: "text-default-500",
+        primary: "text-primary",
+        secondary: "text-secondary",
+        success: "text-success",
+        warning: "text-warning",
+        danger: "text-danger",
+    };
+
+    return (
+        <Card className="shadow-sm border border-default-100 hover:shadow-md transition-shadow">
+            <CardBody className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                    <div className={`p-3 rounded-xl bg-default-50 ${colorMap[color]}`}>
+                        {icon}
+                    </div>
+                </div>
+                <div>
+                    <h3 className="text-2xl font-bold text-default-900 tracking-tight">{value}</h3>
+                    <p className="text-small font-medium text-default-500 mt-1">{title}</p>
+                    {subtext && (
+                        <p className="text-tiny text-default-400 mt-2 flex items-center gap-1">
+                            {subtext} {trendLabel && `• ${trendLabel}`}
+                        </p>
+                    )}
+                </div>
+            </CardBody>
+        </Card>
+    );
+};
