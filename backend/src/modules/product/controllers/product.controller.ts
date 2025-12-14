@@ -3,8 +3,8 @@ import { ProductService } from '../services/product.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { ProductQueryDto } from '../dto/product-query.dto';
-import { Auth } from 'src/common/decorators/auth.decorator';
 import { Role } from 'src/common/enums';
+import { Auth } from 'src/common/decorators/auth.decorator';
 
 @Controller({
   path: 'products',
