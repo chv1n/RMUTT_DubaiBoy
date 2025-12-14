@@ -17,4 +17,63 @@ export class MainDashboardController {
             data,
         };
     }
+
+    @Get('smart/stats')
+    async getSmartStats() {
+        const data = await this.mainDashboardService.getSmartStats();
+        return {
+            success: true,
+            message: 'สำเร็จ',
+            data,
+        };
+    }
+
+    @Get('smart/low-stock')
+    async getLowStock(@Query('limit') limit: number = 10) {
+        const data = await this.mainDashboardService.getLowStock(limit);
+        return {
+            success: true,
+            message: 'สำเร็จ',
+            data,
+        };
+    }
+
+    @Get('smart/alerts')
+    async getSmartAlerts() {
+        const data = await this.mainDashboardService.getSmartAlerts();
+        return {
+            success: true,
+            message: 'สำเร็จ',
+            data,
+        };
+    }
+
+    @Get('smart/charts')
+    async getSmartCharts(
+        @Query('type') type: string,
+        @Query('range') range: string = '30d'
+    ) {
+        if (!type) {
+            return {
+                success: false,
+                message: 'Parameter type is required'
+            };
+        }
+        const data = await this.mainDashboardService.getSmartCharts(type, range);
+        return {
+            success: true,
+            message: 'สำเร็จ',
+            data,
+        };
+    }
+
+    @Get('smart/plans-at-risk')
+    async getPlansAtRisk() {
+        const data = await this.mainDashboardService.getPlansAtRisk();
+        return {
+            success: true,
+            message: 'สำเร็จ',
+            data,
+        };
+    }
 }

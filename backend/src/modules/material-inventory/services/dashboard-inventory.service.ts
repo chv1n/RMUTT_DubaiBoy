@@ -363,4 +363,53 @@ export class DashboardInventoryService {
 
         return Object.values(monthlyData);
     }
+
+    async getTopConsumption(range: string = '30d') {
+        const days = range === '7d' ? 7 : (range === '90d' ? 90 : 30);
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+
+        // Aggregate transactions: Sum of negative changes by material
+        const rawData = await this.transactionRepository.createQueryBuilder('t')
+            .leftJoin('t.materialInventory', 'inv')
+            .leftJoin('inv.material', 'm')
+            .leftJoin('m.unit', 'u')
+            .select('m.material_name', 'material_name')
+            .addSelect('u.unit_name', 'unit')
+            .addSelect('SUM(ABS(t.quantity_change))', 'consumption_qty')
+            .where('t.transaction_date >= :startDate', { startDate })
+            .andWhere('t.quantity_change < 0')
+            .groupBy('m.material_name')
+            .addGroupBy('u.unit_name')
+            .orderBy('consumption_qty', 'DESC')
+            .limit(5)
+            .getRawMany();
+
+        return rawData.map(d => ({
+            material_name: d.material_name || 'Unknown',
+            consumption_qty: Number(d.consumption_qty || 0),
+            unit: d.unit || 'pcs'
+        }));
+    }
+
+    async getExpiringItems(withinDays: number = 7) {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + withinDays);
+        const now = new Date();
+
+        const items = await this.inventoryRepository.find({
+            where: {
+                exp_date: Between(now, targetDate)
+            },
+            relations: ['material'],
+            order: { exp_date: 'ASC' }
+        });
+
+        return items.map(i => ({
+            id: i.id,
+            material_name: i.material?.material_name || 'Unknown',
+            qty: i.quantity,
+            exp_date: i.exp_date
+        }));
+    }
 }

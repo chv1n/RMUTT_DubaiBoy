@@ -24,6 +24,7 @@ import { DashboardPlanService } from './services/dash-board.service';
     MaterialInventoryModule,
     MaterialModule,
     AuditLogModule,
+    BomModule,
   ],
   controllers: [ProductPlanController, PlanDashboardController],
   providers: [
@@ -32,6 +33,7 @@ import { DashboardPlanService } from './services/dash-board.service';
     PlanWorkflowService,
     PlanReportService,
     DashboardPlanService,
+
   ],
   exports: [ProductPlanService, PlanWorkflowService, DashboardPlanService]
 })

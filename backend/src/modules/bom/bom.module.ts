@@ -10,6 +10,6 @@ import { ProductModule } from '../product/product.module';
   imports: [TypeOrmModule.forFeature([Bom]), MaterialModule, ProductModule],
   controllers: [BomController],
   providers: [BomService],
-  exports: [BomService]
+  exports: [BomService, TypeOrmModule]
 })
 export class BomModule { }
