@@ -28,7 +28,7 @@ export class MaterialDashboardController {
         };
     }
 
-    @Get('movement-trends')
+    @Get('movement/trends')
     async getMovementTrends(@Query('range') range: '7d' | '30d' | '1y' = '7d') {
         const data = await this.dashboardService.getMovementTrends(range);
         return {
