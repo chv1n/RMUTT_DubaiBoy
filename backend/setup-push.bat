@@ -1,0 +1,6 @@
+@echo off
+echo Installing web-push...
+call npm install web-push
+echo.
+echo Generating VAPID Keys...
+node generate-keys.js
