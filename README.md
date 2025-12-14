@@ -6,11 +6,11 @@
 
 ---
 
-## 👥Team Member
+## 👥 Team Members
 
-### Natapong Thongkom : Team Lead & Backend Developer
-### Peenapat Jangjai : Backend Developer
-### Nithis Manora : Frontend Developer
+- **Natapong Thongkom** — Team Lead & Backend Developer  
+- **Peenapat Jangjai** — Backend Developer  
+- **Nithis Manora** — Frontend Developer
 
 ---
 
