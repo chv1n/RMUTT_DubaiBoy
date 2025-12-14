@@ -303,19 +303,24 @@
         "bom": "部品表 (BOM)",
         "bomList": "材料リスト",
         "addBom": "材料を追加",
+        "fields": {
+            "unit": "単位",
+            "cost": "原価",
+            "price": "価格"
+        },
+        "features": "主な特徴",
+        "specifications": "仕様",
+        "actions": {
+            "print": "ラベル印刷",
+            "export": "PDF出力",
+            "archive": "アーカイブ",
+            "delete": "削除"
+        },
         "tabs": {
             "info": "基本情報",
-            "bom": "BOM (配合)"
-        },
-        "fields": {
-             "name": "名前",
-             "type": "タイプ",
-             "active": "有効",
-             "material": "材料",
-             "unit": "単位",
-             "quantity": "数量",
-             "waste": "廃棄率 (%)",
-             "cost": "原価"
+            "bom": "部品表 (BOM)",
+            "auditLog": "監査ログ",
+            "documents": "ドキュメント"
         }
     },
     "warehouses": {
@@ -521,6 +526,27 @@
     "audit": {
         "title": "監査ログ",
         "subtitle": "システムの変更とユーザーアクティビティを追跡"
+    },
+    "smartDashboard": {
+        "title": "スマート工場ダッシュボード",
+        "subtitle": "リアルタイムAI監視と資材分析",
+        "totalMaterials": "総材料数",
+        "lowStockMaterials": "在庫不足品目",
+        "criticalAlerts": "重要アラート",
+        "totalStockValue": "総在庫価値",
+        "activePlans": "進行中の計画",
+        "stockTrend": "在庫価値トレンド",
+        "plansAtRisk": "リスクのある計画",
+        "alerts": "システムアラート",
+        "lowStockList": "在庫不足リスト",
+        "reorderPoint": "発注点",
+        "shortage": "不足",
+        "required": "必要数",
+        "available": "在庫数",
+        "status": "ステータス",
+        "risk": "リスク",
+        "warning": "警告",
+        "normal": "正常"
     }
 
 }

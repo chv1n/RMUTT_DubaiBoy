@@ -332,10 +332,6 @@
         "bom": "Bill of Materials",
         "bomList": "Materials List",
         "addBom": "Add Material",
-        "tabs": {
-            "info": "Information",
-            "bom": "BOM (Formula)"
-        },
         "fields": {
              "name": "Name",
              "type": "Type",
@@ -344,7 +340,22 @@
              "unit": "Unit",
              "quantity": "Quantity",
              "waste": "Waste (%)",
-             "cost": "Cost"
+             "cost": "Cost",
+             "price": "Price"
+        },
+        "features": "Key Features",
+        "specifications": "Specifications",
+        "actions": {
+            "print": "Print Label",
+            "export": "Export PDF",
+            "archive": "Archive",
+            "delete": "Delete"
+        },
+        "tabs": {
+            "info": "Information",
+            "bom": "Bill of Materials",
+            "auditLog": "Audit Log",
+            "documents": "Documents"
         },
         "overview": "Overview",
         "routing": "Routing",
@@ -574,6 +585,27 @@
     "audit": {
         "title": "Audit Logs",
         "subtitle": "Track system changes and user activities"
+    },
+    "smartDashboard": {
+        "title": "Smart Factory Dashboard",
+        "subtitle": "Real-time AI monitoring & material analytics",
+        "totalMaterials": "Total Materials",
+        "lowStockMaterials": "Low Stock Items",
+        "criticalAlerts": "Critical Alerts",
+        "totalStockValue": "Total Stock Value",
+        "activePlans": "Active Plans",
+        "stockTrend": "Stock Value Trend",
+        "plansAtRisk": "Plans At Risk",
+        "alerts": "System Alerts",
+        "lowStockList": "Critical Low Stock",
+        "reorderPoint": "Reorder Point",
+        "shortage": "Shortage",
+        "required": "Required",
+        "available": "Available",
+        "status": "Status",
+        "risk": "Risk",
+        "warning": "Warning",
+        "normal": "Normal"
     }
 
 }
