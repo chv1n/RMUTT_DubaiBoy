@@ -30,12 +30,10 @@
 ### Frontend
 - **Framework**: Next.js 15
 - **UI Library**: HeroUI + TailwindCSS
-- **State Management**: React Query (TanStack Query)
-- **Form**: React Hook Form + Zod
 
 ---
 
-## 📁 Project Structure
+## 📁 Project Structure (Sample)
 
 ```
 RMUTT_DubaiBoy/
