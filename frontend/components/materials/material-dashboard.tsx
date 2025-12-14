@@ -166,7 +166,7 @@ export function MaterialDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KPICard
                     title={t("materials.totalValue")}
-                    value={`$${stats.totalValuation.toLocaleString()}`}
+                    value={`฿${stats.totalValuation.toLocaleString()}`}
                     subtext="Estimated Valuation"
                     icon={<DollarSign size={24} className="text-primary" />}
                     trend={2.5}

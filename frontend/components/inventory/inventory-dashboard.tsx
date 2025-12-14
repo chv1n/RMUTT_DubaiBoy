@@ -252,11 +252,11 @@ export function InventoryDashboard() {
                                         axisLine={false}
                                         tickLine={false}
                                         tick={{ fill: '#6B7280', fontSize: 12 }}
-                                        tickFormatter={(val) => `$${(val / 1000).toFixed(0)}k`}
+                                        tickFormatter={(val) => `฿${(val / 1000).toFixed(0)}k`}
                                     />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                                        formatter={(value: number) => [`$${value.toLocaleString()}`, t('inventory.totalValue')]}
+                                        formatter={(value: number) => [`฿${value.toLocaleString()}`, t('inventory.totalValue')]}
                                         labelFormatter={(label) => new Date(label).toLocaleDateString()}
                                     />
                                     <Area

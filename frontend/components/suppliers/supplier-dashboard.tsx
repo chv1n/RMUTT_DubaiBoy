@@ -108,7 +108,7 @@ export function SupplierDashboard() {
                 />
                 <KPICard
                     title={t("suppliers.totalSpent")}
-                    value={`$${(stats.total_spend_ytd || 0).toLocaleString()}`}
+                    value={`฿${(stats.total_spend_ytd || 0).toLocaleString()}`}
                     subtext={t("suppliers.ytdSpending") || "YTD Spending"}
                     icon={<DollarSign size={24} className="text-success" />}
                     trend={stats.total_spend_trend}
@@ -157,10 +157,10 @@ export function SupplierDashboard() {
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(val) => `$${val / 1000}k`} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(val) => `฿${val / 1000}k`} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                                        formatter={(value: number) => [`$${value.toLocaleString()}`, t('suppliers.spent') || 'Spent']}
+                                        formatter={(value: number) => [`฿${value.toLocaleString()}`, t('suppliers.spent') || 'Spent']}
                                     />
                                     <Area type="monotone" dataKey="amount" stroke={primaryColor} fillOpacity={1} fill="url(#colorAmount)" activeDot={{ r: 6 }} strokeWidth={2} />
                                 </AreaChart>
@@ -195,7 +195,7 @@ export function SupplierDashboard() {
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} />
+                                    <Tooltip formatter={(value: number) => `฿${value.toLocaleString()}`} />
                                     <Legend verticalAlign="bottom" height={36} iconType="circle" />
                                 </PieChart>
                             </ResponsiveContainer>

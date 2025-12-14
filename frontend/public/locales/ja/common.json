@@ -41,12 +41,17 @@
         "customize": "カスタマイズ",
         "detail": "詳細",
         "noData": "データなし",
+        "noDescription": "説明なし",
         "totalRevenue": "総額",
         "activePlans": "アクティブな計画",
         "lowStock": "在庫不足アイテム",
         "requiresAttention": "要注意",
         "productionTarget": "生産フロー",
-        "vsLastMonth": "先月比"
+        "vsLastMonth": "先月比",
+        "days": "日",
+        "calculating": "計算中...",
+        "noDocuments": "ドキュメントなし",
+        "uploadDocument": "ドキュメントをアップロード"
     },
     "materials": {
         "title": "資材管理",
@@ -73,6 +78,13 @@
         "totalMaterials": "総資材数",
         "totalValue": "総額",
         "subMaterials": "サブ資材",
+        "stockByWarehouse": "倉庫別在庫",
+        "totalAcrossWarehouses": "全倉庫合計",
+        "maxStock": "最大在庫",
+        "qtyPerContainer": "数量 / コンテナ",
+        "valuation": "評価額",
+        "lowStockWarning": "在庫不足警告",
+        "lowStockMessage": "現在の在庫が最小レベル以下です。",
         "tab": {
             "overview": "概要",
             "history": "履歴",
@@ -81,6 +93,7 @@
         },
         "field": {
             "created": "作成日",
+            "description": "説明",
             "updated": "最終更新日",
             "leadTime": "リードタイム",
             "lifetime": "保存期間",
@@ -181,6 +194,12 @@
         "progress": "計画進捗",
         "statusDistribution": "ステータス分布",
         "list": "計画リスト",
+        "topProducts": "トップ生産製品",
+        "recentActivity": "最近のアクティビティ",
+        "name": "計画名",
+        "product": "製品",
+        "priority": "優先度",
+        "quantity": "数量",
         "subtext": {
             "overview": "生産計画と進捗の概要",
             "total": "すべての計画",
@@ -191,7 +210,9 @@
             "progress": "リアルタイム生産追跡",
             "distribution": "ステータス別計画",
             "vsLastMonth": "先月比",
-            "stable": "安定"
+            "stable": "安定",
+            "topProducts": "生産量順",
+            "recent": "最新の計画更新"
         },
         "create": "計画を作成",
         "edit": "計画を編集",
@@ -548,5 +569,4 @@
         "warning": "警告",
         "normal": "正常"
     }
-
 }
