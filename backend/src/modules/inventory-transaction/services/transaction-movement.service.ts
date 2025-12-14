@@ -465,10 +465,15 @@ export class TransactionMovementService {
 
     private lastNotificationTime = new Map<number, number>();
 
-    private async checkLowStockAndNotify(inventory: MaterialInventory) {
+    public async checkLowStockAndNotify(inventory: MaterialInventory, useAvailableQuantity: boolean = false) {
         try {
             if (inventory.material && inventory.material.container_min_stock !== undefined && inventory.material.container_min_stock !== null) {
-                if (inventory.quantity <= inventory.material.container_min_stock) {
+
+                const stockLevel = useAvailableQuantity
+                    ? (inventory.quantity - (inventory.reserved_quantity || 0))
+                    : inventory.quantity;
+
+                if (stockLevel <= inventory.material.container_min_stock) {
                     const materialId = inventory.material.material_id;
                     const now = Date.now();
                     const lastTime = this.lastNotificationTime.get(materialId);
@@ -477,16 +482,18 @@ export class TransactionMovementService {
                     //     return;
                     // }
 
+                    const typeText = useAvailableQuantity ? "Available" : "Current";
+
                     const payload = {
                         title: 'Low Stock Alert',
-                        body: `Material ${inventory.material.material_name} is running low. Current: ${inventory.quantity} (Min: ${inventory.material.container_min_stock})`,
+                        body: `Material ${inventory.material.material_name} is running low. ${typeText}: ${stockLevel} (Min: ${inventory.material.container_min_stock})`,
                         data: { url: '/inventory' }
                     };
                     await this.pushService.sendToRoles(['admin', 'staff', 'super_admin', 'user'], payload);
                     console.log(`[LowStock] Notification sent for material: ${inventory.material.material_name}`); // Debug
                     this.lastNotificationTime.set(materialId, now);
                 } else {
-                    console.log(`[LowStock] Stock OK: ${inventory.quantity} > ${inventory.material.container_min_stock}`);
+                    console.log(`[LowStock] Stock OK: ${stockLevel} > ${inventory.material.container_min_stock}`);
                 }
             } else {
                 console.log(`[LowStock] Min stock not defined or material missing for ID: ${inventory.material?.material_id}`);

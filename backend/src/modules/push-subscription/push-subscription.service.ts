@@ -64,13 +64,6 @@ export class PushSubscriptionService implements ISoftDeletable {
     const totalSubs = await this.repo.count();
     console.log(`[PushService] Total subscriptions in DB (orphaned + linked): ${totalSubs}`);
 
-    // DIAGNOSTIC: Fetch all subs with users to see what roles they have
-    const allSubs = await this.repo.find({ relations: ['user'] });
-    console.log('[PushService] DIAGNOSTIC - All Subscriptions:');
-    allSubs.forEach(s => {
-      console.log(` - Sub ID: ${s.id}, User ID: ${s.user_id}, Role: ${s.user?.role}, Endpoint: ${s.endpoint.substring(0, 10)}...`);
-    });
-
     // 1. Get user IDs first (Simpler query with case-insensitive check)
     // We expect roles to be checked against lowercase values
     const safeRoles = roles.map(r => `'${r.toLowerCase()}'`).join(',');

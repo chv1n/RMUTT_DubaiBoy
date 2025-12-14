@@ -215,6 +215,7 @@
             "recent": "最新の計画更新"
         },
         "create": "計画を作成",
+        "detail": "計画詳細",
         "edit": "計画を編集",
         "delete": "計画を削除",
         "duplicate": "複製",
@@ -238,6 +239,7 @@
             "end_date": "終了日",
             "items": "アイテム",
             "actions": "アクション",
+            "quantity": "数量",
             "search": "計画を検索",
             "view_list": "リスト表示",
             "view_board": "ボード表示",
@@ -325,6 +327,7 @@
         "bomList": "材料リスト",
         "addBom": "材料を追加",
         "fields": {
+            "product": "製品",
             "unit": "単位",
             "cost": "原価",
             "price": "価格"

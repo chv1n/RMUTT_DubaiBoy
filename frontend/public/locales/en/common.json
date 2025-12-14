@@ -199,6 +199,7 @@
         "statusDistribution": "Status Distribution",
         "list": "Plan List",
         "create": "Create Plan",
+        "detail": "Plan Detail",
         "edit": "Edit Plan",
         "delete": "Delete Plan",
         "planDetail": "Plan Detail",
@@ -255,6 +256,7 @@
             "search": "Search Plans",
             "status": "Status",
             "view_list": "List View",
+            "quantity": "Quantity",
             "view_board": "Board View",
             "updated": "Updated",
             "sort": {
@@ -355,6 +357,7 @@
              "unit": "Unit",
              "quantity": "Quantity",
              "waste": "Waste (%)",
+             "product": "Product",
              "cost": "Cost",
              "price": "Price"
         },

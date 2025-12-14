@@ -88,6 +88,7 @@ export const useStartPlan = () => {
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ['plan', id] });
             queryClient.invalidateQueries({ queryKey: ['plan-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['plans'] });
             addToast({ title: "Production started", color: "success" });
         },
         onError: handleError
@@ -101,6 +102,7 @@ export const useCompletePlan = () => {
         onSuccess: (_, { id }) => {
             queryClient.invalidateQueries({ queryKey: ['plan', id] });
             queryClient.invalidateQueries({ queryKey: ['plan-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['plans'] });
             addToast({ title: "Plan completed", color: "success" });
         },
         onError: handleError
@@ -114,6 +116,7 @@ export const useCancelPlan = () => {
         onSuccess: (_, { id }) => {
             queryClient.invalidateQueries({ queryKey: ['plan', id] });
             queryClient.invalidateQueries({ queryKey: ['plan-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['plans'] });
             addToast({ title: "Plan cancelled", color: "success" });
         },
         onError: handleError
@@ -128,6 +131,7 @@ export const useConfirmPlan = () => {
         onSuccess: (_, { id }) => {
             queryClient.invalidateQueries({ queryKey: ['plan', id] });
             queryClient.invalidateQueries({ queryKey: ['plan-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['plans'] });
             addToast({ title: "Plan confirmed", color: "success" });
         },
         onError: handleError
