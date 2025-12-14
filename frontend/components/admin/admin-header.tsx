@@ -30,7 +30,7 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
                     <Menu size={24} />
                 </Button>
 
-                <Input
+                {/* <Input
                     classNames={{
                         base: "max-w-full sm:max-w-[20rem] h-10",
                         mainWrapper: "h-full",
@@ -41,7 +41,7 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
                     size="sm"
                     startContent={<Search size={18} />}
                     type="search"
-                />
+                /> */}
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">

@@ -142,3 +142,34 @@ export interface InventoryStats {
         outbound: { name: string; value: number }[];
     }
 }
+
+export interface InventoryDashboardStats {
+    total_inventory_value: number;
+    currency: string;
+    total_items_in_stock: number;
+    low_stock_items: number;
+    out_of_stock_items: number;
+    movement_in_today: number;
+    movement_out_today: number;
+    trends: {
+        value: string;
+        movement_in: string;
+        movement_out: string;
+    };
+}
+
+export interface InventoryValueTrend {
+    date: string;
+    value: number;
+}
+
+export interface InventoryMovementActivity {
+    date: string;
+    inbound: number;
+    outbound: number;
+}
+
+export interface InventoryMovementResponse {
+    inbound: { name: string; value: number }[];
+    outbound: { name: string; value: number }[];
+}

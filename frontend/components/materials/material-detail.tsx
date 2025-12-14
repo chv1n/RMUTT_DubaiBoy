@@ -14,8 +14,10 @@ import { useRouter } from 'next/navigation';
 import { Image } from '@heroui/image';
 import { useQuery } from '@tanstack/react-query';
 import { inventoryService } from '@/services/inventory.service';
-import { MovementHistoryTable } from '@/components/warehouse-detail/MovementHistoryTable';
+import { MovementHistoryTable } from '@/components/warehouses/MovementHistoryTable';
 import { Spinner } from '@heroui/spinner';
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 interface MaterialDetailProps {
     material: Material;
@@ -24,6 +26,8 @@ interface MaterialDetailProps {
 export default function MaterialDetail({ material }: MaterialDetailProps) {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
 
     const statusColorMap: Record<string, "success" | "danger" | "warning" | "default"> = {
         active: "success",
@@ -66,14 +70,14 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
 
 
     const handleEdit = () => {
-        router.push(`/super-admin/materials/${material.id}/edit`);
+        router.push(`${basePath}/materials/${material.id}/edit`);
     };
 
     const handleDelete = () => {
         if (confirm(t('common.confirmDeleteMessage'))) {
             // In a real app, call delete mutation here
             alert("Mock delete action triggered");
-            router.push('/super-admin/materials/all');
+            router.push(`${basePath}/materials/all`);
         }
     };
 

@@ -14,6 +14,11 @@ import { useRouter } from 'next/navigation';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@heroui/dropdown';
 import { Selection, SortDescriptor } from '@heroui/table';
 import PlanCard from './plan-card';
+import { ConfirmPlanModal, CompletePlanModal, CancelPlanModal } from './plan-modals';
+import { ConfirmModal } from '@/components/common/confirm-modal';
+import { useStartPlan, useCompletePlan, useCancelPlan, useConfirmPlan } from '@/hooks/usePlans';
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 interface PlanTableProps {
     onEdit: (plan: Plan) => void;
@@ -22,6 +27,8 @@ interface PlanTableProps {
 export default function PlanTable({ onEdit }: PlanTableProps) {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [filterValue, setFilterValue] = React.useState("");
     const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
     const [view, setView] = React.useState<"list" | "board">("list");
@@ -33,6 +40,58 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
     // Hooks
     const deletePlanMutation = useDeletePlan();
     const updatePlanMutation = useUpdatePlan();
+    const startMutation = useStartPlan();
+    const completeMutation = useCompletePlan();
+    const cancelMutation = useCancelPlan();
+    const confirmMutation = useConfirmPlan();
+
+    // Modal Action State
+    const [pendingActionPlan, setPendingActionPlan] = React.useState<Plan | null>(null);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
+    const [isStartModalOpen, setIsStartModalOpen] = React.useState(false);
+    const [isCompleteModalOpen, setIsCompleteModalOpen] = React.useState(false);
+    const [isCancelModalOpen, setIsCancelModalOpen] = React.useState(false);
+
+    // Handlers for Confirmed Action
+    const handleConfirmSubmit = (allocations: any[]) => {
+        if (!pendingActionPlan) return;
+        confirmMutation.mutate({ id: pendingActionPlan.id, allocations }, {
+            onSuccess: () => {
+                setIsConfirmModalOpen(false);
+                setPendingActionPlan(null);
+            }
+        });
+    }
+
+    const handleStartSubmit = () => {
+        if (!pendingActionPlan) return;
+        startMutation.mutate(pendingActionPlan.id, {
+            onSuccess: () => {
+                setIsStartModalOpen(false);
+                setPendingActionPlan(null);
+            }
+        });
+    }
+
+    const handleCompleteSubmit = (qty: number) => {
+        if (!pendingActionPlan) return;
+        completeMutation.mutate({ id: pendingActionPlan.id, actualQuantity: qty }, {
+            onSuccess: () => {
+                setIsCompleteModalOpen(false);
+                setPendingActionPlan(null);
+            }
+        });
+    }
+
+    const handleCancelSubmit = (reason: string) => {
+        if (!pendingActionPlan) return;
+        cancelMutation.mutate({ id: pendingActionPlan.id, reason }, {
+            onSuccess: () => {
+                setIsCancelModalOpen(false);
+                setPendingActionPlan(null);
+            }
+        });
+    }
 
     // Data Fetching
     const { data, isLoading } = usePlans({
@@ -49,7 +108,7 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
     const handleAction = React.useCallback((key: string, plan: Plan) => {
         switch (key) {
             case 'view':
-                router.push(`/super-admin/plans/${plan.id}`);
+                router.push(`${basePath}/plans/${plan.id}`);
                 break;
             case 'edit':
                 onEdit(plan);
@@ -60,7 +119,7 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
                 }
                 break;
         }
-    }, [deletePlanMutation, router, t, onEdit]);
+    }, [deletePlanMutation, router, t, onEdit, basePath]);
 
     // Drag and Drop Logic
     const [draggedPlan, setDraggedPlan] = React.useState<Plan | null>(null);
@@ -85,12 +144,43 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
             return;
         }
 
-        updatePlanMutation.mutate({
-            id: draggedPlan.id,
-            data: { status: targetStatusGroup }
-        });
-
+        setPendingActionPlan(draggedPlan);
         setDraggedPlan(null);
+
+        // Determine which flow to trigger
+        switch (targetStatusGroup) {
+            case 'PENDING':
+                // Draft -> Pending requires Confirmation
+                setIsConfirmModalOpen(true);
+                break;
+            case 'PRODUCTION':
+                // Pending -> Production requires Start
+                setIsStartModalOpen(true);
+                break;
+            case 'COMPLETED':
+                // Production -> Completed requires Complete Modal
+                setIsCompleteModalOpen(true);
+                break;
+            case 'CANCELLED':
+                // Any -> Cancelled requires Cancel Modal
+                setIsCancelModalOpen(true);
+                break;
+            default:
+                // Fallback for simple status updates (e.g. back to draft, or other transitions if allowed)
+                // For safety, let's just do direct update for DRAFT target, or others not needing specific modal
+                if (targetStatusGroup === 'DRAFT') {
+                    updatePlanMutation.mutate({
+                        id: draggedPlan.id,
+                        data: { status: targetStatusGroup }
+                    });
+                    setPendingActionPlan(null);
+                } else {
+                    // unexpected transition, maybe just ignore or show alert
+                    console.warn(`Untracked status transition to ${targetStatusGroup}`);
+                    setPendingActionPlan(null);
+                }
+                break;
+        }
     };
 
     // Grouping Logic
@@ -98,14 +188,15 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
         if (!data?.data) return {};
 
         const groups: Record<PlanStatus, Plan[]> = {
+            "DRAFT": [],
             "PENDING": [],
-            "IN_PROGRESS": [],
+            "PRODUCTION": [],
             "COMPLETED": [],
             "CANCELLED": []
         };
 
         data.data.forEach(plan => {
-            if (groups[plan.status]) {
+            if (plan.status && groups[plan.status]) {
                 groups[plan.status].push(plan);
             }
         });
@@ -127,8 +218,9 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'PENDING': return <Clock size={18} className="text-default-400" />;
-            case 'IN_PROGRESS': return <Flame size={18} className="text-primary" />;
+            case 'DRAFT': return <Eye size={18} className="text-default-400" />;
+            case 'PENDING': return <Clock size={18} className="text-warning" />;
+            case 'PRODUCTION': return <Flame size={18} className="text-primary" />;
             case 'COMPLETED': return <CheckCircle size={18} className="text-success" />;
             case 'CANCELLED': return <Ban size={18} className="text-danger" />;
             default: return <Eye size={18} className="text-default-400" />;
@@ -208,8 +300,9 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
                             onSelectionChange={setStatusFilter}
                         >
                             <DropdownItem key="all">{t('plan.filter.all')}</DropdownItem>
+                            <DropdownItem key="DRAFT">Draft</DropdownItem>
                             <DropdownItem key="PENDING">Pending</DropdownItem>
-                            <DropdownItem key="IN_PROGRESS">In Progress</DropdownItem>
+                            <DropdownItem key="PRODUCTION">Production</DropdownItem>
                             <DropdownItem key="COMPLETED">Completed</DropdownItem>
                             <DropdownItem key="CANCELLED">Cancelled</DropdownItem>
                         </DropdownMenu>
@@ -280,6 +373,47 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
                         <Pagination total={data?.meta.totalPages || 1} initialPage={1} color="primary" />
                     </div>
                 </div>
+            )}
+            {/* Modals for Drag & Drop Actions */}
+            {pendingActionPlan && (
+                <>
+                    <ConfirmPlanModal
+                        isOpen={isConfirmModalOpen}
+                        onClose={() => { setIsConfirmModalOpen(false); setPendingActionPlan(null); }}
+                        onConfirm={handleConfirmSubmit}
+                        planId={pendingActionPlan.id}
+                        isProcessing={confirmMutation.isPending}
+                    />
+
+                    <ConfirmModal
+                        isOpen={isStartModalOpen}
+                        onClose={() => { setIsStartModalOpen(false); setPendingActionPlan(null); }}
+                        onConfirm={handleStartSubmit}
+                        title={t('plan.startPlanTitle')}
+                        message={t('plan.startPlanMessage')}
+                        confirmText={t('plan.startPlan')}
+                        cancelText={t('common.cancel')}
+                        variant="primary"
+                        isLoading={startMutation.isPending}
+                    />
+
+                    <CompletePlanModal
+                        isOpen={isCompleteModalOpen}
+                        onClose={() => { setIsCompleteModalOpen(false); setPendingActionPlan(null); }}
+                        onComplete={handleCompleteSubmit}
+                        inputQuantity={pendingActionPlan.quantity}
+                        isProcessing={completeMutation.isPending}
+                    />
+
+                    <CancelPlanModal
+                        isOpen={isCancelModalOpen}
+                        onClose={() => { setIsCancelModalOpen(false); setPendingActionPlan(null); }}
+                        onCancel={handleCancelSubmit}
+                        isProduction={pendingActionPlan.status === 'PRODUCTION'}
+                        inputQuantity={pendingActionPlan.quantity}
+                        isProcessing={cancelMutation.isPending}
+                    />
+                </>
             )}
         </div>
     );

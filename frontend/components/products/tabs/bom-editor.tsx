@@ -192,7 +192,7 @@ export function BOMEditor({ productId }: BOMEditorProps) {
             </Card>
 
             {/* BOM Modal */}
-            <Modal isOpen={isBomOpen} onOpenChange={onBomOpenChange}>
+            <Modal isOpen={isBomOpen} onOpenChange={onBomOpenChange} placement="center">
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -255,7 +255,7 @@ export function BOMEditor({ productId }: BOMEditorProps) {
             </Modal>
 
             {/* Delete Confirmation Modal */}
-            <Modal isOpen={isDeleteBomOpen} onOpenChange={onDeleteBomOpenChange}>
+            <Modal isOpen={isDeleteBomOpen} onOpenChange={onDeleteBomOpenChange} placement="center">
                 <ModalContent>
                     {(onClose) => (
                         <>

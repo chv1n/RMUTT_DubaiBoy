@@ -12,11 +12,12 @@ import { useRouter } from "next/navigation";
 interface SupplierFormProps {
     initialData?: Supplier;
     mode: "create" | "edit";
+    onSuccess?: () => void;
+    onCancel?: () => void;
 }
 
-export function SupplierForm({ initialData, mode }: SupplierFormProps) {
+export function SupplierForm({ initialData, mode, onSuccess, onCancel }: SupplierFormProps) {
     const { t } = useTranslation();
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState<CreateSupplierDTO>({
@@ -36,6 +37,14 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
                 address: initialData.address || "",
                 status: initialData.status === "blacklisted" ? "inactive" : initialData.status,
             });
+        } else {
+            setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                address: "",
+                status: "active",
+            });
         }
     }, [initialData]);
 
@@ -48,7 +57,7 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
             } else {
                 await supplierService.create(formData);
             }
-            router.push("/super-admin/suppliers/all");
+            if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Failed to save supplier", error);
         } finally {
@@ -57,7 +66,7 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                     label={t("suppliers.name")}
@@ -98,7 +107,7 @@ export function SupplierForm({ initialData, mode }: SupplierFormProps) {
 
 
             <div className="flex gap-2 justify-end">
-                <Button color="danger" variant="light" onPress={() => router.back()}>
+                <Button color="danger" variant="light" onPress={onCancel}>
                     {t("common.cancel")}
                 </Button>
                 <Button color="primary" type="submit" isLoading={loading}>

@@ -14,21 +14,13 @@ import { ConfirmModal } from "@/components/common/confirm-modal";
 import { exportToCSV, exportToExcel } from "@/lib/utils/export";
 import { DataTable, Column } from "@/components/common/data-table";
 import { Meta } from "@/types/api";
-
-// Note: SupplierService needs to be updated to support pagination to fully utilize the DataTable features.
-// For now, we will wrap the existing getAll in a simulated paginated response or update the service.
-// To keep it consistent, I'll update the component to handle client-side pagination if the service doesn't support it yet,
-// OR ideally, update the service. Given the instructions "apply to other pages", I should update the service or simulate it here.
-// I'll simulate it here for now to avoid touching too many files unless requested, but the prompt implies "apply to other pages".
-// Actually, the prompt says "apply to other pages... SOLID... best practices". Best practice is server-side pagination.
-// But I haven't updated SupplierService yet. I will implement client-side pagination using the DataTable for now, 
-// as updating SupplierService mock data was not explicitly the main task (Material was).
-// However, to make it work seamlessly, I'll adapt the data to the Meta structure.
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
+import { SupplierForm } from './supplier-form';
 
 export function SupplierList() {
     const { t } = useTranslation();
     const router = useRouter();
-    const [allSuppliers, setAllSuppliers] = useState<Supplier[]>([]); // Store all for client-side pagination
+    const [allSuppliers, setAllSuppliers] = useState<Supplier[]>([]);
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [loading, setLoading] = useState(true);
     const [meta, setMeta] = useState<Meta>({
@@ -38,6 +30,11 @@ export function SupplierList() {
         totalPages: 0,
         currentPage: 1
     });
+
+    // Modal state
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [selectedSupplier, setSelectedSupplier] = useState<Supplier | undefined>(undefined);
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 
     // Filter states
     const [search, setSearch] = useState("");
@@ -96,6 +93,18 @@ export function SupplierList() {
         });
 
     }, [allSuppliers, search, status, page, rowsPerPage]);
+
+    const handleAddNew = () => {
+        setSelectedSupplier(undefined);
+        setModalMode('create');
+        onOpen();
+    };
+
+    const handleEdit = (supplier: Supplier) => {
+        setSelectedSupplier(supplier);
+        setModalMode('edit');
+        onOpen();
+    };
 
     const confirmDelete = (id: number) => {
         setDeleteId(id);
@@ -177,10 +186,8 @@ export function SupplierList() {
                             </span>
                         </Tooltip>
                         <Tooltip content={t("common.edit")}>
-                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                                <Link href={`/super-admin/suppliers/${item.id}/edit`}>
-                                    <Edit size={20} />
-                                </Link>
+                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item)}>
+                                <Edit size={20} />
                             </span>
                         </Tooltip>
                         <Tooltip color="danger" content={t("common.delete")}>
@@ -217,7 +224,7 @@ export function SupplierList() {
                 }}
                 onExportExcel={handleExportExcel}
                 onExportCSV={handleExportCSV}
-                onAddNew={() => router.push("/super-admin/suppliers/new")}
+                onAddNew={handleAddNew}
                 renderCell={renderCell}
                 statusOptions={[
                     { name: t("suppliers.active"), uid: "active" },
@@ -230,6 +237,30 @@ export function SupplierList() {
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDelete}
             />
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl" placement="center">
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                {modalMode === 'create' ? t('suppliers.addNew') : t('suppliers.edit')}
+                            </ModalHeader>
+                            <ModalBody>
+                                <SupplierForm
+                                    mode={modalMode}
+                                    initialData={selectedSupplier}
+                                    onSuccess={() => {
+                                        onClose();
+                                        loadData();
+                                    }}
+                                    onCancel={onClose}
+                                />
+                            </ModalBody>
+                            <ModalFooter />
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

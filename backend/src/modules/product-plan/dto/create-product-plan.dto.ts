@@ -25,4 +25,12 @@ export class CreateProductPlanDto {
     @IsNumber()
     @IsOptional()
     input_quantity: number;
+
+    @IsString()
+    @IsOptional()
+    plan_status: string;
+
+    @IsString()
+    @IsOptional()
+    plan_priority: string;
 }

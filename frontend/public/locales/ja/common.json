@@ -17,6 +17,8 @@
         "add": "追加",
         "all": "すべて",
         "search": "検索...",
+        "last7Days": "過去7日間",
+        "last30Days": "過去30日間",
         "actions": "アクション",
         "status": "ステータス",
         "active": "有効",
@@ -37,7 +39,14 @@
         "reports": "レポート",
         "help": "ヘルプとサポート",
         "customize": "カスタマイズ",
-        "detail": "詳細"
+        "detail": "詳細",
+        "noData": "データなし",
+        "totalRevenue": "総額",
+        "activePlans": "アクティブな計画",
+        "lowStock": "在庫不足アイテム",
+        "requiresAttention": "要注意",
+        "productionTarget": "生産フロー",
+        "vsLastMonth": "先月比"
     },
     "materials": {
         "title": "資材管理",
@@ -87,6 +96,9 @@
     },
     "suppliers": {
         "title": "サプライヤー管理",
+        "dashboard": "サプライヤーダッシュボード",
+        "subtitle": "サプライヤーのパフォーマンスと支出の概要",
+        "manageSuppliers": "サプライヤーを管理",
         "list": "サプライヤーリスト",
         "detail": "サプライヤー詳細",
         "addSupplier": "サプライヤーを追加",
@@ -100,6 +112,13 @@
         "category": "カテゴリー",
         "totalOrders": "総注文数",
         "totalSpent": "総支出",
+        "activeRate": "稼働率",
+        "vsLastMonth": "先月比",
+        "ytdSpending": "年初来の支出",
+        "pendingDelivery": "配送待ち",
+        "criticalIssues": "重大な問題",
+        "requiresAttention": "注意が必要",
+        "stable": "安定",
         "lastOrder": "前回の注文",
         "paymentTerms": "支払い条件",
         "status": "ステータス",
@@ -109,7 +128,13 @@
         "spendingAnalysis": "支出分析",
         "topSuppliers": "トップサプライヤー",
         "spendingByCategory": "カテゴリー別支出",
-        "monthlySpending": "月次支出",
+        "monthlySpending": "月間支出の傾向",
+        "financialOverview": "財務概要 (6ヶ月)",
+        "spent": "支出",
+        "spendByCategory": "カテゴリ別支出",
+        "highestVolume": "取引量の多いパートナー",
+        "partner": "パートナー",
+        "ytdSpend": "年初来支出",
         "tab": {
             "overview": "概要",
             "products": "商品",
@@ -148,6 +173,7 @@
         "title": "計画管理",
         "dashboard": "生産計画ダッシュボード",
         "totalPlans": "総計画数",
+        "productionTarget": "総生産目標",
         "activePlans": "進行中の計画",
         "completedPlans": "完了した計画",
         "totalProductionTarget": "生産目標",
@@ -157,6 +183,7 @@
         "list": "計画リスト",
         "subtext": {
             "overview": "生産計画と進捗の概要",
+            "total": "すべての計画",
             "active": "現在進行中",
             "target": "計画台数",
             "completed": "完了済み",
@@ -218,7 +245,27 @@
             "approved": "計画が承認されました",
             "rejected": "計画が拒否されました",
             "import_success": "インポート完了: 成功 {{success}}, 失敗 {{failed}}"
-        }
+        },
+        "confirmTitle": "確認と材料の引当",
+        "confirmMessage": "確認する前に十分な材料在庫があることを確認してください。",
+        "completeTitle": "生産完了",
+        "cancelTitle": "計画キャンセル",
+        "reason": "理由",
+        "actual_qty": "実際の数量",
+        "confirmPlan": "計画を確認",
+        "startPlan": "計画開始",
+        "complete": "完了",
+        "cancel": "キャンセル",
+        "startPlanTitle": "生産開始",
+        "startPlanMessage": "生産を開始してもよろしいですか？ これにより、時間と材料使用量の追跡が正式に開始されます。",
+        "deletePlanTitle": "計画を削除",
+        "deletePlanMessage": "本当にこの計画を削除しますか？ この操作は元に戻せません。",
+        "completeMessage": "生産完了を確認します。余剰材料は在庫に戻されます。",
+        "actualProduced": "実際の生産数量",
+        "target": "目標",
+        "warningExceeds": "警告：目標超過",
+        "actual": "実際の生産数",
+        "cost": "コスト"
     },
     "units": {
         "title": "単位管理",
@@ -230,6 +277,18 @@
     "products": {
         "title": "製品管理",
         "list": "製品リスト",
+        "latestProducts": "最近の製品",
+        "subtitle": "製品在庫とパフォーマンスの概要",
+        "subtext": {
+            "activeRate": "稼働率 {{rate}}%",
+            "ready": "生産準備完了",
+            "added": "今月追加",
+            "avgBom": "平均BOMコスト",
+            "vsLast": "先月比",
+            "avgBom6m": "平均BOMコスト（6ヶ月）",
+            "byType": "製品タイプ別",
+            "newAdditions": "カタログへの新規追加"
+        },
         "productTypes": "製品タイプ",
         "detail": "製品詳細",
         "addProduct": "製品を追加",
@@ -262,6 +321,7 @@
     "warehouses": {
         "title": "倉庫管理",
         "dashboard": "倉庫ダッシュボード",
+        "subtitle": "倉庫のパフォーマンスと在庫の概要",
         "totalWarehouses": "総倉庫数",
         "activeWarehouses": "稼働倉庫",
         "totalValue": "総在庫額",
@@ -270,6 +330,20 @@
         "utilization": "容量稼働率",
         "distribution": "在庫分布",
         "capacity": "保管容量",
+        "subtext": {
+            "totalValue": "全倉庫合計",
+            "totalItems": "総在庫数",
+            "avgCapacity": "平均容量使用率",
+            "alerts": "最低在庫未満のアイテム",
+            "vsLastMonth": "先月比",
+            "stable": "安定",
+            "capacityChart": "倉庫ごとの在庫対容量",
+            "distributionChart": "倉庫価値別"
+        },
+        "chart": {
+            "used": "使用済み",
+            "capacity": "総容量"
+        },
         "list": "倉庫リスト",
         "addWarehouse": "倉庫を追加",
         "editWarehouse": "倉庫を編集",
@@ -310,6 +384,8 @@
         "movement": "週間移動",
         "inbound": "入庫",
         "outbound": "出庫",
+        "todayInboundValue": "本日の入庫額",
+        "todayOutboundValue": "本日の出庫額",
         "balance": "在庫残高",
         "transactions": "在庫移動履歴",
         "movementHistory": "移動履歴",
@@ -404,5 +480,47 @@
             "createdAt": "作成日時"
         },
         "edit": "ユーザー編集"
+    },
+    "analytics": {
+        "title": "予測分析",
+        "subtitle": "予測と傾向",
+        "predict": "予測を実行",
+        "material": "資材",
+        "targetDate": "目標日",
+        "generating": "予測を生成中...",
+        "result": "予測結果",
+        "confidence": "信頼度スコア",
+        "factors": "影響要因",
+        "overview": "概要",
+        "predictedWeek": "予測 (7日間)",
+        "stockStatus": "ステータス"
+    },
+    "forecast": {
+        "title": "AI生産予測",
+        "subtitle": "高度なAIモデルを使用して生産傾向を分析し、資材消費を予測します。",
+        "modelStatus": "モデルステータス",
+        "training": "トレーニング中...",
+        "active": "アクティブ",
+        "retrain": "モデルを再トレーニング",
+        "configuration": "設定",
+        "selectProduct": "製品を選択",
+        "horizon": "予測期間",
+        "days": "日",
+        "generate": "予測を生成",
+        "forecastedProduction": "予測生産量",
+        "confidenceScore": "信頼度スコア (標準偏差)",
+        "confidenceInterval": "生産信頼区間",
+        "materialRequirements": "推定資材所要量",
+        "ready": "分析の準備完了",
+        "readyMessage": "左側の設定パネルから製品を選択し、「予測を生成」をクリックしてAIによる予測を確認してください。",
+        "meanPrediction": "平均予測",
+        "interval95": "95% 信頼区間",
+        "costDistribution": "推定コスト配分",
+        "totalEstimatedCost": "総推定コスト"
+    },
+    "audit": {
+        "title": "監査ログ",
+        "subtitle": "システムの変更とユーザーアクティビティを追跡"
     }
+
 }

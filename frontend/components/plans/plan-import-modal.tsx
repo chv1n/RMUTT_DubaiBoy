@@ -65,8 +65,17 @@ export default function PlanImportModal({ isOpen, onClose }: PlanImportModalProp
         onClose();
     };
 
+    // Assuming onOpenChange is a prop that can be derived from onClose or passed directly
+    // For this change, we'll assume the user wants to replace onClose with onOpenChange
+    // and that onOpenChange should call handleClose when the modal is closed.
+    const onOpenChange = (open: boolean) => {
+        if (!open) {
+            handleClose();
+        }
+    };
+
     return (
-        <Modal isOpen={isOpen} onClose={handleClose}>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
             <ModalContent>
                 <ModalHeader>Import Plans</ModalHeader>
                 <ModalBody>

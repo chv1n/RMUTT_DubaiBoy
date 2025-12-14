@@ -30,6 +30,11 @@ export class MaterialQueryDto {
     container_type_id?: number;
 
     @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    supplier_id?: number;
+
+    @IsOptional()
     @IsString()
     unit_id?: string;
 

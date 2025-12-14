@@ -6,22 +6,22 @@ export type LocaleString = {
     ja: string;
 };
 
-export type UserRole = 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+export type UserRole = 'USER' | 'ADMIN' | 'SUPER_ADMIN' | 'PRODUCTION_MANAGER' | 'INVENTORY_MANAGER' | 'PURCHASE_MANAGER';
 
 export interface User {
-    id: number | string; 
+    id: number | string;
     email: string;
     username: string;
     fullname: string;
     role: UserRole;
     is_active: boolean;
-    created_at: string; 
+    created_at: string;
     deleted_at: string | null;
-    
-    last_login?: string | null; 
+
+    last_login?: string | null;
     avatar_url?: string;
     phone?: string;
-    department?: string; 
+    department?: string;
 }
 
 export interface CreateUserPayload {

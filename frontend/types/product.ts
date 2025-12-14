@@ -184,6 +184,17 @@ export interface AuditLogEntry {
     entity: string;
 }
 
+export interface ProductStatsDTO {
+    total_products: number;
+    active_products: number;
+    new_products_this_month: number;
+    avg_cost: number;
+    top_category_name?: string;
+    // Optional arrays if API supports them later or in different format
+    distribution?: { name: string; value: number }[];
+    cost_trends?: { name: string; value: number }[];
+}
+
 export interface ProductStats {
     totalProducts: number;
     activeProducts: number;
@@ -191,4 +202,15 @@ export interface ProductStats {
     avgCost: number;
     distribution: { name: string; value: number; color?: string }[];
     costTrends: { name: string; value: number }[];
+}
+
+export interface ProductDistributionItem {
+    type_name: string;
+    count: number;
+    percentage: number;
+}
+
+export interface ProductCostTrendItem {
+    month: string;
+    avg_cost: number;
 }

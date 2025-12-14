@@ -195,7 +195,7 @@ export function ProductTypeManager() {
                 ]}
             />
 
-            <Modal isOpen={isFormOpen} onClose={onFormClose}>
+            <Modal isOpen={isFormOpen} onClose={onFormClose} placement="center">
                 <ModalContent>
                     {(onFormClose) => (
                         <>

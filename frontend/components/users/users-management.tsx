@@ -5,12 +5,13 @@ import { User, CreateUserPayload, UpdateUserPayload } from "@/types/user";
 import { userService } from "@/services/user.service";
 import { UserForm } from "./user-form";
 import { Button } from "@heroui/button";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { addToast } from "@heroui/toast";
 import { Chip } from "@heroui/chip";
 import { Tooltip } from "@heroui/tooltip";
 import { Edit, Trash2, RotateCcw } from "lucide-react"; // Icons
 import { useTranslation } from "react-i18next";
+import { ConfirmModal } from "@/components/common/confirm-modal";
 import { DataTable, Column } from "@/components/common/data-table";
 import { Meta } from "@/types/api";
 import { UserStatusBadge, UserRoleBadge } from "./user-badges";
@@ -80,15 +81,27 @@ export const UsersManagement = () => {
         router.push(`/super-admin/users/${id}`);
     };
 
-    const handleDelete = async (id: number | string) => {
-        if (confirm(t('common.confirmDeleteMessage'))) {
-            try {
-                await userService.delete(id);
-                addToast({ title: t('users.messages.deleted'), color: "success" });
-                loadUsers();
-            } catch (e) {
-                addToast({ title: "Failed to delete", color: "danger" });
-            }
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<number | string | null>(null);
+
+    const handleDelete = (id: number | string) => {
+        setUserToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!userToDelete) return;
+        setActionLoading(true);
+        try {
+            await userService.delete(userToDelete);
+            addToast({ title: t('users.messages.deleted'), color: "success" });
+            loadUsers();
+        } catch (e) {
+            addToast({ title: "Failed to delete", color: "danger" });
+        } finally {
+            setActionLoading(false);
+            setIsDeleteModalOpen(false);
+            setUserToDelete(null);
         }
     };
 
@@ -220,35 +233,44 @@ export const UsersManagement = () => {
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
                 size="2xl"
-                backdrop="blur"
-                classNames={{
-                    base: "border-default-100 shadow-xl",
-                    header: "border-b border-default-100",
-                    footer: "border-t border-default-100",
-                    closeButton: "hover:bg-default-100 transition-colors"
-                }}
+                placement="center"
             >
                 <ModalContent>
                     {(onClose) => (
                         <>
                             <ModalHeader className="flex flex-col gap-1">
                                 {selectedUser ? t('users.editUser') : t('users.addUser')}
-                                <span className="text-small font-normal text-default-500">
-                                    {selectedUser ? "Update user details" : "Create new user"}
-                                </span>
+                                {/* Subtext removed to match WarehouseList simpler style, or keep if preferred. Creating consistency usually implies simplication. WarehouseList doesnt have subtext span. removed for strict match or keeping? I'll header only as requested style match. */}
                             </ModalHeader>
-                            <ModalBody className="py-6 px-1">
+                            <ModalBody>
                                 <UserForm
                                     initialData={selectedUser}
                                     onSubmit={handleSubmit}
-                                    onCancel={onClose}
+                                    onCancel={() => { }} // No-op as buttons are outside
                                     isLoading={actionLoading}
                                 />
                             </ModalBody>
+                            <ModalFooter>
+                                <Button color="danger" variant="flat" onPress={onClose}>
+                                    {t("common.cancel")}
+                                </Button>
+                                <Button color="primary" type="submit" form="user-form" isLoading={actionLoading}>
+                                    {t("common.save")}
+                                </Button>
+                            </ModalFooter>
                         </>
                     )}
                 </ModalContent>
             </Modal>
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                isLoading={actionLoading}
+                title={t("users.delete")}
+                message={t("common.confirmDeleteMessage")}
+            />
         </div>
     );
 };

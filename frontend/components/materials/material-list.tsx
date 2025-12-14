@@ -13,10 +13,14 @@ import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/common/confirm-modal";
 import { exportToCSV, exportToExcel } from "@/lib/utils/export";
 import { DataTable, Column } from "@/components/common/data-table";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 export function MaterialList() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [materials, setMaterials] = useState<Material[]>([]);
     const [loading, setLoading] = useState(true);
     const [meta, setMeta] = useState<Meta>({
@@ -42,7 +46,7 @@ export function MaterialList() {
             const response = await materialService.getAll(page, rowsPerPage, search, status);
             console.log(response.data);
             setMaterials(response.data);
-            setMeta(response.meta);
+            setMeta(response.meta || meta);
         } catch (error) {
             console.error("Failed to load materials", error);
         } finally {
@@ -145,14 +149,14 @@ export function MaterialList() {
                     <div className="relative flex items-center justify-center gap-2">
                         <Tooltip content={t("materials.detail")}>
                             <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                                <Link href={`/super-admin/materials/${item.id}`}>
+                                <Link href={`${basePath}/materials/${item.id}`}>
                                     <Eye size={20} />
                                 </Link>
                             </span>
                         </Tooltip>
                         <Tooltip content={t("common.edit")}>
                             <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                                <Link href={`/super-admin/materials/${item.id}/edit`}>
+                                <Link href={`${basePath}/materials/${item.id}/edit`}>
                                     <Edit size={20} />
                                 </Link>
                             </span>
@@ -167,7 +171,7 @@ export function MaterialList() {
             default:
                 return cellValue as React.ReactNode;
         }
-    }, [t]);
+    }, [t, basePath]);
 
     return (
         <div className="space-y-4">
@@ -191,7 +195,7 @@ export function MaterialList() {
                 }}
                 onExportExcel={handleExportExcel}
                 onExportCSV={handleExportCSV}
-                onAddNew={() => router.push("/super-admin/materials/new")}
+                onAddNew={() => router.push(`${basePath}/materials/new`)}
                 renderCell={renderCell}
                 statusOptions={[
                     { name: t("common.active"), uid: "true" },

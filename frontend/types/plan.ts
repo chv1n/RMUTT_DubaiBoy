@@ -1,5 +1,5 @@
 export type PlanPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-export type PlanStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type PlanStatus = 'DRAFT' | 'PENDING' | 'PRODUCTION' | 'COMPLETED' | 'CANCELLED';
 
 // Backend DTOs
 export interface ProductPlanDTO {
@@ -10,6 +10,9 @@ export interface ProductPlanDTO {
     plan_description: string;
     start_date: string; // ISO Date
     end_date: string; // ISO Date
+    plan_status: PlanStatus; // Add this if missing in previous turns
+    plan_priority: PlanPriority;
+    actual_produced_quantity?: number;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
@@ -34,12 +37,12 @@ export interface PlanListDTO {
 
 // Domain Model (Unified for UI)
 export interface Plan {
-    id: string; // plan_list_id (string for frontend consistency, convert to number for API)
+    id: string; // plan_list_id
     planListId: number;
     productPlanId: number;
 
     // Product Plan Details
-    planCode: string; // Generated or ID-based
+    planCode: string;
     name: string;
     description: string;
 
@@ -49,6 +52,7 @@ export interface Plan {
     quantity: number;
     startDate: string;
     endDate: string;
+    actualProducedQuantity?: number;
 
     // Plan List Details
     priority: PlanPriority;
@@ -113,5 +117,63 @@ export interface PlanStats {
     onTimeRate: number;
     progress: { plan_name: string; target: number; produced: number; status: string }[];
     statusDistribution: { name: string; value: number; color?: string }[];
+}
+
+
+export interface MaterialRequirement {
+    material_id: number;
+    material_name: string;
+    usage_per_piece: number;
+    required_quantity: number;
+    total_cost: number;
+
+    // Detailed fields
+    scrap_factor?: number;
+    net_quantity?: number;
+    scrap_quantity?: number;
+    unit_cost?: number;
+
+    available_stock?: number;
+    stock_by_warehouse?: {
+        warehouse_id: number;
+        warehouse_name: string;
+        available_quantity: number;
+    }[];
+}
+
+export interface PlanPreview {
+    plan_id: number;
+    plan_name: string;
+    input_quantity: number;
+    estimated_cost: number;
+    materials: MaterialRequirement[];
+}
+
+export interface PlanDashboardStats {
+    total_plans: number;
+    active_plans: number;
+    completed_plans: number;
+    pending_plans: number;
+    delayed_plans?: number; // Kept as optional for backward compatibility if needed, but not in new JSON
+    total_production_target: number;
+    on_time_rate: number;
+    trend?: {
+        active_plans?: string;
+        on_time_rate?: string;
+    };
+}
+
+export interface PlanProgressItem {
+    plan_id: number;
+    plan_name: string;
+    progress: number;
+    status: string;
+    due_date: string;
+}
+
+export interface PlanStatusDistributionItem {
+    name: string;
+    value: number;
+    color: string;
 }
 

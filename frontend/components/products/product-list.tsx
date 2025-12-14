@@ -12,6 +12,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/common/confirm-modal";
 import { DataTable, Column } from "@/components/common/data-table";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+import { ProductForm } from "./product-form";
 
 export function ProductList() {
     const { t } = useTranslation();
@@ -33,6 +35,11 @@ export function ProductList() {
 
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    // Form Modal State
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [formMode, setFormMode] = useState<"create" | "edit">("create");
 
     // Load Data
     const loadData = useCallback(async () => {
@@ -73,12 +80,33 @@ export function ProductList() {
         }
     };
 
+    const handleCreate = () => {
+        setSelectedProduct(null);
+        setFormMode("create");
+        setIsFormModalOpen(true);
+    };
+
+    const handleEdit = (product: Product) => {
+        setSelectedProduct(product);
+        setFormMode("edit");
+        setIsFormModalOpen(true);
+    };
+
+    const handleFormSuccess = () => {
+        setIsFormModalOpen(false);
+        loadData();
+    };
+
+    const handleFormClose = () => {
+        setIsFormModalOpen(false);
+        setSelectedProduct(null);
+    };
+
     const columns: Column[] = [
         { name: t("products.code"), uid: "id" },
         { name: t("products.name"), uid: "name", sortable: true },
         { name: t("products.type"), uid: "typeName" },
         { name: t("products.fields.active"), uid: "isActive", align: "center" },
-        { name: t("products.lastUpdated"), uid: "lastUpdated" },
         { name: t("common.actions"), uid: "actions", align: "center" }
     ];
 
@@ -102,12 +130,6 @@ export function ProductList() {
                         {item.isActive ? t("common.active") : t("common.inactive")}
                     </Chip>
                 );
-            case "lastUpdated":
-                return (
-                    <span className="text-tiny text-default-400">
-                        {new Date(item.lastUpdated).toLocaleDateString()}
-                    </span>
-                );
             case "actions":
                 return (
                     <div className="relative flex items-center justify-center gap-2">
@@ -117,7 +139,7 @@ export function ProductList() {
                             </span>
                         </Tooltip>
                         <Tooltip content={t("common.edit")}>
-                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => router.push(`/super-admin/products/${item.id}/edit`)}>
+                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(item)}>
                                 <Edit size={20} />
                             </span>
                         </Tooltip>
@@ -161,10 +183,11 @@ export function ProductList() {
                     { name: t("common.active"), uid: "active" },
                     { name: t("common.inactive"), uid: "inactive" }
                 ]}
-                onAddNew={() => router.push("/super-admin/products/new")}
+                onAddNew={handleCreate}
                 renderCell={renderCell}
             />
 
+            {/* Delete Modal */}
             <ConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -172,6 +195,36 @@ export function ProductList() {
                 title={t("common.confirmDelete")}
                 message={t("common.confirmDeleteMessage")}
             />
+
+            {/* Create/Edit Modal */}
+            <Modal
+                isOpen={isFormModalOpen}
+                onClose={handleFormClose}
+                size="4xl"
+                placement="center"
+                scrollBehavior="inside"
+                classNames={{
+                    body: "p-6",
+                }}
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1">
+                                {formMode === "create" ? t("products.addProduct") : t("products.editProduct")}
+                            </ModalHeader>
+                            <ModalBody>
+                                <ProductForm
+                                    initialData={selectedProduct}
+                                    mode={formMode}
+                                    onSuccess={handleFormSuccess}
+                                    onCancel={handleFormClose}
+                                />
+                            </ModalBody>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </div>
     );
 }

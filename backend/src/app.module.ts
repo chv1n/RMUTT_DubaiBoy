@@ -7,7 +7,12 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AppModules } from './modules';
 
+
 import * as Joi from 'joi';
+import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
+import { Roles } from './common/decorators/roles.decorator';
+import { RolesGuard } from './common/guards/roles.guard';
+import { AtGuard } from './common/guards/at.guard';
 
 
 @Module({
@@ -38,6 +43,8 @@ import * as Joi from 'joi';
       limit: 100,
     }]),
     ...AppModules,
+
+
 
 
 

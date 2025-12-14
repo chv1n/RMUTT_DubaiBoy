@@ -16,10 +16,14 @@ import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Switch } from "@heroui/switch";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 export function WarehouseList() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [loading, setLoading] = useState(true);
     const [meta, setMeta] = useState<Meta>({
@@ -179,7 +183,7 @@ export function WarehouseList() {
                 return (
                     <div className="relative flex items-center justify-center gap-2">
                         <Tooltip content={t("common.detail") || "View Detail"}>
-                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors" onClick={() => router.push(`/super-admin/warehouse/${item.id}`)}>
+                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors" onClick={() => router.push(`${basePath}/warehouse/${item.id}`)}>
                                 <Eye size={18} />
                             </span>
                         </Tooltip>
@@ -198,7 +202,7 @@ export function WarehouseList() {
             default:
                 return (item as any)[columnKey as string];
         }
-    }, [t, router]);
+    }, [t, router, basePath]);
 
     return (
         <div className="space-y-4">
@@ -235,7 +239,7 @@ export function WarehouseList() {
                 renderCell={renderCell}
             />
 
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -248,7 +252,7 @@ export function WarehouseList() {
                                         autoFocus
                                         label={t("warehouses.code")}
                                         placeholder="WH-001"
-                                        variant="bordered"
+
                                         value={formData.warehouse_code}
                                         onValueChange={(val) => setFormData({ ...formData, warehouse_code: val })}
                                         isRequired
@@ -256,7 +260,7 @@ export function WarehouseList() {
                                     <Input
                                         label={t("warehouses.name")}
                                         placeholder="Main Warehouse"
-                                        variant="bordered"
+
                                         value={formData.warehouse_name}
                                         onValueChange={(val) => setFormData({ ...formData, warehouse_name: val })}
                                         isRequired
@@ -265,7 +269,7 @@ export function WarehouseList() {
                                 <Input
                                     label={t("warehouses.email")}
                                     placeholder="contact@warehouse.com"
-                                    variant="bordered"
+
                                     startContent={<Mail className="text-2xl text-default-400 pointer-events-none flex-shrink-0" size={16} />}
                                     value={formData.warehouse_email}
                                     onValueChange={(val) => setFormData({ ...formData, warehouse_email: val })}
@@ -273,7 +277,7 @@ export function WarehouseList() {
                                 <Input
                                     label={t("warehouses.phone")}
                                     placeholder="02-123-4567"
-                                    variant="bordered"
+
                                     startContent={<Phone className="text-2xl text-default-400 pointer-events-none flex-shrink-0" size={16} />}
                                     value={formData.warehouse_phone}
                                     onValueChange={(val) => setFormData({ ...formData, warehouse_phone: val })}
@@ -281,7 +285,7 @@ export function WarehouseList() {
                                 <Textarea
                                     label={t("warehouses.address")}
                                     placeholder="123 Street..."
-                                    variant="bordered"
+
                                     value={formData.warehouse_address}
                                     onValueChange={(val) => setFormData({ ...formData, warehouse_address: val })}
                                 />

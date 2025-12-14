@@ -1,4 +1,4 @@
-import { IsNumber } from "class-validator";
+import { IsNumber, IsOptional } from "class-validator";
 
 export class CreateBomDto {
     @IsNumber()
@@ -8,11 +8,13 @@ export class CreateBomDto {
     @IsNumber()
     usage_per_piece: number;
     @IsNumber()
-    unit_id: number;
-    @IsNumber()
+    @IsOptional()
     version: number;
     @IsNumber()
+    @IsOptional()
     active: number;
     @IsNumber()
+    @IsOptional()
     scrap_factor: number;
 }
+

@@ -15,6 +15,12 @@ export const UserRoleBadge = ({ role }: { role: UserRole }) => {
             return <Chip color="primary" variant="dot" size="sm">Admin</Chip>;
         case 'SUPER_ADMIN':
             return <Chip color="secondary" variant="dot" size="sm">Super Admin</Chip>;
+        case 'PRODUCTION_MANAGER':
+            return <Chip color="warning" variant="dot" size="sm">Production Manager</Chip>;
+        case 'INVENTORY_MANAGER':
+            return <Chip color="success" variant="dot" size="sm">Inventory Manager</Chip>;
+        case 'PURCHASE_MANAGER':
+            return <Chip color="danger" variant="dot" size="sm">Purchase Manager</Chip>;
         case 'USER':
         default:
             return <Chip color="default" variant="flat" size="sm">User</Chip>;
