@@ -1,4 +1,4 @@
-# 🏭 RMUTT DubaiBoy - Smart Factory Management System
+# 🏭 Material Core
 
 > Sony Smart Factory Hackathon 2025 - ทีมหนุ่มดูไบ
 
