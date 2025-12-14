@@ -734,40 +734,49 @@ async function generateHistoricalPlans() {
     const plansToSeed: any[] = [];
 
     for (const product of products) {
-        // Generate plans for the last 60 days (1 per day) matching SQL logic
+        let baseQty = 900 + Math.floor(Math.random() * 100); // base ต่อ product
+
         for (let i = 1; i <= 60; i++) {
-            // Date logic: CURRENT_DATE - gs (i)
             const planDate = new Date(today);
             planDate.setDate(today.getDate() - i);
 
-            // Input Qty: 900 + random(0-200)
-            const inputQty = 900 + Math.floor(Math.random() * 201);
+            // ---- TREND (เพิ่มทีละนิด) ----
+            const trend = i * (Math.random() * 1.5); // +0 ถึง +90 ใน 60 วัน
 
-            // Actual Qty: Input * (0.95 + random(0-0.10)) -> 95% to 105%
-            const actualQty = Math.floor(inputQty * (0.95 + Math.random() * 0.10));
+            // ---- SEASON (weekly) ----
+            const season = Math.sin((2 * Math.PI * i) / 7) * 50; // ±50
 
-            // Random cost based on input qty (keeping previous cost logic as SQL didn't specify cost explicitly but required context)
-            const estCost = inputQty * 100; // Simplified cost
-            const actualCost = estCost * (actualQty / inputQty);
+            // ---- INPUT ----
+            const inputQty = Math.floor(
+                baseQty + trend + season + (Math.random() * 40 - 20)
+            );
+
+            // ---- ACTUAL (มี inefficiency) ----
+            const efficiency = 0.9 + Math.random() * 0.15; // 90%–105%
+            const actualQty = Math.floor(inputQty * efficiency);
+
+            const estCost = inputQty * 100;
+            const actualCost = actualQty * 100;
 
             plansToSeed.push({
-                plan_name: `Backfill Plan (30 days) - ${product.product_name} - Day ${i}`,
+                plan_name: `Backfill Plan - ${product.product_name} - Day ${i}`,
                 plan_description: 'Insert ย้อนหลังเพื่อ retrain model',
-                product: product,
+                product,
                 input_quantity: inputQty,
                 actual_produced_quantity: actualQty,
                 start_date: planDate,
-                end_date: planDate, // SQL has start=end
+                end_date: planDate,
                 plan_status: Status.COMPLETED,
                 plan_priority: PlanPriorityEnum.MEDIUM,
                 started_at: planDate,
-                completed_at: new Date(planDate.getTime() + 60 * 60 * 1000), // +1 hour as per SQL
+                completed_at: new Date(planDate.getTime() + 60 * 60 * 1000),
                 estimated_cost: estCost,
                 actual_cost: actualCost,
                 created_at: new Date()
             });
         }
     }
+
 
     // Save plans
     for (const plan of plansToSeed) {
