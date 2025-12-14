@@ -55,7 +55,14 @@ class ProductService {
     private readonly bomEndpoint = '/boms'; // Assuming standard pluralization, check if 'bom' or 'boms' in controller, defaulting to boms as typical
 
     // --- Products ---
-    async getAll(page: number = 1, limit: number = 10, search: string = "", status: string = ""): Promise<ApiResponse<Product[]>> {
+    async getAll(
+        page: number = 1,
+        limit: number = 10,
+        search: string = "",
+        status: string = "",
+        sortBy: string = "created_at",
+        sortOrder: "ASC" | "DESC" = "DESC"
+    ): Promise<ApiResponse<Product[]>> {
         if (MOCK_CONFIG.useMock) {
             await simulateDelay();
             let filtered = [...MOCK_PRODUCTS];
@@ -67,6 +74,18 @@ class ProductService {
                 const isActive = status === "active" ? 1 : 0;
                 filtered = filtered.filter(p => p.active === isActive);
             }
+
+            // Sort
+            filtered.sort((a, b) => {
+                const valA = a[sortBy as keyof ProductDTO];
+                const valB = b[sortBy as keyof ProductDTO];
+
+                if (valA === undefined || valB === undefined) return 0;
+
+                if (valA < valB) return sortOrder === "ASC" ? -1 : 1;
+                if (valA > valB) return sortOrder === "ASC" ? 1 : -1;
+                return 0;
+            });
 
             const start = (page - 1) * limit;
             const paginatedData = filtered.slice(start, start + limit);
@@ -85,7 +104,8 @@ class ProductService {
         }
 
         const is_active_param = status === "all" || status === "" ? "" : `&active=${status === "active" ? 1 : 0}`;
-        const response = await apiClient.get<ApiResponse<ProductDTO[]> | ProductDTO[]>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}${is_active_param}`);
+        const sort_param = `&sort_by=${sortBy}&sort_order=${sortOrder}`;
+        const response = await apiClient.get<ApiResponse<ProductDTO[]> | ProductDTO[]>(`${this.endpoint}?page=${page}&limit=${limit}&search=${search}${is_active_param}${sort_param}`);
 
         let data: ProductDTO[] = [];
         let meta = {
@@ -395,8 +415,31 @@ class ProductService {
         }
 
         try {
-            const response = await apiClient.get<ApiResponse<import('@/types/product').ProductStats>>(`${this.endpoint}/dashboard/stats`);
-            return response.data;
+            // The API reference implies a standard structure, but the user logs show a double-nested structure:
+            // { success: true, data: { success: true, data: { total_products: 5 ... } } }
+            const response = await apiClient.get<any>(`${this.endpoint}/dashboard/stats`);
+
+            let statsData = response.data;
+
+            // Handle double nesting if present
+            if (statsData && statsData.data && !statsData.total_products) {
+                statsData = statsData.data;
+            }
+
+            // Fallback if the structure is just simple (direct properties on response.data)
+            // or if it was triple nested (unlikely but safe to check)
+            if (!statsData) statsData = {};
+
+            // Map snake_case DTO to camelCase Domain
+            return {
+                totalProducts: statsData.total_products || 0,
+                activeProducts: statsData.active_products || 0,
+                newThisMonth: statsData.new_products_this_month || 0,
+                avgCost: statsData.avg_cost || 0,
+                // Use API data if available, otherwise default to empty
+                distribution: Array.isArray(statsData.distribution) ? statsData.distribution : [],
+                costTrends: Array.isArray(statsData.cost_trends) ? statsData.cost_trends : []
+            };
         } catch (error) {
             console.warn("API failed, falling back to mock stats", error);
             // Fallback mock
@@ -408,6 +451,75 @@ class ProductService {
                 distribution: [],
                 costTrends: []
             };
+        }
+    }
+    async getDistribution(): Promise<import('@/types/product').ProductDistributionItem[]> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return [
+                { type_name: "Electronics", count: 50, percentage: 33.3 },
+                { type_name: "Mechanical", count: 40, percentage: 26.6 },
+                { type_name: "Packaging", count: 60, percentage: 40.0 }
+            ];
+        }
+
+        try {
+            const response = await apiClient.get<any>(`${this.endpoint}/dashboard/distribution`);
+
+            // Handle various response structures
+            // Case 1: Double nested { success: true, data: { success: true, data: [...] } }
+            if (response.data?.data && Array.isArray(response.data.data)) {
+                return response.data.data;
+            }
+
+            // Case 2: Nested in data { success: true, data: [...] }
+            if (Array.isArray(response.data)) {
+                return response.data;
+            }
+
+            // Case 3: Direct array
+            if (Array.isArray(response)) {
+                return response;
+            }
+
+            return [];
+        } catch (error) {
+            console.warn("API failed for distribution, falling back to mock", error);
+            return [];
+        }
+    }
+
+    async getCostTrends(): Promise<import('@/types/product').ProductCostTrendItem[]> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return [
+                { month: "Jan", avg_cost: 420 },
+                { month: "Feb", avg_cost: 430 },
+                { month: "Mar", avg_cost: 450 },
+                { month: "Apr", avg_cost: 480 },
+                { month: "May", avg_cost: 470 },
+                { month: "Jun", avg_cost: 500 }
+            ];
+        }
+
+        try {
+            const response = await apiClient.get<any>(`${this.endpoint}/dashboard/cost-trends`);
+
+            // Handle various response structures
+            if (response.data?.data && Array.isArray(response.data.data)) {
+                return response.data.data;
+            }
+            if (Array.isArray(response.data)) {
+                return response.data;
+            }
+            if (Array.isArray(response)) {
+                return response;
+            }
+
+            return [];
+        } catch (error) {
+            console.warn("API failed for cost trends, falling back to mock", error);
+            return [];
         }
     }
 }

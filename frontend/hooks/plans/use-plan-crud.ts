@@ -1,23 +1,27 @@
 import { useState } from 'react';
-import { CreatePlanDTO, UpdatePlanDTO } from '@/types/plan';
+import { CreatePlanRequest, UpdatePlanRequest } from '@/types/plan';
 import { planService } from '@/services/plan.service';
 import { addToast } from "@heroui/toast";
 import { useTranslation } from "@/components/providers/language-provider";
 import { useRouter } from 'next/navigation';
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 export function usePlanCrud(onSuccess?: () => void) {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [saving, setSaving] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
-    const createPlan = async (data: CreatePlanDTO) => {
+    const createPlan = async (data: CreatePlanRequest) => {
         setSaving(true);
         try {
             await planService.create(data);
             addToast({ title: t("common.success"), color: "success" });
             if (onSuccess) onSuccess();
-            else router.push('/super-admin/plans');
+            else router.push(`${basePath}/plans`);
         } catch (error) {
             console.error(error);
             addToast({ title: t("common.error"), color: "danger" });
@@ -26,13 +30,13 @@ export function usePlanCrud(onSuccess?: () => void) {
         }
     };
 
-    const updatePlan = async (id: number, data: UpdatePlanDTO) => {
+    const updatePlan = async (id: number | string, data: UpdatePlanRequest) => {
         setSaving(true);
         try {
-            await planService.update(id, data);
+            await planService.update(id.toString(), data);
             addToast({ title: t("common.success"), color: "success" });
             if (onSuccess) onSuccess();
-            else router.push('/super-admin/plans');
+            else router.push(`${basePath}/plans`);
         } catch (error) {
             console.error(error);
             addToast({ title: t("common.error"), color: "danger" });
@@ -41,10 +45,10 @@ export function usePlanCrud(onSuccess?: () => void) {
         }
     };
 
-    const deletePlan = async (id: number) => {
+    const deletePlan = async (id: number | string) => {
         setDeleting(true);
         try {
-            await planService.delete(id);
+            await planService.delete(id.toString());
             addToast({ title: t("common.success"), color: "success" });
             if (onSuccess) onSuccess();
         } catch (error) {

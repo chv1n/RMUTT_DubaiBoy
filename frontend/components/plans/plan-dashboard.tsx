@@ -16,20 +16,38 @@ import { ArrowUpRight, TrendingUp, TrendingDown, Calendar, CheckCircle, Clock, A
 import { usePrimaryColor } from "@/hooks/use-primary-color";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export function PlanDashboard() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const primaryColor = usePrimaryColor();
 
     // --- Data Fetching ---
-    const { data: stats, isLoading } = useQuery({
+    const { data: statsData, isLoading: isStatsLoading } = useQuery({
         queryKey: ['plans', 'dashboard', 'stats'],
-        queryFn: () => planService.getStats(),
-        staleTime: 5 * 60 * 1000 // Cache for 5 mins
+        queryFn: () => planService.getDashboardStats(),
+        staleTime: 5 * 60 * 1000
     });
+
+    const { data: progressData, isLoading: isProgressLoading } = useQuery({
+        queryKey: ['plans', 'dashboard', 'progress'],
+        queryFn: () => planService.getDashboardProgress(5),
+        staleTime: 5 * 60 * 1000
+    });
+
+    const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
+        queryKey: ['plans', 'dashboard', 'distribution'],
+        queryFn: () => planService.getDashboardStatusDistribution(),
+        staleTime: 5 * 60 * 1000
+    });
+
+    const isLoading = isStatsLoading || isProgressLoading || isDistributionLoading;
 
     if (isLoading) return (
         <div className="flex h-96 w-full justify-center items-center flex-col gap-4">
@@ -37,6 +55,13 @@ export function PlanDashboard() {
             <p className="text-default-500 animate-pulse">{t('common.loading')}</p>
         </div>
     );
+
+
+
+
+    const stats = statsData?.data;
+    const progressList = Array.isArray(progressData?.data) ? progressData.data : [];
+    const distribution = Array.isArray(distributionData?.data) ? distributionData.data : [];
 
     if (!stats) return <div className="text-center text-default-500 py-10">{t('common.error')}</div>;
 
@@ -52,7 +77,7 @@ export function PlanDashboard() {
                     <Button color="primary" startContent={<ArrowUpRight size={16} />}>
                         {t('common.export')}
                     </Button>
-                    <Button variant="flat" onPress={() => router.push('/super-admin/plans/management')}>
+                    <Button variant="flat" onPress={() => router.push(`${basePath}/plans/management`)}>
                         {t('plan.list')}
                     </Button>
                 </div>
@@ -61,37 +86,41 @@ export function PlanDashboard() {
             {/* KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KPICard
-                    title={t("plan.activePlans")}
-                    value={stats.activePlans}
-                    subtext={t("plan.subtext.active")}
-                    icon={<ActivityIcon />}
-                    trend={2}
-                    trendLabel={t("plan.subtext.vsLastMonth")}
+                    title={t("plan.totalPlans") || "Total Plans"}
+                    value={stats.total_plans ?? 0}
+                    subtext={t("plan.subtext.total") || "All plans"}
+                    icon={<Target size={24} className="text-default-500" />} // Using Target generic or similar
+                    trend={0}
+                    trendLabel={""}
+                    color="default"
                 />
                 <KPICard
-                    title={t("plan.totalProductionTarget")}
-                    value={stats.totalProductionTarget.toLocaleString()}
-                    subtext={t("plan.subtext.target")}
+                    title={t("plan.productionTarget") || "Production Target"}
+                    value={(stats.total_production_target ?? 0).toLocaleString()}
+                    subtext={t("plan.subtext.target") || "Total units"}
                     icon={<Target size={24} className="text-primary" />}
-                    trend={5}
+                    trend={0}
+                    trendLabel={""}
+                    color="primary"
+                />
+                <KPICard
+                    title={t("plan.activePlans")}
+                    value={stats.active_plans ?? 0}
+                    subtext={t("plan.subtext.active")}
+                    icon={<ActivityIcon />}
+                    trend={stats.trend?.active_plans}
                     trendLabel={t("plan.subtext.vsLastMonth")}
                 />
                 <KPICard
                     title={t("plan.completedPlans")}
-                    value={stats.completedPlans}
+                    value={stats.completed_plans ?? 0}
                     subtext={t("plan.subtext.completed")}
                     icon={<CheckCircle size={24} className="text-success" />}
-                    trend={10}
-                    trendLabel={t("plan.subtext.vsLastMonth")}
+                    trend={0}
+                    trendLabel={""}
+                    color="success"
                 />
-                <KPICard
-                    title={t("plan.onTimeRate")}
-                    value={`${stats.onTimeRate}%`}
-                    subtext={t("plan.subtext.onTime")}
-                    icon={<Clock size={24} className="text-secondary" />}
-                    trend={1}
-                    trendLabel={t("plan.subtext.stable")}
-                />
+
             </div>
 
             {/* Charts & Progress Section */}
@@ -106,25 +135,25 @@ export function PlanDashboard() {
                         </div>
                     </CardHeader>
                     <CardBody className="px-6 pb-6 space-y-6">
-                        {stats.progress.map((item: any, index: number) => {
-                            const percentage = Math.min(100, Math.round((item.produced / item.target) * 100));
-                            return (
-                                <div key={index} className="space-y-2">
-                                    <div className="flex justify-between text-small">
-                                        <span className="font-medium text-default-700">{item.plan_name}</span>
-                                        <span className="text-default-500">{item.produced.toLocaleString()} / {item.target.toLocaleString()} ({item.status})</span>
-                                    </div>
-                                    <Progress
-                                        value={percentage}
-                                        color={item.status === 'COMPLETED' ? "success" : item.status === 'PRODUCTION' ? "primary" : "warning"}
-                                        size="sm"
-                                        radius="sm"
-                                        showValueLabel={true}
-                                        className="max-w-full"
-                                    />
+                        {progressList.length === 0 && <div className="text-center text-default-400 py-4">No active plans</div>}
+                        {progressList.map((item: any, index: number) => (
+                            <div key={item.plan_id || index} className="space-y-2">
+                                <div className="flex justify-between text-small">
+                                    <span className="font-medium text-default-700">{item.plan_name}</span>
+                                    <span className="text-default-500">
+                                        {item.status} • Due: {item.due_date ? new Date(item.due_date).toLocaleDateString() : '-'}
+                                    </span>
                                 </div>
-                            )
-                        })}
+                                <Progress
+                                    value={item.progress}
+                                    color={item.status === 'COMPLETED' ? "success" : item.status === 'IN_PROGRESS' || item.status === 'PRODUCTION' ? "primary" : item.status === 'DELAYED' ? "danger" : "warning"}
+                                    size="sm"
+                                    radius="sm"
+                                    showValueLabel={true}
+                                    className="max-w-full"
+                                />
+                            </div>
+                        ))}
                     </CardBody>
                 </Card>
 
@@ -141,15 +170,16 @@ export function PlanDashboard() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={stats.statusDistribution}
+                                        data={distribution as any[]}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
                                         outerRadius={80}
                                         paddingAngle={5}
                                         dataKey="value"
+                                        nameKey="name"
                                     >
-                                        {stats.statusDistribution.map((entry: any, index: number) => (
+                                        {distribution.map((entry: any, index: number) => (
                                             <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
@@ -173,7 +203,35 @@ const ActivityIcon = () => (
 
 // Reusable KPI Card
 const KPICard = ({ title, value, subtext, icon, trend, trendLabel, inverseTrend }: any) => {
-    const isPositive = trend > 0;
+    // Determine direction and value
+    let isPositive = false;
+    let displayTrend = "";
+    let hasTrend = false;
+
+    if (trend !== undefined && trend !== null && trend !== 0 && trend !== "0" && trend !== "0.0%" && trend !== 0) {
+        hasTrend = true;
+        if (typeof trend === 'number') {
+            isPositive = trend > 0;
+            displayTrend = `${Math.abs(trend)}%`;
+        } else if (typeof trend === 'string') {
+            // Check for '+' or '-'
+            isPositive = !trend.trim().startsWith('-');
+            // If it's effectively 0 (like "0.0%"), treat as no trend for display purposes? 
+            // The JSON has "0.0%", I should probably show it if provided, or hide if 0.
+            // But let's trust the 'hasTrend' check. "0.0%" might mean stable.
+            // Let's assume if the string contains non-zero numbers it's a trend.
+            // But strict check: "+2" -> pos. "-5" -> neg. "0.0%" -> ?
+            // Let's just use it as is.
+            displayTrend = trend;
+            // Parse for positive check refinement
+            const num = parseFloat(trend.replace(/[^0-9.-]/g, ''));
+            if (!isNaN(num)) {
+                isPositive = num > 0;
+                hasTrend = num !== 0;
+            }
+        }
+    }
+
     const isGood = inverseTrend ? !isPositive : isPositive;
 
     return (
@@ -181,14 +239,14 @@ const KPICard = ({ title, value, subtext, icon, trend, trendLabel, inverseTrend 
             <CardBody className="p-6">
                 <div className="flex justify-between items-start mb-4">
                     <div className="p-3 bg-default-50 rounded-xl">{icon}</div>
-                    {trend !== 0 && (
+                    {hasTrend && (
                         <Chip
                             size="sm"
                             variant="flat"
                             color={isGood ? "success" : "danger"}
                             startContent={isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                         >
-                            {Math.abs(trend)}%
+                            {displayTrend.replace(/^[+-]/, '')}
                         </Chip>
                     )}
                 </div>

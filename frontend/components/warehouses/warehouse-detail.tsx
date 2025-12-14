@@ -5,6 +5,8 @@ import { Warehouse, MaterialInventory, InventoryTransaction } from "@/types/ware
 import { warehouseService } from "@/services/warehouse.service";
 import { useTranslation } from "@/components/providers/language-provider";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 import {
     ArrowLeft, Edit, MapPin, Phone, Mail, Box, Activity,
     Calendar, Package, ArrowUpCircle, ArrowDownCircle, Info
@@ -25,6 +27,8 @@ interface WarehouseDetailProps {
 export function WarehouseDetail({ id }: WarehouseDetailProps) {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
     const [inventory, setInventory] = useState<MaterialInventory[]>([]);
     const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
@@ -100,8 +104,8 @@ export function WarehouseDetail({ id }: WarehouseDetailProps) {
             {/* Breadcrumbs */}
             <div>
                 <Breadcrumbs size="lg" variant="solid" radius="full">
-                    <BreadcrumbItem onPress={() => router.push("/super-admin/dashboard")}>{t("common.home")}</BreadcrumbItem>
-                    <BreadcrumbItem onPress={() => router.push("/super-admin/warehouse")}>{t("warehouses.list")}</BreadcrumbItem>
+                    <BreadcrumbItem onPress={() => router.push(`${basePath}`)}>{t("common.home")}</BreadcrumbItem>
+                    <BreadcrumbItem onPress={() => router.push(`${basePath}/warehouse`)}>{t("warehouses.list")}</BreadcrumbItem>
                     <BreadcrumbItem>{warehouse.name}</BreadcrumbItem>
                 </Breadcrumbs>
             </div>
