@@ -2,7 +2,7 @@ import sys
 import json
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
+from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 # -------------------------------
@@ -66,9 +66,18 @@ try:
             continue
 
         # -------------------------------
-        # Train Linear Model
+        # Train XGBoost
         # -------------------------------
-        model = LinearRegression()
+        model = XGBRegressor(
+            n_estimators=300,
+            max_depth=4,
+            learning_rate=0.05,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            objective="reg:squarederror",
+            random_state=42
+        )
+
         model.fit(X_train, y_train)
 
         y_pred = model.predict(X_val)
@@ -90,7 +99,7 @@ try:
             status = "REJECT"
 
         metrics[int(pid)] = {
-            "model": "LINEAR_LAG",
+            "model": "XGBOOST",
             "lags": LAGS,
             "rmse": float(rmse),
             "mae": float(mae),
