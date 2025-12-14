@@ -15,6 +15,8 @@ import { ConfirmPlanModal, CompletePlanModal, CancelPlanModal } from './plan-mod
 import { ConfirmModal } from '@/components/common/confirm-modal';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
 import { Skeleton } from "@heroui/skeleton";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 interface PlanDetailProps {
     plan: Plan;
@@ -23,6 +25,8 @@ interface PlanDetailProps {
 export default function PlanDetail({ plan }: PlanDetailProps) {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const updatePlanMutation = useUpdatePlan();
     const deleteMutation = useDeletePlan();
     const startMutation = useStartPlan();
@@ -52,7 +56,7 @@ export default function PlanDetail({ plan }: PlanDetailProps) {
         deleteMutation.mutate(plan.id, {
             onSuccess: () => {
                 setIsDeleteConfirmOpen(false);
-                router.push('/super-admin/plans');
+                router.push(`${basePath}/plans`);
             }
         });
     };
@@ -90,15 +94,6 @@ export default function PlanDetail({ plan }: PlanDetailProps) {
     }
 
     const handleCancelSubmit = (reason: string, actualQty?: number) => {
-        // If coming from Production, actualQty might be needed if API requires it, 
-        // usually cancel in production implies stopping current work, so partial result might be recorded.
-        // For now, assume cancel simply stops. If actualQty is provided, we might need a specific endpoint or payload.
-        // The implementation.md says use 'cancel' with reason. Separation of 'actual_produced' usually happens in 'complete' or special 'stop' logic.
-        // However, if spec says cancel needs actual, pass it.
-        // Spec: "Page 7: Cancel Plan... From PRODUCTION: reason, actual_produced_quantity"
-        // Let's assume we pass it in payload if available, or just reason.
-        // Currently service `cancel` only takes reason. Let's update service later if strictly required. 
-        // For now, just reason to keep consistent with defined service.
         cancelMutation.mutate({ id: plan.id, reason }, {
             onSuccess: () => setIsCancelOpen(false)
         });
@@ -380,4 +375,3 @@ export default function PlanDetail({ plan }: PlanDetailProps) {
         </div>
     );
 }
-

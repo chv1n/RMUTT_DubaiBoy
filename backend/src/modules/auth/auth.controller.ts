@@ -51,18 +51,21 @@ export class AuthController {
   }
 
   private setCookies(res, accessToken: string, refreshToken: string) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isHttps = process.env.HTTPS === 'true' || true; // Force HTTPS for LAN testing
+
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       maxAge: 1000 * 60 * 15,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: isHttps ? 'none' : 'lax', // 'none' for cross-origin HTTPS
+      secure: isHttps, // Required when sameSite is 'none'
       path: '/',
     });
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: isHttps ? 'none' : 'lax',
+      secure: isHttps,
       path: '/',
     });
   }

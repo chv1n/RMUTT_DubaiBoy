@@ -25,8 +25,33 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginRequest) => {
     try {
       const response: any = await login(data);
-      if (response.data) {
-        router.push("/super-admin");
+      // Determine user and role
+      const user = response.data || response.user;
+      if (user) {
+        const role = user.role ? user.role.toUpperCase() : '';
+        let redirectPath = "/user";
+        switch (role) {
+          case 'SUPER_ADMIN':
+            redirectPath = "/super-admin";
+            break;
+          case 'ADMIN':
+            redirectPath = "/admin";
+            break;
+          case 'USER':
+            redirectPath = "/user";
+            break;
+          case 'INVENTORY_MANAGER':
+            redirectPath = "/inventory-manager";
+            break;
+          case 'PRODUCTION_MANAGER':
+            redirectPath = "/prouction-manager"; // Matching directory typo
+            break;
+          case 'PURCHASE_MANAGER':
+            redirectPath = "/purchase-maneger"; // Matching directory typo
+            break;
+        }
+        // Use window.location for ngrok/cross-domain compatibility
+        window.location.href = redirectPath;
       }
     } catch (e) {
       // Error is handled by the hook and displayed below

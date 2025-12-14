@@ -18,11 +18,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/providers/sidebar-provider";
-import { sidebarItems, bottomItems, MenuItem } from "@/config/admin-menu";
+import { getSidebarItems, getBottomItems, sidebarItems, bottomItems, MenuItem, SubMenuItem } from "@/config/menu";
 import { useTranslation } from "@/components/providers/language-provider";
 import { authService } from "@/services/auth.service";
 import { ConfirmModal } from "@/components/common/confirm-modal";
-
+import { usePermission } from "@/hooks/use-permission";
+import { UserRole, User } from "@/types/user";
 
 
 export function AdminSidebar() {
@@ -30,6 +31,14 @@ export function AdminSidebar() {
     const { isCollapsed, toggleSidebar, isMobileOpen, closeMobileSidebar } = useSidebar();
     const { t } = useTranslation();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+    const { userRole, hasRole } = usePermission();
+
+    const [user, setUser] = useState<User | null>(null);
+
+    React.useEffect(() => {
+        const u = authService.getUser();
+        setUser(u);
+    }, []);
 
     // Helper to check if a menu item is active
     const isItemActive = (item: MenuItem) => {
@@ -43,31 +52,99 @@ export function AdminSidebar() {
         authService.logout();
     };
 
+    const getFilteredItems = (items: MenuItem[]) => {
+        return items.filter(item => {
+            // If item has specific allowedRoles, check permission
+            if (item.allowedRoles && item.allowedRoles.length > 0) {
+                if (!hasRole(item.allowedRoles)) return false;
+            }
+
+            // If item has children, filter them as well
+            if (item.children) {
+                const filteredChildren = item.children.filter((child: SubMenuItem) => {
+                    if (child.allowedRoles && child.allowedRoles.length > 0) {
+                        return hasRole(child.allowedRoles);
+                    }
+                    return true;
+                });
+                // If all children are filtered out and item has no href itself (is just a group), hide it
+                // OR if we want to show it but empty? Usually hide.
+                // But we can attach the filtered children back to a copy of item to render.
+                if (filteredChildren.length === 0 && !item.href) return false;
+
+                // Note: We are filtering "in place" for rendering. 
+                // Since sidebarItems is constant, we shouldn't mutate it.
+                // The map function below handles rendering, so we should logic separation.
+                // Better approach: create a new filtered list.
+                return true;
+            }
+
+            return true;
+        }).map(item => {
+            if (item.children) {
+                return {
+                    ...item,
+                    children: item.children.filter((child: SubMenuItem) => {
+                        if (child.allowedRoles && child.allowedRoles.length > 0) {
+                            return hasRole(child.allowedRoles);
+                        }
+                        return true;
+                    })
+                };
+            }
+            return item;
+        }).filter(item => {
+            // Second pass to remove groups that became empty
+            if (item.children && item.children.length === 0 && !item.href) {
+                return false;
+            }
+            return true;
+        });
+    };
+
+    const filteredSidebarItems = React.useMemo(() => {
+        const items = getSidebarItems(userRole);
+        return getFilteredItems(items);
+    }, [userRole, pathname]); // pathname might not strictly be needed if items don't react to it, but good practice if active state logic moves there
+
+    const filteredBottomItems = React.useMemo(() => {
+        const items = getBottomItems(userRole);
+        return getFilteredItems(items);
+    }, [userRole, pathname]);
+
     const SidebarContent = () => (
         <>
             <div className={cn("flex items-center gap-3 px-6 py-6 h-20", isCollapsed ? "justify-center px-2" : "")}>
-                <div className="w-8 h-8 min-w-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground  font-bold">
-                    MC
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary-500 to-secondary-500 flex items-center justify-center shadow-lg shadow-primary-500/30">
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+
                 </div>
-                {!isCollapsed && <span className="font-bold text-lg whitespace-nowrap">MeterialCore</span>}
+                {!isCollapsed && <div className="font-black tracking-tight">
+                    <span className="text-default-900">Material</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-600">Core</span>
+                </div>}
             </div>
 
             <ScrollShadow className="flex-1 px-3 py-2 gap-2 flex flex-col">
                 {/* Main Menu */}
                 <div className="flex flex-col gap-1">
                     {!isCollapsed && <p className="text-xs font-semibold text-default-500 uppercase px-3 mb-2 mt-2">{t("common.materials")}</p>}
-                    {sidebarItems.map((item) => (
+                    {filteredSidebarItems.map((item) => (
                         <SidebarItem key={item.key} item={item} isCollapsed={isCollapsed} isActive={isItemActive(item)} pathname={pathname} t={t} />
                     ))}
                 </div>
 
                 {/* Bottom Menu */}
-                <div className="mt-auto flex flex-col gap-1">
+                {/* <div className="mt-auto flex flex-col gap-1">
                     {!isCollapsed && <p className="text-xs font-semibold text-default-500 uppercase px-3 mb-2 mt-4">{t("common.system")}</p>}
-                    {bottomItems.map((item) => (
+                    {filteredBottomItems.map((item) => (
                         <SidebarItem key={item.key} item={item} isCollapsed={isCollapsed} isActive={isItemActive(item)} pathname={pathname} t={t} />
                     ))}
-                </div>
+                </div> */}
             </ScrollShadow>
 
 
@@ -80,11 +157,19 @@ export function AdminSidebar() {
                     )}
                     onClick={() => setIsLogoutModalOpen(true)}
                 >
-                    <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" size="sm" isBordered className="transition-transform group-hover:scale-105" />
+                    <Avatar
+                        name={(user?.fullname || user?.username || "U").substring(0, 2).toUpperCase()}
+                        size="sm"
+                        isBordered
+                        className="transition-transform group-hover:scale-105"
+                        classNames={{
+                            base: "bg-primary text-white"
+                        }}
+                    />
                     {!isCollapsed && (
                         <div className="flex flex-col flex-1 min-w-0">
-                            <span className="text-sm font-semibold truncate">Super Admin</span>
-                            <span className="text-xs text-default-500 truncate">admin@system.com</span>
+                            <span className="text-sm font-semibold truncate">{user?.fullname || user?.username || "User"}</span>
+                            <span className="text-xs text-default-500 truncate">{user?.email || "..."}</span>
                         </div>
                     )}
                     {!isCollapsed && <LogOut className="w-4 h-4 text-default-400 group-hover:text-danger transition-colors" />}

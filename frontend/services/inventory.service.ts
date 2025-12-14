@@ -13,7 +13,11 @@ import {
     InventoryAdjustmentDTO,
     TransactionResponse,
     MovementHistoryItem,
-    MovementHistoryResponse
+    MovementHistoryResponse,
+    InventoryDashboardStats,
+    InventoryValueTrend,
+    InventoryMovementActivity,
+    InventoryMovementResponse
 } from '@/types/inventory';
 import { MOCK_CONFIG, simulateDelay } from '@/lib/mock/config';
 
@@ -251,9 +255,9 @@ class InventoryService {
             // Generate Mock Data
             const mockData: MovementHistoryItem[] = Array.from({ length: 15 }).map((_, i) => ({
                 transaction_id: i + 1,
-                material_id: params.material_id || (i % 3) + 1,
+                material_id: params.material_id ? Number(params.material_id) : (i % 3) + 1,
                 material_name: params.material_id ? "Details from ID" : `Material ${String.fromCharCode(65 + (i % 3))}`,
-                warehouse_id: params.warehouse_id || (i % 2) + 1,
+                warehouse_id: params.warehouse_id ? Number(params.warehouse_id) : (i % 2) + 1,
                 warehouse_name: params.warehouse_id ? `Warehouse ${params.warehouse_id}` : (i % 2 === 0 ? "Main Warehouse" : "Secondary Warehouse"),
                 transaction_type: ["IN", "OUT", "TRANSFER_IN", "TRANSFER_OUT"][i % 4],
                 quantity_change: i % 2 === 0 ? 10 * (i + 1) : -5 * (i + 1),
@@ -292,8 +296,95 @@ class InventoryService {
         return await apiClient.get<ApiResponse<MovementHistoryResponse>>(`/inventory/reports/movement-history?${query}`);
     }
 
-    // --- Dashboard Stats ---
+    // --- Dashboard Stats (New Implementation per API Spec) ---
+
+    // 1. Inventory Stats
+    async getDashboardStats(): Promise<ApiResponse<InventoryDashboardStats>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return {
+                success: true,
+                message: "Success",
+                data: {
+                    total_inventory_value: 9796500,
+                    currency: "THB",
+                    total_items_in_stock: 2736,
+                    low_stock_items: 0,
+                    out_of_stock_items: 0,
+                    movement_in_today: 0,
+                    movement_out_today: 0,
+                    trends: {
+                        value: "0.0%",
+                        movement_in: "-100.0%",
+                        movement_out: "0.0%"
+                    }
+                }
+            };
+        }
+        return await apiClient.get<ApiResponse<InventoryDashboardStats>>('/inventory/dashboard/stats');
+    }
+
+    // 2. Value Trends
+    async getValueTrends(range: string = 'week'): Promise<ApiResponse<InventoryValueTrend[]>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            // Generate mock data based on range if needed, for now returning static mock as per spec example + some variations
+            const baseDate = new Date('2023-10-01');
+            const data: InventoryValueTrend[] = Array.from({ length: 7 }).map((_, i) => {
+                const date = new Date(baseDate);
+                date.setDate(baseDate.getDate() + i);
+                return {
+                    date: date.toISOString().split('T')[0],
+                    value: 1400000 + (Math.random() * 100000)
+                };
+            });
+
+            return {
+                success: true,
+                message: "Success",
+                data: data
+            };
+        }
+        return await apiClient.get<ApiResponse<InventoryValueTrend[]>>(`/inventory/dashboard/value-trends?range=${range}`);
+    }
+
+    // 3. Movement Activity
+    async getMovementActivity(range: string = 'week'): Promise<ApiResponse<InventoryMovementResponse>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return {
+                success: true,
+                message: "Success",
+                data: {
+                    inbound: [
+                        { "name": "Mon", "value": 100 },
+                        { "name": "Tue", "value": 120 },
+                        { "name": "Wed", "value": 150 },
+                        { "name": "Thu", "value": 80 },
+                        { "name": "Fri", "value": 200 },
+                        { "name": "Sat", "value": 110 },
+                        { "name": "Sun", "value": 90 }
+                    ],
+                    outbound: [
+                        { "name": "Mon", "value": 80 },
+                        { "name": "Tue", "value": 90 },
+                        { "name": "Wed", "value": 100 },
+                        { "name": "Thu", "value": 120 },
+                        { "name": "Fri", "value": 150 },
+                        { "name": "Sat", "value": 80 },
+                        { "name": "Sun", "value": 60 }
+                    ]
+                }
+            };
+        }
+        return await apiClient.get<ApiResponse<InventoryMovementResponse>>(`/inventory/dashboard/movement?range=${range}`);
+    }
+
+    /**
+     * @deprecated Use specific dashboard methods instead
+     */
     async getStats(): Promise<import('@/types/inventory').InventoryStats> {
+        // ... (keep existing implementation for backward compatibility if needed, or just return basic structure)
         if (MOCK_CONFIG.useMock) {
             await simulateDelay();
             return {

@@ -16,7 +16,7 @@ interface UsePushNotificationResult {
     isSubscribed: boolean;
     isLoading: boolean;
     error: string | null;
-    subscribe: (token: string) => Promise<boolean>;
+    subscribe: () => Promise<boolean>;
     unsubscribe: () => Promise<boolean>;
     checkSubscription: () => Promise<void>;
 }
@@ -53,8 +53,8 @@ export function usePushNotification(): UsePushNotificationResult {
         checkSupport();
     }, []);
 
-    // Subscribe to push notifications
-    const subscribe = useCallback(async (token: string): Promise<boolean> => {
+    // Subscribe to push notifications (uses cookies for auth)
+    const subscribe = useCallback(async (): Promise<boolean> => {
         if (!isSupported) {
             setError('Push notifications are not supported');
             return false;
@@ -64,7 +64,7 @@ export function usePushNotification(): UsePushNotificationResult {
         setError(null);
 
         try {
-            const subscription = await subscribeToPush(token);
+            const subscription = await subscribeToPush();
             if (subscription) {
                 setIsSubscribed(true);
                 setPermission('granted');

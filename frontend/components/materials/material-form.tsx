@@ -11,6 +11,8 @@ import { Material, CreateMaterialDTO, MaterialGroup, ContainerType, MaterialUnit
 import { Supplier } from "@/types/suppliers";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@heroui/spinner";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 interface MaterialFormProps {
     initialData?: Material;
@@ -20,6 +22,8 @@ interface MaterialFormProps {
 export function MaterialForm({ initialData, mode }: MaterialFormProps) {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [loading, setLoading] = useState(false);
     const [groups, setGroups] = useState<MaterialGroup[]>([]);
     const [containers, setContainers] = useState<ContainerType[]>([]);
@@ -90,7 +94,7 @@ export function MaterialForm({ initialData, mode }: MaterialFormProps) {
             } else {
                 await materialService.create(formData);
             }
-            router.push("/super-admin/materials/all");
+            router.push(`${basePath}/materials/all`);
         } catch (error) {
             console.error("Failed to save material", error);
         } finally {

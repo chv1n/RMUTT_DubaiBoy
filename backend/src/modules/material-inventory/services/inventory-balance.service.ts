@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Between, Repository, SelectQueryBuilder } from 'typeorm';
 import { MaterialInventory } from '../entities/material-inventory.entity';
 import { MaterialMaster } from '../../material/entities/material-master.entity';
 import { WarehouseMaster } from '../../warehouse-master/entities/warehouse-master.entity';
@@ -9,6 +9,7 @@ import { TotalStockQueryDto, TotalStockResponseDto } from '../dto/total-stock.dt
 import { LotBatchQueryDto, LotBatchSuggestionDto } from '../dto/lot-batch.dto';
 import { LowStockQueryDto, LowStockAlertResponseDto } from '../dto/low-stock-alert.dto';
 import { LotStrategy } from '../../../common/enums';
+import { InventoryTransaction } from 'src/modules/inventory-transaction/entities/inventory-transaction.entity';
 
 /**
  * Service สำหรับจัดการยอดคงคลัง (Inventory Balance Control)
@@ -28,6 +29,8 @@ export class InventoryBalanceService {
         private readonly materialRepository: Repository<MaterialMaster>,
         @InjectRepository(WarehouseMaster)
         private readonly warehouseRepository: Repository<WarehouseMaster>,
+        @InjectRepository(InventoryTransaction)
+        private readonly transactionRepository: Repository<InventoryTransaction>,
     ) { }
 
     /**
@@ -344,4 +347,7 @@ export class InventoryBalanceService {
             currentPage: page,
         };
     }
+
+
+
 }

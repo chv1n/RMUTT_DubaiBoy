@@ -17,7 +17,11 @@ export class PushSubscriptionService implements ISoftDeletable {
   ) { }
 
   async create(createDto: CreatePushSubscriptionDto, userId?: number) {
-    const entity = await this.repo.create(createDto);
+    const entity = this.repo.create({
+      endpoint: createDto.endpoint,
+      p256dh: createDto.keys.p256dh,
+      auth: createDto.keys.auth,
+    });
     if (userId) entity.user_id = userId;
     return this.repo.save(entity);
   }

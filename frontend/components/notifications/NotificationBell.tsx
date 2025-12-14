@@ -18,11 +18,8 @@ interface Notification {
     read: boolean;
 }
 
-interface NotificationBellProps {
-    token?: string;
-}
-
-export function NotificationBell({ token }: NotificationBellProps) {
+// No token prop needed - auth uses httpOnly cookies
+export function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const { isSupported, isSubscribed, permission, subscribe, unsubscribe, isLoading } = usePushNotification();
@@ -30,12 +27,10 @@ export function NotificationBell({ token }: NotificationBellProps) {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     const handleToggleSubscription = async () => {
-        if (!token) return;
-
         if (isSubscribed) {
             await unsubscribe();
         } else {
-            await subscribe(token);
+            await subscribe();
         }
     };
 
@@ -108,7 +103,7 @@ export function NotificationBell({ token }: NotificationBellProps) {
                                 isLoading={isLoading}
                                 startContent={isSubscribed ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
                                 onPress={handleToggleSubscription}
-                                isDisabled={!token || permission === 'denied'}
+                                isDisabled={permission === 'denied'}
                             >
                                 {isSubscribed ? 'ปิดการแจ้งเตือน' : 'เปิดการแจ้งเตือน'}
                             </Button>

@@ -3,4 +3,5 @@ export enum Status {
     COMPLETED = 'COMPLETED',
     CANCELLED = 'CANCELLED',
     PENDING = 'PENDING',
+    DRAFT = 'DRAFT'
 }

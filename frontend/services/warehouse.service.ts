@@ -296,45 +296,79 @@ class WarehouseService {
     }
 
     // --- Dashboard Stats ---
-    async getStats(): Promise<import('@/types/warehouse').WarehouseStats> {
+    // --- Dashboard Stats ---
+
+    async getDashboardStats(): Promise<ApiResponse<import('@/types/warehouse').WarehouseDashboardStats>> {
         if (MOCK_CONFIG.useMock) {
             await simulateDelay();
-
             return {
-                totalWarehouses: MOCK_WAREHOUSES.length,
-                activeWarehouses: MOCK_WAREHOUSES.filter(w => w.is_active).length,
-                totalValue: 1250000,
-                totalItems: 8500,
-                lowStockAlerts: 5,
-                utilizationRate: 72,
-                distribution: [
-                    { name: "Main Warehouse", value: 850000, count: 5000, color: '#6366f1' },
-                    { name: "Chemical Storage", value: 250000, count: 1500, color: '#10b981' },
-                    { name: "Cold Storage", value: 150000, count: 2000, color: '#f59e0b' }
-                ],
-                capacity: [
-                    { name: "Main Warehouse", capacity: 10000, used: 5000, percentage: 50 },
-                    { name: "Chemical Storage", capacity: 2000, used: 1500, percentage: 75 },
-                    { name: "Cold Storage", capacity: 3000, used: 2000, percentage: 66 }
+                success: true,
+                message: "Success",
+                data: {
+                    total_warehouses: 5,
+                    active_warehouses: 5,
+                    total_inventory_value: 1500000,
+                    total_stock_items: 12500,
+                    low_stock_alerts: 12,
+                    utilization_rate: 78
+                }
+            };
+        }
+        const response = await apiClient.get<ApiResponse<import('@/types/warehouse').WarehouseDashboardStats>>(`${this.endpoint}/dashboard/stats`);
+        return response;
+    }
+
+    async getDashboardDistribution(): Promise<ApiResponse<import('@/types/warehouse').WarehouseStockDistributionItem[]>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return {
+                success: true,
+                message: "Success",
+                data: [
+                    { warehouse_name: "Main Warehouse", value: 800000, item_count: 5000, color: '#6366f1' },
+                    { warehouse_name: "Cold Storage", value: 400000, item_count: 2000, color: '#f59e0b' },
+                    { warehouse_name: "Chemical Store", value: 300000, item_count: 1500, color: '#10b981' }
                 ]
             };
         }
+        const response = await apiClient.get<ApiResponse<import('@/types/warehouse').WarehouseStockDistributionItem[]>>(`${this.endpoint}/dashboard/distribution`);
+        return response;
+    }
 
-        try {
-            const response = await apiClient.get<ApiResponse<import('@/types/warehouse').WarehouseStats>>(`${this.endpoint}/dashboard/stats`);
-            return response.data;
-        } catch (error) {
-            console.warn("API warehouse stats failed, using fallback", error);
+    async getDashboardUtilization(): Promise<ApiResponse<import('@/types/warehouse').WarehouseCapacityItem[]>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
             return {
-                totalWarehouses: 0,
-                activeWarehouses: 0,
-                totalValue: 0,
-                totalItems: 0,
-                lowStockAlerts: 0,
-                utilizationRate: 0,
-                distribution: []
+                success: true,
+                message: "Success",
+                data: [
+                    { warehouse_name: "Main Warehouse", capacity: 10000, used: 8000, percentage: 80 },
+                    { warehouse_name: "Cold Storage", capacity: 5000, used: 2000, percentage: 40 },
+                    { warehouse_name: "Chemical Store", capacity: 4000, used: 2500, percentage: 62.5 }
+                ]
             };
         }
+        const response = await apiClient.get<ApiResponse<import('@/types/warehouse').WarehouseCapacityItem[]>>(`${this.endpoint}/dashboard/utilization`);
+        return response;
+    }
+
+    // Deprecated
+    async getStats(): Promise<import('@/types/warehouse').WarehouseStatsLegacy> {
+        // This is kept only if other components rely on it, but we are rewriting the dashboard.
+        // Returning mock wrapper that calls new methods locally if needed, but for now just mock return.
+        if (MOCK_CONFIG.useMock) {
+            return {
+                totalWarehouses: 5,
+                activeWarehouses: 5,
+                totalValue: 1500000,
+                totalItems: 12500,
+                lowStockAlerts: 12,
+                utilizationRate: 78,
+                distribution: [],
+                capacity: []
+            };
+        }
+        return {} as any;
     }
 }
 

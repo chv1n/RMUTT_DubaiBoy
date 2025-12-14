@@ -16,10 +16,14 @@ import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Switch } from "@heroui/switch";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 export function WarehouseList() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [loading, setLoading] = useState(true);
     const [meta, setMeta] = useState<Meta>({
@@ -179,7 +183,7 @@ export function WarehouseList() {
                 return (
                     <div className="relative flex items-center justify-center gap-2">
                         <Tooltip content={t("common.detail") || "View Detail"}>
-                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors" onClick={() => router.push(`/super-admin/warehouse/${item.id}`)}>
+                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50 hover:text-primary transition-colors" onClick={() => router.push(`${basePath}/warehouse/${item.id}`)}>
                                 <Eye size={18} />
                             </span>
                         </Tooltip>
@@ -198,7 +202,7 @@ export function WarehouseList() {
             default:
                 return (item as any)[columnKey as string];
         }
-    }, [t, router]);
+    }, [t, router, basePath]);
 
     return (
         <div className="space-y-4">

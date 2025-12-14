@@ -18,7 +18,6 @@ type AdminHeaderProps = {
 export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
     // const { toggleMobileSidebar } = useSidebar(); // Removed internal hook usage
     const { locale, setLocale } = useTranslation();
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
     return (
         <header className="h-16    bg-background  backdrop-blur-lg flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
@@ -32,7 +31,7 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
                     <Menu size={24} />
                 </Button>
 
-                <Input
+                {/* <Input
                     classNames={{
                         base: "max-w-full sm:max-w-[20rem] h-10",
                         mainWrapper: "h-full",
@@ -43,11 +42,11 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
                     size="sm"
                     startContent={<Search size={18} />}
                     type="search"
-                />
+                /> */}
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
-                <NotificationBell token={token || undefined} />
+                <NotificationBell />
                 <Button isIconOnly variant="light" size="sm" radius="full" className="hidden sm:flex">
                     <Settings size={20} className="text-default-500" />
                 </Button>

@@ -33,8 +33,8 @@ class SupplierService { // Fixed: Renamed from SupplierService to avoid conflict
         await simulateDelay();
         // Since we removed totalSpent from Supplier, we must simulate it or fetch elsewhere if needed.
         // For now, using mock values to satisfy SupplierStats.
-        const totalSpent = 500000; 
-        
+        const totalSpent = 500000;
+
         return {
             totalSuppliers: MOCK_SUPPLIERS.length,
             activeSuppliers: MOCK_SUPPLIERS.filter(s => s.status === 'active').length,
@@ -70,7 +70,7 @@ class SupplierService { // Fixed: Renamed from SupplierService to avoid conflict
             return [];
         } catch (error) {
             console.warn("API failed, falling back to mock data", error);
-            throw error; 
+            throw error;
         }
     }
 
@@ -102,7 +102,7 @@ class SupplierService { // Fixed: Renamed from SupplierService to avoid conflict
             MOCK_SUPPLIERS.push(newSupplier);
             return newSupplier;
         }
-        
+
         const backendPayload = {
             supplier_name: data.name,
             phone: data.phone || null,
@@ -120,7 +120,7 @@ class SupplierService { // Fixed: Renamed from SupplierService to avoid conflict
             await simulateDelay();
             const index = MOCK_SUPPLIERS.findIndex(s => s.id === Number(id));
             if (index === -1) throw new Error("Supplier not found");
-            
+
             const current = MOCK_SUPPLIERS[index];
             const updated: Supplier = {
                 ...current,
@@ -159,21 +159,85 @@ class SupplierService { // Fixed: Renamed from SupplierService to avoid conflict
         return apiClient.delete<void>(`${this.endpoint}/${id}`);
     }
 
-    async getStats(): Promise<SupplierStats> {
+    // --- Dashboard Methods ---
+
+    async getDashboardStats(): Promise<ApiResponse<import('@/types/suppliers').SupplierDashboardStats>> {
         if (MOCK_CONFIG.useMock) {
-            return this.getMockStats();
+            await simulateDelay();
+            return {
+                success: true,
+                message: "Success",
+                data: {
+                    total_suppliers: 120,
+                    active_suppliers: 115,
+                    active_suppliers_trend: 5.2,
+                    total_spend_ytd: 1500000,
+                    total_spend_trend: 10.5,
+                    open_orders_count: 45,
+                    open_orders_trend: -2.0,
+                    issues_count: 3
+                }
+            };
         }
-        try {
-            const response = await apiClient.get<ApiResponse<any>>(`${this.endpoint}/stats`);
-            const data = response.data;
-            if (data.topSuppliers && Array.isArray(data.topSuppliers)) {
-                data.topSuppliers = data.topSuppliers.map(mapSupplierDTOToDomain);
+        const response = await apiClient.get<ApiResponse<import('@/types/suppliers').SupplierDashboardStats>>(`${this.endpoint}/stats/summary`);
+        return response;
+    }
+
+    async getSpendingAnalytics(type: 'monthly' | 'category'): Promise<ApiResponse<import('@/types/suppliers').SupplierSpendingItem[]>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            if (type === 'monthly') {
+                return {
+                    success: true,
+                    message: "Success",
+                    data: [
+                        { month: "Jan", amount: 150000 },
+                        { month: "Feb", amount: 230000 },
+                        { month: "Mar", amount: 180000 },
+                        { month: "Apr", amount: 320000 },
+                        { month: "May", amount: 290000 },
+                        { month: "Jun", amount: 450000 }
+                    ]
+                };
+            } else {
+                return {
+                    success: true,
+                    message: "Success",
+                    data: [
+                        { category: "Electronics", amount: 500000, percentage: 35 },
+                        { category: "Construction", amount: 350000, percentage: 25 },
+                        { category: "Chemicals", amount: 1200000, percentage: 80 }, // Wait, percentages don't sum to 100 in mock? Just mock values.
+                        { category: "Metals", amount: 850000, percentage: 15 }
+                    ]
+                };
             }
-            return data as SupplierStats;
-        } catch (error) {
-            console.warn("API failed, falling back to mock data", error);
-            return this.getMockStats();
         }
+        const response = await apiClient.get<ApiResponse<import('@/types/suppliers').SupplierSpendingItem[]>>(`${this.endpoint}/stats/spending?type=${type}`);
+        return response;
+    }
+
+    async getTopPerformingSuppliers(): Promise<ApiResponse<import('@/types/suppliers').TopPerformingSupplier[]>> {
+        if (MOCK_CONFIG.useMock) {
+            await simulateDelay();
+            return {
+                success: true,
+                message: "Success",
+                data: [
+                    { supplier_id: 1, supplier_name: "ABC Corp", total_spend: 500000, rating: 4.8, status: "active", category: "Electronics", email: "contact@abc.com" },
+                    { supplier_id: 2, supplier_name: "Global Steel", total_spend: 350000, rating: 4.5, status: "active", category: "Metals", email: "sales@steel.com" },
+                    { supplier_id: 3, supplier_name: "ChemTech", total_spend: 320000, rating: 4.2, status: "active", category: "Chemicals", email: "info@chemtech.com" },
+                    { supplier_id: 4, supplier_name: "Office Supplies Co", total_spend: 50000, rating: 3.9, status: "active", category: "Office", email: "support@osc.com" },
+                    { supplier_id: 5, supplier_name: "BuildIt", total_spend: 45000, rating: 3.5, status: "inactive", category: "Construction", email: "contact@buildit.com" }
+                ]
+            };
+        }
+        const response = await apiClient.get<ApiResponse<import('@/types/suppliers').TopPerformingSupplier[]>>(`${this.endpoint}/stats/top-performing`);
+        return response;
+    }
+
+    // Deprecated legacy method
+    async getStats(): Promise<any> {
+        return {};
     }
 }
 

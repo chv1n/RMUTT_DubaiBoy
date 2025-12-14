@@ -64,19 +64,20 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 }
 
 /**
- * Get VAPID public key from backend
+ * Get VAPID public key from backend (uses cookies for auth)
  */
-export async function getVapidPublicKey(token: string): Promise<string> {
+export async function getVapidPublicKey(): Promise<string> {
+    console.log(`${API_BASE_URL}/notifications/vapid-public-key`);
     const response = await axios.get(`${API_BASE_URL}/notifications/vapid-public-key`, {
-        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true, // Send cookies
     });
     return response.data.data.publicKey;
 }
 
 /**
- * Subscribe to push notifications
+ * Subscribe to push notifications (uses cookies for auth)
  */
-export async function subscribeToPush(token: string): Promise<PushSubscription | null> {
+export async function subscribeToPush(): Promise<PushSubscription | null> {
     if (!isPushSupported()) {
         console.warn('Push notifications not supported');
         return null;
@@ -94,7 +95,7 @@ export async function subscribeToPush(token: string): Promise<PushSubscription |
         const registration = await registerServiceWorker();
 
         // Get VAPID public key from backend
-        const vapidPublicKey = await getVapidPublicKey(token);
+        const vapidPublicKey = await getVapidPublicKey();
         if (!vapidPublicKey) {
             throw new Error('VAPID public key not available');
         }
@@ -108,7 +109,7 @@ export async function subscribeToPush(token: string): Promise<PushSubscription |
         console.log('Push subscription created:', subscription);
 
         // Send subscription to backend
-        await sendSubscriptionToServer(subscription, token);
+        await sendSubscriptionToServer(subscription);
 
         return subscription;
     } catch (error) {
@@ -118,20 +119,23 @@ export async function subscribeToPush(token: string): Promise<PushSubscription |
 }
 
 /**
- * Send subscription to backend
+ * Send subscription to backend (uses cookies for auth)
  */
-async function sendSubscriptionToServer(subscription: PushSubscription, token: string): Promise<void> {
+async function sendSubscriptionToServer(subscription: PushSubscription): Promise<void> {
     const subscriptionJson = subscription.toJSON();
 
     await axios.post(
         `${API_BASE_URL}/push-subscriptions/subscribe`,
         {
             endpoint: subscriptionJson.endpoint,
-            p256dh: subscriptionJson.keys?.p256dh,
-            auth: subscriptionJson.keys?.auth,
+            keys: {
+                p256dh: subscriptionJson.keys?.p256dh,
+                auth: subscriptionJson.keys?.auth,
+            },
+            expirationTime: subscriptionJson.expirationTime || null,
         },
         {
-            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true, // Send cookies
         }
     );
 

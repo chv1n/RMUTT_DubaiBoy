@@ -15,6 +15,8 @@ import {
 import { useRouter } from "next/navigation";
 import { Chip } from "@heroui/chip";
 import { Spinner } from "@heroui/spinner";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 // Mock Data for now - In real app, fetch from multiple services or a dedicated dashboard endpoint
 const mockData = {
@@ -41,6 +43,8 @@ const mockData = {
 export default function MainDashboard() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [isLoading, setIsLoading] = React.useState(true);
 
     React.useEffect(() => {
@@ -79,7 +83,7 @@ export default function MainDashboard() {
                             className="bg-white/10 backdrop-blur-md text-white border border-white/20 shadow-lg"
                             size="lg"
                             variant="flat"
-                            onPress={() => router.push('/super-admin/reports')}
+                            onPress={() => router.push(`${basePath}/analytics`)}
                             startContent={<Activity className="text-secondary-300" />}
                         >
                             {t("common.analytics")}
@@ -99,7 +103,7 @@ export default function MainDashboard() {
                     value={mockData.users.total.toLocaleString()}
                     change={`${mockData.users.change}%`}
                     icon={<Users className="text-primary" />}
-                    onClick={() => router.push('/super-admin/users')}
+                    onClick={() => router.push(`${basePath}/users`)}
                     subtext={t("user.subtext.active")}
                 />
                 <StatCard
@@ -107,7 +111,7 @@ export default function MainDashboard() {
                     value={mockData.materials.total.toLocaleString()}
                     change={`${mockData.materials.change}%`}
                     icon={<Package className="text-secondary" />}
-                    onClick={() => router.push('/super-admin/materials')}
+                    onClick={() => router.push(`${basePath}/materials`)}
                     subtext="Items stored"
                 />
                 <StatCard
@@ -116,7 +120,7 @@ export default function MainDashboard() {
                     change="-2%"
                     icon={<AlertTriangle className="text-warning" />}
                     negative={true}
-                    onClick={() => router.push('/super-admin/inventory/balance')}
+                    onClick={() => router.push(`${basePath}/inventory/balance`)}
                     subtext="Requires attention"
                 />
                 <StatCard
@@ -124,7 +128,7 @@ export default function MainDashboard() {
                     value={`${mockData.plans.onTime}%`}
                     change="+1.5%"
                     icon={<Activity className="text-success" />}
-                    onClick={() => router.push('/super-admin/plans')}
+                    onClick={() => router.push(`${basePath}/plans`)}
                     subtext="Production efficiency"
                 />
             </div>

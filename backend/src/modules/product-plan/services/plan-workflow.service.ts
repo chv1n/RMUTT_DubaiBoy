@@ -9,12 +9,12 @@ import { CompletePlanDto } from '../dto/complete-plan.dto';
 import { CancelPlanDto } from '../dto/cancel-plan.dto';
 import { StockReservationService, IStockOperation } from './stock-reservation.service';
 import { BomService } from 'src/modules/bom/bom.service';
-import { MaterialService } from 'src/modules/material/material.service';
 import { AuditLogService } from 'src/modules/audit-log/audit-log.service';
 import { AuditAction } from 'src/modules/audit-log/enums/audit-action.enum';
 import { AuditEntity } from 'src/modules/audit-log/enums/audit-entity.enum';
 import { MaterialInventory } from 'src/modules/material-inventory/entities/material-inventory.entity';
 import { IPlanPreview, IMaterialRequirement, IWarehouseStock } from '../interfaces';
+import { MaterialService } from 'src/modules/material/services/material.service';
 
 /**
  * Service สำหรับจัดการ Plan Workflow

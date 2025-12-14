@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, ParseIntPipe } from '@nestjs/common';
-import { WarehouseMasterService } from './warehouse-master.service';
+import { WarehouseMasterService } from './services/warehouse-master.service';
 import { CreateWarehouseMasterDto } from './dto/create-warehouse-master.dto';
 import { UpdateWarehouseMasterDto } from './dto/update-warehouse-master.dto';
 import { WarehouseMasterQueryDto } from './dto/warehouse-master-query.dto';
