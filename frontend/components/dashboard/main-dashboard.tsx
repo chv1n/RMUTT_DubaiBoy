@@ -83,7 +83,7 @@ export default function MainDashboard() {
                             className="bg-white/10 backdrop-blur-md text-white border border-white/20 shadow-lg"
                             size="lg"
                             variant="flat"
-                            onPress={() => router.push(`${basePath}/reports`)}
+                            onPress={() => router.push(`${basePath}/analytics`)}
                             startContent={<Activity className="text-secondary-300" />}
                         >
                             {t("common.analytics")}

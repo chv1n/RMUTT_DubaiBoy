@@ -24,15 +24,29 @@ export function WarehouseDashboard() {
     const { t } = useTranslation();
     const router = useRouter();
     const primaryColor = usePrimaryColor();
-    const { userRole } = usePermission(); // Add hook
-    const basePath = getRolePath(userRole); // Compute base path
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
 
     // --- Data Fetching ---
-    const { data: stats, isLoading } = useQuery({
+    const { data: statsData, isLoading: isStatsLoading } = useQuery({
         queryKey: ['warehouse', 'dashboard', 'stats'],
-        queryFn: () => warehouseService.getStats(),
-        staleTime: 5 * 60 * 1000 // Cache for 5 mins
+        queryFn: () => warehouseService.getDashboardStats(),
+        staleTime: 5 * 60 * 1000
     });
+
+    const { data: distributionData, isLoading: isDistLoading } = useQuery({
+        queryKey: ['warehouse', 'dashboard', 'distribution'],
+        queryFn: () => warehouseService.getDashboardDistribution(),
+        staleTime: 5 * 60 * 1000
+    });
+
+    const { data: utilizationData, isLoading: isUtilLoading } = useQuery({
+        queryKey: ['warehouse', 'dashboard', 'utilization'],
+        queryFn: () => warehouseService.getDashboardUtilization(),
+        staleTime: 5 * 60 * 1000
+    });
+
+    const isLoading = isStatsLoading || isDistLoading || isUtilLoading;
 
     if (isLoading) return (
         <div className="flex h-96 w-full justify-center items-center flex-col gap-4">
@@ -40,6 +54,21 @@ export function WarehouseDashboard() {
             <p className="text-default-500 animate-pulse">{t('common.loading')}</p>
         </div>
     );
+
+    const unwrapData = (response: any) => {
+        if (!response?.data) return undefined;
+        // Check for double wrapping: response.data has 'success' and 'data' properties
+        if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+            return response.data.data;
+        }
+        return response.data;
+    };
+
+    const stats = unwrapData(statsData);
+    const rawDistribution = unwrapData(distributionData);
+    const distribution = Array.isArray(rawDistribution) ? rawDistribution : [];
+    const rawUtilization = unwrapData(utilizationData);
+    const utilization = Array.isArray(rawUtilization) ? rawUtilization : [];
 
     if (!stats) return <div className="text-center text-default-500 py-10">{t('common.error')}</div>;
 
@@ -49,7 +78,7 @@ export function WarehouseDashboard() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-default-900">{t("warehouses.dashboard")}</h1>
-                    <p className="text-small text-default-500">Overview of warehouse performance and inventory</p>
+                    <p className="text-small text-default-500">{t("warehouses.subtitle") || "Overview of warehouse performance and inventory"}</p>
                 </div>
                 <div className="flex gap-2">
                     <Button color="primary" startContent={<ArrowUpRight size={16} />}>
@@ -65,36 +94,37 @@ export function WarehouseDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KPICard
                     title={t("warehouses.totalValue")}
-                    value={`$${stats.totalValue.toLocaleString()}`}
-                    subtext="Across all warehouses"
+                    value={`$${(stats.total_inventory_value ?? 0).toLocaleString()}`}
+                    subtext={t("warehouses.subtext.totalValue") || "Across all warehouses"}
                     icon={<DollarSign size={24} className="text-success" />}
-                    trend={12}
-                    trendLabel="vs last month"
+                    trend={12} // Mock trend
+                    trendLabel={t("warehouses.subtext.vsLastMonth") || "vs last month"}
                 />
                 <KPICard
                     title={t("warehouses.totalItems")}
-                    value={stats.totalItems.toLocaleString()}
-                    subtext="Total stock count"
+                    value={(stats.total_stock_items ?? 0).toLocaleString()}
+                    subtext={t("warehouses.subtext.totalItems") || "Total stock count"}
                     icon={<Package size={24} className="text-primary" />}
-                    trend={5}
-                    trendLabel="vs last month"
+                    trend={5} // Mock trend
+                    trendLabel={t("warehouses.subtext.vsLastMonth") || "vs last month"}
                 />
                 <KPICard
                     title={t("warehouses.utilization")}
-                    value={`${stats.utilizationRate}%`}
-                    subtext="Avg. Capacity Usage"
+                    value={`${stats.utilization_rate ?? 0}%`}
+                    subtext={t("warehouses.subtext.avgCapacity") || "Avg. Capacity Usage"}
                     icon={<Activity size={24} className="text-secondary" />}
                     trend={2}
-                    trendLabel="stable"
+                    trendLabel={t("warehouses.subtext.stable") || "stable"}
                 />
                 <KPICard
                     title={t("warehouses.lowStockAlerts")}
-                    value={stats.lowStockAlerts}
-                    subtext="Items below min stock"
+                    value={stats.low_stock_alerts ?? 0}
+                    subtext={t("warehouses.subtext.alerts") || "Items below min stock"}
                     icon={<AlertTriangle size={24} className="text-warning" />}
                     trend={-20}
-                    trendLabel="vs last month"
+                    trendLabel={t("warehouses.subtext.vsLastMonth") || "vs last month"}
                     inverseTrend
+                    color="warning"
                 />
             </div>
 
@@ -106,23 +136,23 @@ export function WarehouseDashboard() {
                     <CardHeader className="flex justify-between items-center px-6 py-4">
                         <div>
                             <h4 className="font-bold text-large text-default-700">{t("warehouses.capacity")}</h4>
-                            <p className="text-small text-default-500">Stock vs Capacity per Warehouse</p>
+                            <p className="text-small text-default-500">{t("warehouses.subtext.capacityChart") || "Stock vs Capacity per Warehouse"}</p>
                         </div>
                     </CardHeader>
                     <CardBody className="px-4 pb-4">
                         <div className="h-[320px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={stats.capacity ? stats.capacity : []} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                                <BarChart data={utilization as any[]} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
                                     <XAxis type="number" hide />
-                                    <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 12, fill: '#6B7280' }} />
+                                    <YAxis dataKey="warehouse_name" type="category" width={120} tick={{ fontSize: 12, fill: '#6B7280' }} />
                                     <Tooltip
                                         cursor={{ fill: 'transparent' }}
                                         contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                                     />
                                     <Legend />
-                                    <Bar dataKey="used" name="Used" stackId="a" fill={primaryColor} radius={[0, 4, 4, 0]} barSize={20} />
-                                    <Bar dataKey="capacity" name="Total Capacity" stackId="a" fill="#e5e7eb" radius={[0, 4, 4, 0]} barSize={20} />
+                                    <Bar dataKey="used" name={t("warehouses.chart.used") || "Used"} stackId="a" fill={primaryColor} radius={[0, 4, 4, 0]} barSize={20} />
+                                    <Bar dataKey="capacity" name={t("warehouses.chart.capacity") || "Total Capacity"} stackId="a" fill="#e5e7eb" radius={[0, 4, 4, 0]} barSize={20} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -134,7 +164,7 @@ export function WarehouseDashboard() {
                     <CardHeader className="flex justify-between items-center px-6 py-4">
                         <div>
                             <h4 className="font-bold text-large text-default-700">{t("warehouses.distribution")}</h4>
-                            <p className="text-small text-default-500">By Warehouse Value</p>
+                            <p className="text-small text-default-500">{t("warehouses.subtext.distributionChart") || "By Warehouse Value"}</p>
                         </div>
                     </CardHeader>
                     <CardBody className="px-4 pb-4 flex items-center justify-center">
@@ -142,15 +172,16 @@ export function WarehouseDashboard() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={stats.distribution}
+                                        data={distribution as any[]}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
                                         outerRadius={80}
                                         paddingAngle={5}
                                         dataKey="value"
+                                        nameKey="warehouse_name" // Ensure nameKey is correct
                                     >
-                                        {stats.distribution.map((entry, index) => (
+                                        {distribution.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>

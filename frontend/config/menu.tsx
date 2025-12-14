@@ -141,18 +141,18 @@ export const getSidebarItems = (role: UserRole | null): MenuItem[] => {
 export const getBottomItems = (role: UserRole | null): MenuItem[] => {
     const prefix = getRolePath(role);
     return [
-        {
-            key: "settings",
-            label: "common.settings",
-            icon: <Settings className="w-5 h-5" />,
-            href: `${prefix}`, // Assuming settings page is at root or similar
-        },
-        {
-            key: "help",
-            label: "common.help",
-            icon: <HelpCircle className="w-5 h-5" />,
-            href: `${prefix}`,
-        },
+        // {
+        //     key: "settings",
+        //     label: "common.settings",
+        //     icon: <Settings className="w-5 h-5" />,
+        //     href: `${prefix}`, // Assuming settings page is at root or similar
+        // },
+        // {
+        //     key: "help",
+        //     label: "common.help",
+        //     icon: <HelpCircle className="w-5 h-5" />,
+        //     href: `${prefix}`,
+        // },
     ];
 };
 

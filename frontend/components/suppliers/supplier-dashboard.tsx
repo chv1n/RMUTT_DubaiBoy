@@ -19,16 +19,45 @@ import { useQuery } from "@tanstack/react-query";
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
+// Helper to safely unwrap data
+const unwrapData = (response: any) => {
+    if (!response?.data) return undefined;
+    if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+        return response.data.data;
+    }
+    return response.data;
+};
+
 export function SupplierDashboard() {
     const { t } = useTranslation();
     const primaryColor = usePrimaryColor();
 
     // --- Data Fetching ---
-    const { data: stats, isLoading } = useQuery({
+    const { data: statsData, isLoading: isStatsLoading } = useQuery({
         queryKey: ['suppliers', 'dashboard', 'stats'],
-        queryFn: () => supplierService.getStats(),
-        staleTime: 5 * 60 * 1000 // Cache for 5 mins
+        queryFn: () => supplierService.getDashboardStats(),
+        staleTime: 5 * 60 * 1000
     });
+
+    const { data: monthlyData, isLoading: isMonthlyLoading } = useQuery({
+        queryKey: ['suppliers', 'dashboard', 'spending', 'monthly'],
+        queryFn: () => supplierService.getSpendingAnalytics('monthly'),
+        staleTime: 5 * 60 * 1000
+    });
+
+    const { data: categoryData, isLoading: isCategoryLoading } = useQuery({
+        queryKey: ['suppliers', 'dashboard', 'spending', 'category'],
+        queryFn: () => supplierService.getSpendingAnalytics('category'),
+        staleTime: 5 * 60 * 1000
+    });
+
+    const { data: topSuppliersData, isLoading: isTopLoading } = useQuery({
+        queryKey: ['suppliers', 'dashboard', 'top'],
+        queryFn: () => supplierService.getTopPerformingSuppliers(),
+        staleTime: 5 * 60 * 1000
+    });
+
+    const isLoading = isStatsLoading || isMonthlyLoading || isCategoryLoading || isTopLoading;
 
     if (isLoading) return (
         <div className="flex h-96 w-full justify-center items-center flex-col gap-4">
@@ -37,11 +66,16 @@ export function SupplierDashboard() {
         </div>
     );
 
+    const stats = unwrapData(statsData);
+    const monthlySpending = Array.isArray(unwrapData(monthlyData)) ? unwrapData(monthlyData) : [];
+    const categorySpending = Array.isArray(unwrapData(categoryData)) ? unwrapData(categoryData) : [];
+    const topSuppliers = Array.isArray(unwrapData(topSuppliersData)) ? unwrapData(topSuppliersData) : [];
+
     if (!stats) return <div className="text-center text-default-500 py-10">{t('common.error')}</div>;
 
-    // Derived Metrics
-    const activeRate = stats.totalSuppliers > 0
-        ? Math.round((stats.activeSuppliers / stats.totalSuppliers) * 100)
+    // Calculate Active Rate
+    const activeRate = stats.total_suppliers > 0
+        ? Math.round((stats.active_suppliers / stats.total_suppliers) * 100)
         : 0;
 
     return (
@@ -50,11 +84,11 @@ export function SupplierDashboard() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-default-900">{t("suppliers.title")}</h1>
-                    <p className="text-small text-default-500">Overview of supplier performance and spending</p>
+                    <p className="text-small text-default-500">{t("suppliers.subtitle") || "Overview of supplier performance and spending"}</p>
                 </div>
                 <div className="flex gap-2">
                     <Button variant="flat" startContent={<Briefcase size={16} />}>
-                        Manage Suppliers
+                        {t('suppliers.manageSuppliers') || "Manage Suppliers"}
                     </Button>
                     <Button color="primary" startContent={<ArrowUpRight size={16} />}>
                         {t('common.export')}
@@ -66,36 +100,36 @@ export function SupplierDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KPICard
                     title={t("suppliers.totalSuppliers")}
-                    value={stats.totalSuppliers}
-                    subtext={`${activeRate}% Active Rate`}
+                    value={stats.total_suppliers}
+                    subtext={`${activeRate}% ${t('suppliers.activeRate') || "Active Rate"}`}
                     icon={<Users size={24} className="text-primary" />}
-                    trend={12}
-                    trendLabel="vs last month"
+                    trend={stats.active_suppliers_trend}
+                    trendLabel={t("suppliers.vsLastMonth") || "vs last month"}
                 />
                 <KPICard
                     title={t("suppliers.totalSpent")}
-                    value={`$${(stats.totalSpent || 0).toLocaleString()}`}
-                    subtext="YTD Spending"
+                    value={`$${(stats.total_spend_ytd || 0).toLocaleString()}`}
+                    subtext={t("suppliers.ytdSpending") || "YTD Spending"}
                     icon={<DollarSign size={24} className="text-success" />}
-                    trend={5}
-                    trendLabel="vs last month"
+                    trend={stats.total_spend_trend}
+                    trendLabel={t("suppliers.vsLastMonth") || "vs last month"}
                 />
                 <KPICard
-                    title={t("suppliers.totalOrders")}
-                    value="45" // Mock for now if not in stats
-                    subtext="Pending Delivery"
+                    title={t("suppliers.totalOrders") || "Total Orders"}
+                    value={stats.open_orders_count ?? 45} // Fallback
+                    subtext={t("suppliers.pendingDelivery") || "Pending Delivery"}
                     icon={<Package size={24} className="text-secondary" />}
-                    trend={-2}
-                    trendLabel="vs last month"
+                    trend={stats.open_orders_trend ?? -2.0}
+                    trendLabel={t("suppliers.vsLastMonth") || "vs last month"}
                     inverseTrend
                 />
                 <KPICard
-                    title="Critical Issues"
-                    value="3"
-                    subtext="Requires Attention"
+                    title={t("suppliers.criticalIssues") || "Critical Issues"}
+                    value={stats.issues_count ?? 3} // Fallback
+                    subtext={t("suppliers.requiresAttention") || "Requires Attention"}
                     icon={<AlertTriangle size={24} className="text-danger" />}
                     trend={0}
-                    trendLabel="Stable"
+                    trendLabel={t("suppliers.stable") || "Stable"}
                     inverseTrend
                 />
             </div>
@@ -107,14 +141,14 @@ export function SupplierDashboard() {
                     <CardHeader className="flex justify-between items-center px-6 py-4">
                         <div>
                             <h4 className="font-bold text-large text-default-700">{t("suppliers.monthlySpending")}</h4>
-                            <p className="text-small text-default-500">Financial overview (6 Months)</p>
+                            <p className="text-small text-default-500">{t("suppliers.financialOverview") || "Financial overview (6 Months)"}</p>
                         </div>
                         <Button size="sm" variant="light" isIconOnly><MoreVertical size={18} /></Button>
                     </CardHeader>
                     <CardBody className="px-4 pb-4">
                         <div className="h-[320px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={stats.monthlySpending}>
+                                <AreaChart data={monthlySpending as any[]}>
                                     <defs>
                                         <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor={primaryColor} stopOpacity={0.8} />
@@ -126,7 +160,7 @@ export function SupplierDashboard() {
                                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} tickFormatter={(val) => `$${val / 1000}k`} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                                        formatter={(value: number) => [`$${value.toLocaleString()}`, 'Spent']}
+                                        formatter={(value: number) => [`$${value.toLocaleString()}`, t('suppliers.spent') || 'Spent']}
                                     />
                                     <Area type="monotone" dataKey="amount" stroke={primaryColor} fillOpacity={1} fill="url(#colorAmount)" activeDot={{ r: 6 }} strokeWidth={2} />
                                 </AreaChart>
@@ -140,7 +174,7 @@ export function SupplierDashboard() {
                     <CardHeader className="flex justify-between items-center px-6 py-4">
                         <div>
                             <h4 className="font-bold text-large text-default-700">{t("suppliers.spendingByCategory")}</h4>
-                            <p className="text-small text-default-500">Spend by Category</p>
+                            <p className="text-small text-default-500">{t("suppliers.spendByCategory") || "Spend by Category"}</p>
                         </div>
                     </CardHeader>
                     <CardBody className="px-4 pb-4 flex items-center justify-center">
@@ -148,15 +182,16 @@ export function SupplierDashboard() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={stats.spendingByCategory}
+                                        data={categorySpending as any[]}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
                                         outerRadius={80}
                                         paddingAngle={5}
                                         dataKey="amount"
+                                        nameKey="category"
                                     >
-                                        {stats.spendingByCategory.map((entry, index) => (
+                                        {categorySpending.map((entry: any, index: number) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
@@ -174,29 +209,29 @@ export function SupplierDashboard() {
                 <CardHeader className="flex justify-between items-center px-6 py-4">
                     <div>
                         <h4 className="font-bold text-large text-default-700">{t("suppliers.topSuppliers")}</h4>
-                        <p className="text-small text-default-500">Highest volume partners</p>
+                        <p className="text-small text-default-500">{t("suppliers.highestVolume") || "Highest volume partners"}</p>
                     </div>
                     <Button size="sm" color="primary" variant="flat" endContent={<ArrowUpRight size={16} />}>
-                        View All
+                        {t('common.viewAll') || "View All"}
                     </Button>
                 </CardHeader>
                 <CardBody className="px-0 pb-0">
                     <Table aria-label="Top Suppliers" removeWrapper shadow="none" isStriped>
                         <TableHeader>
-                            <TableColumn>PARTNER</TableColumn>
-                            <TableColumn>CATEGORY</TableColumn>
-                            <TableColumn>RATING</TableColumn>
-                            <TableColumn>STATUS</TableColumn>
-                            <TableColumn align="end">YTD SPEND</TableColumn>
+                            <TableColumn>{t('suppliers.partner') || "PARTNER"}</TableColumn>
+                            <TableColumn>{t('suppliers.category') || "CATEGORY"}</TableColumn>
+                            <TableColumn>{t('suppliers.rating') || "RATING"}</TableColumn>
+                            <TableColumn>{t('suppliers.status') || "STATUS"}</TableColumn>
+                            <TableColumn align="end">{t('suppliers.ytdSpend') || "YTD SPEND"}</TableColumn>
                         </TableHeader>
-                        <TableBody items={stats.topSuppliers}>
-                            {(supplier) => (
-                                <TableRow key={supplier.id} className="hover:bg-default-50 cursor-pointer">
+                        <TableBody items={topSuppliers as any[]} emptyContent={t('common.noData')}>
+                            {(supplier: any) => (
+                                <TableRow key={supplier.supplier_id} className="hover:bg-default-50 cursor-pointer">
                                     <TableCell>
                                         <div className="flex items-center gap-3">
-                                            <Avatar name={supplier.name?.charAt(0)} size="sm" src={supplier.logoUrl || undefined} />
+                                            <Avatar name={supplier.supplier_name?.charAt(0)} size="sm" src={supplier.logoUrl || undefined} />
                                             <div>
-                                                <p className="font-semibold text-small">{supplier.name ?? "Unknown"}</p>
+                                                <p className="font-semibold text-small">{supplier.supplier_name ?? "Unknown"}</p>
                                                 <p className="text-tiny text-default-400">{supplier.email ?? "-"}</p>
                                             </div>
                                         </div>
@@ -215,7 +250,7 @@ export function SupplierDashboard() {
                                     </TableCell>
                                     <TableCell>
                                         <span className="font-bold text-default-700">
-                                            ${(supplier.totalSpent || 0).toLocaleString()}
+                                            ${(supplier.total_spend || 0).toLocaleString()}
                                         </span>
                                     </TableCell>
                                 </TableRow>

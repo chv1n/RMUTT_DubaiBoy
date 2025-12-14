@@ -12,6 +12,7 @@ import {
     MaterialRequirement
 } from "@/types/plan";
 import { apiClient } from "@/lib/api/core/client";
+import { ApiResponse } from '@/types/api';
 
 // --- Mock Data Store (Stateful) ---
 const MOCK_STORE = {
@@ -446,6 +447,69 @@ class PlanService {
         }
         const response = await apiClient.get<{ success: boolean, data: PlanPreview }>(`${this.productPlanEndpoint}/${id}/preview`);
         return response.data;
+    }
+
+    // --- Dashboard API (New) ---
+
+    async getDashboardStats(): Promise<ApiResponse<import('@/types/plan').PlanDashboardStats>> {
+        if (USE_MOCK) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return {
+                success: true,
+                message: "Success",
+                data: {
+                    total_plans: 15,
+                    active_plans: 8,
+                    completed_plans: 4,
+                    pending_plans: 3,
+                    total_production_target: 50000,
+                    on_time_rate: 92.5,
+                    trend: {
+                        active_plans: "+2",
+                        on_time_rate: "+1.5%"
+                    }
+                }
+            };
+        }
+        const response = await apiClient.get<ApiResponse<import('@/types/plan').PlanDashboardStats>>('/product-plans/dashboard/stats');
+        return response;
+    }
+
+    async getDashboardProgress(limit: number = 5): Promise<ApiResponse<import('@/types/plan').PlanProgressItem[]>> {
+        if (USE_MOCK) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return {
+                success: true,
+                message: "Success",
+                data: [
+                    { plan_id: 101, plan_name: "Project A", progress: 75, status: "IN_PROGRESS", due_date: "2023-12-31" },
+                    { plan_id: 102, plan_name: "Project B", progress: 40, status: "PENDING", due_date: "2024-01-15" },
+                    { plan_id: 103, plan_name: "Project C", progress: 90, status: "IN_PROGRESS", due_date: "2023-11-30" },
+                    { plan_id: 104, plan_name: "Project D", progress: 10, status: "DELAYED", due_date: "2023-10-01" },
+                    { plan_id: 105, plan_name: "Project E", progress: 100, status: "COMPLETED", due_date: "2023-09-01" },
+                ]
+            };
+        }
+        const response = await apiClient.get<ApiResponse<import('@/types/plan').PlanProgressItem[]>>(`/product-plans/dashboard/progress?limit=${limit}`);
+        return response;
+    }
+
+    async getDashboardStatusDistribution(): Promise<ApiResponse<import('@/types/plan').PlanStatusDistributionItem[]>> {
+        if (USE_MOCK) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return {
+                success: true,
+                message: "Success",
+                data: [
+                    { name: "PENDING", value: 2, color: "#fbbf24" },
+                    { name: "IN_PROGRESS", value: 5, color: "#3b82f6" },
+                    { name: "COMPLETED", value: 12, color: "#10b981" },
+                    { name: "DELAYED", value: 3, color: "#ef4444" }
+                ]
+            };
+        }
+        const response = await apiClient.get<ApiResponse<import('@/types/plan').PlanStatusDistributionItem[]>>('/product-plans/dashboard/status-distribution');
+        return response;
     }
 
     // --- Dashboard Stats ---
