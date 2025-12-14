@@ -107,6 +107,14 @@ export interface Product {
     typeName?: string;
     isActive: boolean;
     lastUpdated: string;
+    price: number;
+    cost: number;
+    unit: string;
+    description?: string;
+    imageUrl?: string;
+    images?: string[];
+    specifications?: { label: string; value: string }[];
+    features?: string[];
 
     // Relations
     bom: BOM[];

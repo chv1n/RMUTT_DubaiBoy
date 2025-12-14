@@ -132,7 +132,7 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
                                 <span className="text-small text-default-500 block mb-1">{t('materials.field.leadTime')}</span>
                                 <div className="flex items-center gap-2">
                                     <Truck size={18} className="text-warning" />
-                                    <span className="font-medium text-default-900">{material.orderLeadTime} Days</span>
+                                    <span className="font-medium text-default-900">{material.orderLeadTime} {t('common.days')}</span>
                                 </div>
                             </div>
                         </div>
@@ -145,7 +145,7 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
                         <CardHeader className="pb-0 px-6 pt-6">
                             <h4 className="font-bold text-medium text-default-600 flex items-center gap-2">
                                 <Building size={18} />
-                                Stock by Warehouse
+                                {t('materials.stockByWarehouse')}
                             </h4>
                         </CardHeader>
                         <CardBody className="px-6 py-4">
@@ -174,7 +174,7 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
                         </div>
                         <div className="flex flex-col">
                             <p className="text-small text-default-500 uppercase font-bold">{t('materials.inventoryLevel')}</p>
-                            <span className="text-tiny text-default-400">Total across all warehouses</span>
+                            <span className="text-tiny text-default-400">{t('materials.totalAcrossWarehouses')}</span>
                         </div>
                     </CardHeader>
                     <CardBody className="px-6 pb-6 pt-2 gap-4">
@@ -189,23 +189,23 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
                         <Divider />
                         <div className="grid grid-cols-2 gap-4 text-small">
                             <div>
-                                <span className="text-default-500 block">Min Stock</span>
+                                <span className="text-default-500 block">{t('materials.minStock')}</span>
                                 <span className="font-semibold text-danger">{material.minStockLevel}</span>
                             </div>
                             <div>
-                                <span className="text-default-500 block">Max Stock</span>
+                                <span className="text-default-500 block">{t('materials.maxStock')}</span>
                                 <span className="font-semibold text-success">{material.containerMaxStock}</span>
                             </div>
                             <div>
-                                <span className="text-default-500 block">Qty / Container</span>
+                                <span className="text-default-500 block">{t('materials.qtyPerContainer')}</span>
                                 <span className="font-semibold">{material.quantity.toLocaleString()}</span>
                             </div>
                             <div>
-                                <span className="text-default-500 block uppercase">Valuation</span>
+                                <span className="text-default-500 block uppercase">{t('materials.valuation')}</span>
                                 {isLoadingBalance ? (
-                                    <span className="text-tiny text-default-400">Calcul...</span>
+                                    <span className="text-tiny text-default-400">{t('common.calculating')}</span>
                                 ) : (
-                                    <span className="font-semibold text-primary">${(material.price * totalStock).toLocaleString()}</span>
+                                    <span className="font-semibold text-primary">฿{(material.price * totalStock).toLocaleString()}</span>
                                 )}
                             </div>
                         </div>
@@ -217,8 +217,8 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
                         <CardBody className="flex flex-row items-center gap-4 p-4 text-warning-600">
                             <AlertTriangle size={24} />
                             <div className="flex flex-col">
-                                <span className="font-bold">Low Stock Warning</span>
-                                <span className="text-xs">Current stock is at or below minimum level.</span>
+                                <span className="font-bold">{t('materials.lowStockWarning')}</span>
+                                <span className="text-xs">{t('materials.lowStockMessage')}</span>
                             </div>
                         </CardBody>
                     </Card>
@@ -271,7 +271,7 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
             </div>
 
             {/* Tabs */}
-            <Tabs aria-label="Material Details" color="primary" variant="underlined">
+            <Tabs aria-label={t('materials.detail')} color="primary" variant="underlined">
                 <Tab key="overview" title={
                     <div className="flex items-center gap-2">
                         <Info size={16} />
@@ -306,8 +306,8 @@ export default function MaterialDetail({ material }: MaterialDetailProps) {
                 }>
                     <Card className="shadow-none border border-default-200 p-8 flex flex-col items-center justify-center text-default-400 border-dashed">
                         <FileText size={48} className="mb-4 opacity-50" />
-                        <p>No documents.</p>
-                        <Button size="sm" variant="flat" className="mt-4">Upload Document (Mock)</Button>
+                        <p>{t('common.noDocuments')}</p>
+                        <Button size="sm" variant="flat" className="mt-4">{t('common.uploadDocument')}</Button>
                     </Card>
                 </Tab>
             </Tabs>

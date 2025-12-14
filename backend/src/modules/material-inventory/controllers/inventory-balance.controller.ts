@@ -62,11 +62,6 @@ export class InventoryBalanceController {
         return this.inventoryBalanceService.getLowStockAlerts(query);
     }
 
-    /**
-     * GET /v1/inventory/balance/check-availability/:materialId/:warehouseId
-     * ตรวจสอบยอดคงคลังว่าเพียงพอหรือไม่
-     */
-    @Auth(Role.INVENTORY_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
     @Get('check-availability/:materialId/:warehouseId')
     async checkAvailability(
         @Param('materialId', ParseIntPipe) materialId: number,

@@ -41,11 +41,16 @@
         "customize": "ปรับแต่ง",
         "detail": "รายละเอียด",
         "noData": "ไม่พบข้อมูล",
+        "noDescription": "ไม่มีรายละเอียด",
         "totalRevenue": "มูลค่ารวม",
         "activePlans": "แผนการผลิตที่ใช้งาน",
         "lowStock": "สินค้าเหลือน้อย",
         "requiresAttention": "ต้องการการตรวจสอบ",
-        "productionTarget": "เป้าหมายการผลิต"
+        "productionTarget": "เป้าหมายการผลิต",
+        "days": "วัน",
+        "calculating": "กำลังคำนวณ...",
+        "noDocuments": "ไม่พบเอกสาร",
+        "uploadDocument": "อัปโหลดเอกสาร"
     },
     "materials": {
         "title": "จัดการวัสดุอุปกรณ์",
@@ -72,6 +77,13 @@
         "totalMaterials": "วัสดุทั้งหมด",
         "totalValue": "มูลค่ารวม",
         "subMaterials": "วัสดุย่อย",
+        "stockByWarehouse": "สต็อกตามคลังสินค้า",
+        "totalAcrossWarehouses": "ยอดรวมจากทุกคลังสินค้า",
+        "maxStock": "สต็อกสูงสุด",
+        "qtyPerContainer": "จำนวน / ภาชนะ",
+        "valuation": "มูลค่าประเมิน",
+        "lowStockWarning": "แจ้งเตือนสินค้าใกล้หมด",
+        "lowStockMessage": "ปริมาณสต็อกปัจจุบันต่ำกว่าหรือเท่ากับระดับต่ำสุด",
         "tab": {
             "overview": "ภาพรวม",
             "history": "ประวัติ",
@@ -80,6 +92,7 @@
         },
         "field": {
             "created": "วันที่สร้าง",
+            "description": "รายละเอียด",
             "updated": "อัปเดตล่าสุด",
             "leadTime": "ระยะเวลานำสั่งซื้อ",
             "lifetime": "อายุการเก็บรักษา",
@@ -180,6 +193,12 @@
         "progress": "ความคืบหน้าแผน",
         "statusDistribution": "การกระจายสถานะ",
         "list": "รายการแผน",
+        "topProducts": "สินค้าผลิตสูงสุด",
+        "recentActivity": "กิจกรรมล่าสุด",
+        "name": "ชื่อแผน",
+        "product": "สินค้า",
+        "priority": "ความสำคัญ",
+        "quantity": "จำนวน",
         "subtext": {
             "overview": "ภาพรวมแผนการผลิตและความคืบหน้า",
             "total": "แผนทั้งหมด",
@@ -190,7 +209,9 @@
             "progress": "ติดตามการผลิตแบบเรียลไทม์",
             "distribution": "สถานะแผนปัจจุบัน",
             "vsLastMonth": "เทียบเดือนที่แล้ว",
-            "stable": "คงที่"
+            "stable": "คงที่",
+            "topProducts": "เรียงตามปริมาณการผลิต",
+            "recent": "อัปเดตแผนล่าสุด"
         },
         "create": "สร้างแผน",
         "edit": "แก้ไขแผน",
@@ -493,6 +514,26 @@
     "audit": {
         "title": "บันทึกการตรวจสอบ",
         "subtitle": "ติดตามการเปลี่ยนแปลงของระบบและกิจกรรมผู้ใช้"
+    },
+    "smartDashboard": {
+        "title": "แดชบอร์ด Smart Factory",
+        "subtitle": "การติดตามด้วย AI และวิเคราะห์วัตถุดิบ",
+        "totalMaterials": "จำนวนวัสดุทั้งหมด",
+        "lowStockMaterials": "วัสดุใกล้หมด",
+        "criticalAlerts": "แจ้งเตือนวิกฤต",
+        "totalStockValue": "มูลค่าสต็อกรวม",
+        "activePlans": "แผนผลิตที่กำลังทำ",
+        "stockTrend": "แนวโน้มมูลค่าสต็อก",
+        "plansAtRisk": "แผนมีความเสี่ยง",
+        "alerts": "แจ้งเตือนระบบ",
+        "lowStockList": "รายการวัสดุวิกฤต",
+        "reorderPoint": "จุดสั่งซื้อ",
+        "shortage": "ขาดแคลน",
+        "required": "ต้องการ",
+        "available": "มีอยู่",
+        "status": "สถานะ",
+        "risk": "เสี่ยง",
+        "warning": "เตือน",
+        "normal": "ปกติ"
     }
-
 }

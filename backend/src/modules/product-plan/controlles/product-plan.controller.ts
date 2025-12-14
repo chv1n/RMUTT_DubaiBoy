@@ -1,5 +1,7 @@
+
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query, ParseIntPipe } from '@nestjs/common';
-import { ProductPlanService } from '../product-plan.service';
+
+
 import { CreateProductPlanDto } from '../dto/create-product-plan.dto';
 import { UpdateProductPlanDto } from '../dto/update-product-plan.dto';
 import { ProductPlanQueryDto } from '../dto/product-plan-query.dto';
@@ -9,6 +11,7 @@ import { ConfirmPlanDto } from '../dto/confirm-plan.dto';
 import { CompletePlanDto } from '../dto/complete-plan.dto';
 import { CancelPlanDto } from '../dto/cancel-plan.dto';
 import { ReportQueryDto } from '../dto/report-query.dto';
+import { ProductPlanService } from '../product-plan.service';
 import { Role } from 'src/common/enums';
 import { Auth } from 'src/common/decorators/auth.decorator';
 
@@ -109,9 +112,6 @@ export class ProductPlanController {
     };
   }
 
-  /**
-   * Confirm Plan - ยืนยัน + จอง stock ตาม allocations ที่ user เลือก
-   */
   @Post(':id/confirm')
   async confirmPlan(
     @Param('id', ParseIntPipe) id: number,

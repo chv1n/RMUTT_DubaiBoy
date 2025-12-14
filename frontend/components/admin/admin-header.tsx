@@ -55,7 +55,7 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
                 <Dropdown>
                     <DropdownTrigger>
                         <Button variant="light" size="sm" className="min-w-0 px-2 uppercase font-bold">
-                            {locale || 'en'}
+                            {locale == 'ja' ? 'JP' : locale == 'th' ? 'TH' : 'EN'}
                         </Button>
                     </DropdownTrigger>
                     <DropdownMenu aria-label="Language Actions" onAction={(key) => setLocale(key as "en" | "th" | "ja")}>

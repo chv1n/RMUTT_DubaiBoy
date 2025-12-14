@@ -46,6 +46,24 @@ const mapProductDTOToDomain = (dto: ProductDTO): Product => ({
     typeName: dto.product_type?.type_name || dto.type_name || "Unknown",
     isActive: dto.is_active !== undefined ? Boolean(dto.is_active) : Boolean(dto.active),
     lastUpdated: dto.update_date || dto.create_date,
+    price: (dto as any).price || 0,
+    cost: (dto as any).cost || 0,
+    unit: (dto as any).unit || "PCS",
+    description: (dto as any).description || "High-performance industrial component designed for durability and efficiency. Suitable for heavy-duty manufacturing applications.",
+    imageUrl: (dto as any).image_url || null,
+    images: (dto as any).images || [],
+    features: (dto as any).features || [
+        "Industrial Grade Durability",
+        "High Efficiency Output",
+        "ISO 9001 Certified",
+        "Low Maintenance Requirement"
+    ],
+    specifications: (dto as any).specifications || [
+        { label: "Material", value: "Aluminum Alloy 6061" },
+        { label: "Weight", value: "2.5 kg" },
+        { label: "Dimensions", value: "20x10x5 cm" },
+        { label: "Warranty", value: "2 Years" }
+    ],
     bom: (dto.boms || []).map(mapBomDTOToDomain)
 });
 
@@ -161,6 +179,9 @@ class ProductService {
                 typeName: "Mock Type",
                 isActive: true,
                 lastUpdated: new Date().toISOString(),
+                price: 0,
+                cost: 0,
+                unit: "PCS",
                 bom: []
             };
         }
@@ -178,6 +199,9 @@ class ProductService {
                 typeName: "Mock Type",
                 isActive: true, // simplified
                 lastUpdated: new Date().toISOString(),
+                price: 0,
+                cost: 0,
+                unit: "PCS",
                 bom: []
             };
         }

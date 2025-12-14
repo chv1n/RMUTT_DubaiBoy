@@ -4,12 +4,19 @@ import { ProductPlan } from '../../product-plan/entities/product-plan.entity';
 import { Repository, LessThanOrEqual } from 'typeorm';
 import { PlanStatusEnum } from '../../product-plan/enum/plan-status.enum';
 import { Status } from 'src/common/enums/status.enum';
+import { Bom } from 'src/modules/bom/entities/bom.entity';
+import { MaterialInventory } from 'src/modules/material-inventory/entities/material-inventory.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class DashboardPlanService {
     constructor(
         @InjectRepository(ProductPlan)
         private planRepository: Repository<ProductPlan>,
+        @InjectRepository(Bom)
+        private bomRepository: Repository<Bom>,
+        @InjectRepository(MaterialInventory)
+        private inventoryRepository: Repository<MaterialInventory>,
     ) { }
 
     async getPlanStats() {
@@ -175,5 +182,74 @@ export class DashboardPlanService {
             value: Number(p.count),
             color: colors[p.status] || '#cccccc'
         }));
+    }
+
+    async getPlansAtRisk() {
+        // 1. Get Active Plans (Pending/In Progress) with their Products
+        const activePlans = await this.planRepository.find({
+            where: {
+                plan_status: In([PlanStatusEnum.PENDING, PlanStatusEnum.PRODUCTION])
+            },
+            relations: ['product']
+        });
+
+        // 2. For each plan, check BOM requirements vs Inventory
+        const riskPlans: any[] = [];
+
+        for (const plan of activePlans) {
+            if (!plan.product) continue;
+
+            // Get BOM
+            const boms = await this.bomRepository.find({
+                where: { product_id: plan.product.product_id, active: 1 },
+                relations: ['material']
+            });
+
+            if (boms.length === 0) continue;
+
+            const risks: any[] = [];
+            let isPlanRisk = false;
+            let isPlanBlocked = false;
+
+            for (const bom of boms) {
+                const requiredQty = (plan.input_quantity || 0) * Number(bom.usage_per_piece);
+
+                // Check Total Available Stock for this Material
+                const inventories = await this.inventoryRepository.find({
+                    where: { material: { material_id: bom.material_id } }
+                });
+
+                const totalInStock = inventories.reduce((sum, i) => sum + i.quantity, 0);
+                const totalReserved = inventories.reduce((sum, i) => sum + i.reserved_quantity, 0);
+                const available = Math.max(0, totalInStock - totalReserved);
+
+                // Check Risk
+                if (available < requiredQty) {
+                    const status = available === 0 ? 'BLOCKED' : 'RISK';
+                    if (status === 'BLOCKED') isPlanBlocked = true;
+                    else isPlanRisk = true;
+
+                    risks.push({
+                        material_name: bom.material?.material_name || 'Unknown',
+                        required_qty: requiredQty,
+                        available_qty: available,
+                        status: status
+                    });
+                }
+            }
+
+            if (risks.length > 0) {
+                riskPlans.push({
+                    plan_id: plan.id,
+                    plan_name: plan.plan_name,
+                    product_name: plan.product.product_name,
+                    risk_materials: risks,
+                    overall_status: isPlanBlocked ? 'BLOCKED' : 'RISK',
+                    start_date: plan.start_date
+                });
+            }
+        }
+
+        return riskPlans;
     }
 }

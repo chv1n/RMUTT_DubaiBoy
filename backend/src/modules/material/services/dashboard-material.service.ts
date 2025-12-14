@@ -93,6 +93,7 @@ export class DashboardMaterialService {
             total_materials_count: totalMaterialsCount,
             active_materials_count: activeMaterialsCount,
             low_stock_count: lowStockCount,
+            critical_alerts: 0, // Placeholder, logic mapped in controller or improved here
             out_of_stock_count: outOfStockCount,
             turnover_rate: parseFloat(currentTurnover.toFixed(2)),
             trends: {
@@ -101,6 +102,62 @@ export class DashboardMaterialService {
                 turnover_change: parseFloat(turnoverChange.toFixed(1))
             }
         };
+    }
+
+    async getLowStockMaterials(limit: number = 10) {
+
+        const materials = await this.materialRepository
+            .createQueryBuilder('m')
+            .leftJoinAndSelect('m.materialInventory', 'inv')
+            .leftJoinAndSelect('inv.warehouse', 'wh')
+            .leftJoinAndSelect('m.unit', 'u')
+            .where('m.container_min_stock IS NOT NULL')
+            .andWhere('m.is_active = :isActive', { isActive: true })
+            .select([
+                'm.material_id',
+                'm.material_name',
+                'm.container_min_stock',
+                'u.unit_name',
+                'inv.id',
+                'inv.quantity',
+                'wh.warehouse_name',
+            ])
+            .getMany();
+
+        const lowStockList: any[] = [];
+
+
+        materials.forEach(m => {
+            const totalQty = m.materialInventory.reduce((sum, i) => sum + i.quantity, 0);
+            if (m.container_min_stock && totalQty <= m.container_min_stock) {
+                // Determine warehouse name (concatenated or first)
+                const warehouses = [...new Set(m.materialInventory.map(i => i.warehouse?.warehouse_name).filter(Boolean))];
+
+                // Critical if < 50% of min stock
+                const isCritical = totalQty < (m.container_min_stock * 0.5);
+
+                lowStockList.push({
+                    material_id: m.material_id,
+                    material_name: m.material_name,
+                    warehouse: warehouses.join(', ') || 'N/A',
+                    current_qty: totalQty,
+                    reorder_point: m.container_min_stock,
+                    shortage_qty: m.container_min_stock - totalQty,
+                    unit: m.unit?.unit_name || 'pcs',
+                    status: isCritical ? 'CRITICAL' : 'WARNING'
+                });
+            }
+        });
+
+        // Sort by Criticality (Shortage % or Status)
+        // Sort by status CRITICAL first, then shortage quantity descending
+        lowStockList.sort((a, b) => {
+            if (a.status === 'CRITICAL' && b.status !== 'CRITICAL') return -1;
+            if (b.status === 'CRITICAL' && a.status !== 'CRITICAL') return 1;
+            return b.shortage_qty - a.shortage_qty;
+        });
+
+        return lowStockList.slice(0, limit);
     }
 
     async getValueDistribution() {

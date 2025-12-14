@@ -13,6 +13,9 @@ import { Bom } from '../../modules/bom/entities/bom.entity';
 import { ProductPlan } from '../../modules/product-plan/entities/product-plan.entity';
 import { PlanStatusEnum } from '../../modules/product-plan/enum/plan-status.enum';
 import { PlanPriorityEnum } from '../../modules/product-plan/enum/plan-priority.enum';
+import { InventoryTransaction } from '../../modules/inventory-transaction/entities/inventory-transaction.entity';
+import { MaterialInventory } from '../../modules/material-inventory/entities/material-inventory.entity';
+import { Between } from 'typeorm';
 
 async function seed() {
     try {
@@ -32,7 +35,7 @@ async function seed() {
         ];
 
         for (const groupData of groups) {
-            const exists = await groupRepo.findOneBy({ group_name: groupData.group_name });
+            const exists = await groupRepo.findOne({ where: { group_name: groupData.group_name }, withDeleted: true });
             if (!exists) {
                 await groupRepo.save(groupRepo.create(groupData));
                 console.log(`Seeded MaterialGroup: ${groupData.group_name}`);
@@ -53,7 +56,7 @@ async function seed() {
         ];
 
         for (const unitData of units) {
-            const exists = await unitRepo.findOneBy({ unit_name: unitData.unit_name });
+            const exists = await unitRepo.findOne({ where: { unit_name: unitData.unit_name }, withDeleted: true });
             if (!exists) {
                 await unitRepo.save(unitRepo.create(unitData));
                 console.log(`Seeded MaterialUnit: ${unitData.unit_name}`);
@@ -73,7 +76,7 @@ async function seed() {
         ];
 
         for (const containerData of containers) {
-            const exists = await containerRepo.findOneBy({ type_name: containerData.type_name });
+            const exists = await containerRepo.findOne({ where: { type_name: containerData.type_name }, withDeleted: true });
             if (!exists) {
                 await containerRepo.save(containerRepo.create(containerData));
                 console.log(`Seeded ContainerType: ${containerData.type_name}`);
@@ -121,7 +124,7 @@ async function seed() {
         ];
 
         for (const supplierData of suppliers) {
-            const exists = await supplierRepo.findOneBy({ supplier_name: supplierData.supplier_name });
+            const exists = await supplierRepo.findOne({ where: { supplier_name: supplierData.supplier_name }, withDeleted: true });
             if (!exists) {
                 await supplierRepo.save(supplierRepo.create(supplierData));
                 console.log(`Seeded Supplier: ${supplierData.supplier_name}`);
@@ -138,7 +141,7 @@ async function seed() {
         ];
 
         for (const typeData of productTypes) {
-            const exists = await productTypeRepo.findOneBy({ type_name: typeData.type_name });
+            const exists = await productTypeRepo.findOne({ where: { type_name: typeData.type_name }, withDeleted: true });
             if (!exists) {
                 await productTypeRepo.save(productTypeRepo.create(typeData));
                 console.log(`Seeded ProductType: ${typeData.type_name}`);
@@ -157,10 +160,14 @@ async function seed() {
                 { product_name: 'Packaged Chip Type A', product_type: finishedType, active: 1 },
                 { product_name: 'Solar Cell Unit', product_type: finishedType, active: 1 },
                 { product_name: 'Test Die', product_type: semiType, active: 1 },
+                // New Products for Model Training
+                { product_name: 'High-Performance CPU (Gen 12)', product_type: finishedType, active: 1 },
+                { product_name: 'IoT Wireless Module (Wi-Fi 6)', product_type: finishedType, active: 1 },
+                { product_name: 'Automotive Sensor Chip (Lidar)', product_type: finishedType, active: 1 },
             ];
 
             for (const productData of products) {
-                const exists = await productRepo.findOneBy({ product_name: productData.product_name });
+                const exists = await productRepo.findOne({ where: { product_name: productData.product_name }, withDeleted: true });
                 if (!exists) {
                     await productRepo.save(productRepo.create(productData));
                     console.log(`Seeded Product: ${productData.product_name}`);
@@ -200,7 +207,7 @@ async function seed() {
         ];
 
         for (const whData of warehouses) {
-            const exists = await warehouseRepo.findOneBy({ warehouse_code: whData.warehouse_code });
+            const exists = await warehouseRepo.findOne({ where: { warehouse_code: whData.warehouse_code }, withDeleted: true });
             if (!exists) {
                 await warehouseRepo.save(warehouseRepo.create(whData));
                 console.log(`Seeded Warehouse: ${whData.warehouse_name}`);
@@ -237,7 +244,7 @@ async function seed() {
         ];
 
         for (const userData of users) {
-            const exists = await userRepo.findOneBy({ username: userData.username });
+            const exists = await userRepo.findOne({ where: { username: userData.username }, withDeleted: true });
             if (!exists) {
                 // We depend on the @BeforeInsert hook in User entity to hash the password
                 const newUser = userRepo.create(userData);
@@ -432,7 +439,7 @@ async function seed() {
             ];
 
             for (const matData of materials) {
-                const exists = await materialRepo.findOneBy({ material_name: matData.material_name });
+                const exists = await materialRepo.findOne({ where: { material_name: matData.material_name }, withDeleted: true });
                 if (!exists) {
                     await materialRepo.save(materialRepo.create(matData));
                     console.log(`Seeded Material: ${matData.material_name}`);
@@ -447,6 +454,7 @@ async function seed() {
             const packagedChip = await productRepo.findOneBy({ product_name: 'Packaged Chip Type A' });
 
             const primeWaferMat = await materialRepo.findOneBy({ material_name: '300mm Silicon Wafer (Prime)' });
+            const testWaferMat = await materialRepo.findOneBy({ material_name: '300mm Silicon Wafer (Test)' }); // Added for IoT/Sensor
             const slurryMat = await materialRepo.findOneBy({ material_name: 'CMP Slurry (Oxide)' });
             const prMat = await materialRepo.findOneBy({ material_name: 'Photoresist PR-193nm' });
             const copperTargetMat = await materialRepo.findOneBy({ material_name: 'Copper Target (450mm)' });
@@ -472,6 +480,36 @@ async function seed() {
             if (packagedChip && copperTargetMat) {
                 bomsToSeed.push(
                     { product: packagedChip, material: copperTargetMat, unit: pieceUnit, usage_per_piece: 0.0001, scrap_factor: 0.01, active: 1, version: '1.0' as any }
+                );
+            }
+
+            // --- New BOMs for Training Products ---
+            const cpuProduct = await productRepo.findOneBy({ product_name: 'High-Performance CPU (Gen 12)' });
+            const iotProduct = await productRepo.findOneBy({ product_name: 'IoT Wireless Module (Wi-Fi 6)' });
+            const sensorProduct = await productRepo.findOneBy({ product_name: 'Automotive Sensor Chip (Lidar)' });
+
+            // CPU BOM (Complex: Prime Wafer + Copper + PR)
+            if (cpuProduct && primeWaferMat && copperTargetMat && prMat) {
+                bomsToSeed.push(
+                    { product: cpuProduct, material: primeWaferMat, unit: waferUnit, usage_per_piece: 1, scrap_factor: 0.03, active: 1, version: '1.0' as any },
+                    { product: cpuProduct, material: copperTargetMat, unit: pieceUnit, usage_per_piece: 0.0002, scrap_factor: 0.01, active: 1, version: '1.0' as any },
+                    { product: cpuProduct, material: prMat, unit: literUnit, usage_per_piece: 0.01, scrap_factor: 0.05, active: 1, version: '1.0' as any }
+                );
+            }
+
+            // IoT Module BOM (Medium: Test Wafer + Copper)
+            if (iotProduct && testWaferMat && copperTargetMat) {
+                bomsToSeed.push(
+                    { product: iotProduct, material: testWaferMat, unit: waferUnit, usage_per_piece: 1, scrap_factor: 0.05, active: 1, version: '1.0' as any },
+                    { product: iotProduct, material: copperTargetMat, unit: pieceUnit, usage_per_piece: 0.0001, scrap_factor: 0.02, active: 1, version: '1.0' as any }
+                );
+            }
+
+            // Sensor BOM (Simple: Test Wafer + PR)
+            if (sensorProduct && testWaferMat && prMat) {
+                bomsToSeed.push(
+                    { product: sensorProduct, material: testWaferMat, unit: waferUnit, usage_per_piece: 1, scrap_factor: 0.1, active: 1, version: '1.0' as any },
+                    { product: sensorProduct, material: prMat, unit: literUnit, usage_per_piece: 0.005, scrap_factor: 0.05, active: 1, version: '1.0' as any }
                 );
             }
 
@@ -567,7 +605,7 @@ async function seed() {
             }
 
             for (const planData of plans) {
-                const exists = await planRepo.findOneBy({ plan_name: planData.plan_name });
+                const exists = await planRepo.findOne({ where: { plan_name: planData.plan_name }, withDeleted: true });
                 if (!exists) {
                     await planRepo.save(planRepo.create(planData as any));
                     console.log(`Seeded Plan: ${planData.plan_name}`);
@@ -577,6 +615,10 @@ async function seed() {
         } else {
             console.warn('Skipping Material seeding due to missing dependencies.');
         }
+        // --- Demo Data Generation (6 Months History) ---
+        console.log('Generating 6 Months Historical Data...');
+        await generateHistoricalData();
+        await generateHistoricalPlans(); // Add this call
 
         console.log('Seeding completed successfully.');
     } catch (error) {
@@ -584,6 +626,157 @@ async function seed() {
     } finally {
         await AppDataSource.destroy();
     }
+}
+
+async function generateHistoricalData() {
+    const transactionRepo = AppDataSource.getRepository(InventoryTransaction);
+    const inventoryRepo = AppDataSource.getRepository(MaterialInventory);
+    const materialRepo = AppDataSource.getRepository(MaterialMaster);
+    const warehouseRepo = AppDataSource.getRepository(WarehouseMaster);
+
+    const materials = await materialRepo.find();
+    const warehouses = await warehouseRepo.find();
+
+    if (materials.length === 0 || warehouses.length === 0) {
+        console.log("Skipping historical data: No materials or warehouses found.");
+        return;
+    }
+
+    const today = new Date();
+    const startDate = new Date();
+    startDate.setMonth(today.getMonth() - 6);
+
+    const mainWarehouse = warehouses[0]; // Assume first is main
+
+    // 1. Ensure Inventory Exists for Materials
+    const inventories: MaterialInventory[] = [];
+    for (const mat of materials) {
+        let inv = await inventoryRepo.findOne({
+            where: { material: { material_id: mat.material_id }, warehouse: { id: mainWarehouse.id } }
+        });
+
+        if (!inv) {
+            inv = inventoryRepo.create({
+                material: mat,
+                warehouse: mainWarehouse,
+                quantity: Math.floor(Math.random() * 500) + 100, // Initial Base
+                reserved_quantity: 0,
+                order_number: `INIT-${mat.material_id}`,
+                mfg_date: new Date(),
+                exp_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+            });
+            await inventoryRepo.save(inv);
+        }
+        inventories.push(inv);
+    }
+
+    // 2. Generate Daily Transactions
+    const transactions: any[] = [];
+    const loopDate = new Date(startDate);
+
+    while (loopDate <= today) {
+        // Randomly select some materials to have transactions today
+        const dailyActiveMaterials = inventories.sort(() => 0.5 - Math.random()).slice(0, Math.floor(inventories.length * 0.3));
+
+        for (const inv of dailyActiveMaterials) {
+            // Decide Inbound vs Outbound
+            // 40% Inbound, 60% Outbound (Consumption)
+            const isInbound = Math.random() > 0.6;
+            const qty = Math.floor(Math.random() * 50) + 1;
+            const change = isInbound ? qty : -qty;
+
+            // Only allow outbound if enough stock (logic proxy)
+            // Ideally we track running stock, but for seed we just generate records.
+            // Dashboard calculates trends from these records.
+
+            transactions.push({
+                materialInventory: inv,
+                warehouse: mainWarehouse,
+                transaction_type: isInbound ? 'PURCHASE' : 'PRODUCTION_ISSUE',
+                transaction_date: new Date(loopDate), // Clone date
+                quantity_change: change,
+                reference_number: `REF-${loopDate.getTime()}-${Math.floor(Math.random() * 1000)}`,
+                reason_remarks: isInbound ? 'Restock' : 'Used in production'
+            });
+        }
+
+        loopDate.setDate(loopDate.getDate() + 1);
+    }
+
+
+    // Batch insert transactions for performance
+    // Chunking to avoid memory issues
+    const chunkSize = 100;
+    for (let i = 0; i < transactions.length; i += chunkSize) {
+        const chunk = transactions.slice(i, i + chunkSize);
+        await transactionRepo.save(transactionRepo.create(chunk));
+    }
+    console.log(`Generated ${transactions.length} historical transactions.`);
+}
+
+async function generateHistoricalPlans() {
+    console.log("Generating Historical Plans for Model Training...");
+    const planRepo = AppDataSource.getRepository(ProductPlan);
+    const productRepo = AppDataSource.getRepository(Product);
+
+    const products = await productRepo.find({ where: { is_active: true } });
+
+    if (products.length === 0) {
+        console.warn("No active products found for historical plan generation.");
+        return;
+    }
+
+    const today = new Date();
+    const sixMonthsAgo = new Date(); // Changed to 6 months
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+
+    const plansToSeed: any[] = [];
+
+    for (const product of products) {
+        // Generate plans for the last 60 days (1 per day) matching SQL logic
+        for (let i = 1; i <= 60; i++) {
+            // Date logic: CURRENT_DATE - gs (i)
+            const planDate = new Date(today);
+            planDate.setDate(today.getDate() - i);
+
+            // Input Qty: 900 + random(0-200)
+            const inputQty = 900 + Math.floor(Math.random() * 201);
+
+            // Actual Qty: Input * (0.95 + random(0-0.10)) -> 95% to 105%
+            const actualQty = Math.floor(inputQty * (0.95 + Math.random() * 0.10));
+
+            // Random cost based on input qty (keeping previous cost logic as SQL didn't specify cost explicitly but required context)
+            const estCost = inputQty * 100; // Simplified cost
+            const actualCost = estCost * (actualQty / inputQty);
+
+            plansToSeed.push({
+                plan_name: `Backfill Plan (30 days) - ${product.product_name} - Day ${i}`,
+                plan_description: 'Insert ย้อนหลังเพื่อ retrain model',
+                product: product,
+                input_quantity: inputQty,
+                actual_produced_quantity: actualQty,
+                start_date: planDate,
+                end_date: planDate, // SQL has start=end
+                plan_status: PlanStatusEnum.COMPLETED,
+                plan_priority: PlanPriorityEnum.MEDIUM,
+                started_at: planDate,
+                completed_at: new Date(planDate.getTime() + 60 * 60 * 1000), // +1 hour as per SQL
+                estimated_cost: estCost,
+                actual_cost: actualCost,
+                created_at: new Date()
+            });
+        }
+    }
+
+    // Save plans
+    for (const plan of plansToSeed) {
+        // Check if exists to avoid dupes on re-run (though names are unique-ish, strict check helps)
+        const exists = await planRepo.findOne({ where: { plan_name: plan.plan_name }, withDeleted: true });
+        if (!exists) {
+            await planRepo.save(planRepo.create(plan));
+        }
+    }
+    console.log(`Generated ${plansToSeed.length} historical plans.`);
 }
 
 seed();

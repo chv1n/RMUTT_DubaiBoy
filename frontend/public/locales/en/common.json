@@ -45,17 +45,17 @@
         "action": "Action",
         "detail": "Details",
         "noData": "No data available",
-        "welcomeMessage": "Welcome back, here's what's happening today.",
+        "noDescription": "No description provided",
         "totalRevenue": "Total Value",
         "activePlans": "Active Plans",
-        "overviewTrend": "System Performance",
-        "performanceSummary": "Revenue vs Expenses trend over the last 6 months",
-        "quickActions": "Quick Actions",
-        "recentActivity": "Recent Activity",
         "lowStock": "Low Stock Items",
         "requiresAttention": "Requires attention",
         "productionTarget": "Production Flow",
-        "vsLastMonth": "vs last month"
+        "vsLastMonth": "vs last month",
+        "days": "Days",
+        "calculating": "Calculating...",
+        "noDocuments": "No documents.",
+        "uploadDocument": "Upload Document"
     },
     "materials": {
         "title": "Material Management",
@@ -82,6 +82,13 @@
         "totalMaterials": "Total Materials",
         "totalValue": "Total Value",
         "subMaterials": "Sub Materials",
+        "stockByWarehouse": "Stock by Warehouse",
+        "totalAcrossWarehouses": "Total across all warehouses",
+        "maxStock": "Max Stock",
+        "qtyPerContainer": "Qty / Container",
+        "valuation": "Valuation",
+        "lowStockWarning": "Low Stock Warning",
+        "lowStockMessage": "Current stock is at or below minimum level.",
         "tab": {
             "overview": "Overview",
             "history": "History",
@@ -90,6 +97,7 @@
         },
         "field": {
             "created": "Created At",
+            "description": "Description",
             "updated": "Last Updated",
             "leadTime": "Lead Time",
             "lifetime": "Shelf Life",
@@ -202,6 +210,11 @@
         "startDate": "Start Date",
         "endDate": "End Date",
         "quantity": "Quantity",
+        "topProducts": "Top Products",
+        "recentActivity": "Recent Activity",
+        "name": "Plan Name",
+        "product": "Product",
+        "priority": "Priority",
         "subtext": {
             "overview": "Overview of production plans and progress",
             "total": "All plans",
@@ -212,7 +225,9 @@
             "progress": "Real-time production tracking",
             "distribution": "Plans by current status",
             "vsLastMonth": "vs last month",
-            "stable": "stable"
+            "stable": "stable",
+            "topProducts": "Most produced items",
+            "recent": "Latest plan updates"
         },
         "status": {
             "draft": "Draft",
@@ -332,10 +347,6 @@
         "bom": "Bill of Materials",
         "bomList": "Materials List",
         "addBom": "Add Material",
-        "tabs": {
-            "info": "Information",
-            "bom": "BOM (Formula)"
-        },
         "fields": {
              "name": "Name",
              "type": "Type",
@@ -344,7 +355,22 @@
              "unit": "Unit",
              "quantity": "Quantity",
              "waste": "Waste (%)",
-             "cost": "Cost"
+             "cost": "Cost",
+             "price": "Price"
+        },
+        "features": "Key Features",
+        "specifications": "Specifications",
+        "actions": {
+            "print": "Print Label",
+            "export": "Export PDF",
+            "archive": "Archive",
+            "delete": "Delete"
+        },
+        "tabs": {
+            "info": "Information",
+            "bom": "Bill of Materials",
+            "auditLog": "Audit Log",
+            "documents": "Documents"
         },
         "overview": "Overview",
         "routing": "Routing",
@@ -574,6 +600,26 @@
     "audit": {
         "title": "Audit Logs",
         "subtitle": "Track system changes and user activities"
+    },
+    "smartDashboard": {
+        "title": "Smart Factory Dashboard",
+        "subtitle": "Real-time AI monitoring & material analytics",
+        "totalMaterials": "Total Materials",
+        "lowStockMaterials": "Low Stock Items",
+        "criticalAlerts": "Critical Alerts",
+        "totalStockValue": "Total Stock Value",
+        "activePlans": "Active Plans",
+        "stockTrend": "Stock Value Trend",
+        "plansAtRisk": "Plans At Risk",
+        "alerts": "System Alerts",
+        "lowStockList": "Critical Low Stock",
+        "reorderPoint": "Reorder Point",
+        "shortage": "Shortage",
+        "required": "Required",
+        "available": "Available",
+        "status": "Status",
+        "risk": "Risk",
+        "warning": "Warning",
+        "normal": "Normal"
     }
-
 }

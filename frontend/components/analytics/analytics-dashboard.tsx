@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { forecastService } from "@/services/forecast.service";
 import { productService } from "@/services/product.service";
@@ -84,28 +84,34 @@ export function AnalyticsDashboard() {
     const predictionData: ForecastData | undefined = predictMutation.data?.data;
 
     // Chart Data Preparation
-    const chartData = predictionData ? predictionData.predictions.map((val, index) => ({
-        name: `${t('forecast.days')} ${index + 1}`,
-        value: val,
-        errorRange: [
-            val - predictionData.confidence.interval_95[index].lower,
-            predictionData.confidence.interval_95[index].upper - val
-        ]
-    })) : [];
+    const chartData = useMemo(() => {
+        if (!predictionData) return [];
+        return predictionData.predictions.map((val, index) => ({
+            name: `${t('forecast.days')} ${index + 1}`,
+            value: val,
+            errorRange: [
+                val - predictionData.confidence.interval_95[index].lower,
+                predictionData.confidence.interval_95[index].upper - val
+            ]
+        }));
+    }, [predictionData, t]);
 
     // Calculate Total Forecasted Production
     const totalForecastedProduction = predictionData?.predictions.reduce((acc, curr) => acc + curr, 0) || 0;
 
     // Material Cost Data Preparation
-    const materialCostData = predictionData?.materialUsage.map(usage => {
-        const costPerUnit = predictionData?.product?.boms?.find(
-            b => b.material.material_id === usage.material_id
-        )?.material?.cost_per_unit || 0;
-        return {
-            name: usage.material_name,
-            value: usage.total_usage * costPerUnit
-        };
-    }).filter(item => item.value > 0).sort((a, b) => b.value - a.value);
+    const materialCostData = useMemo(() => {
+        if (!predictionData) return [];
+        return predictionData.materialUsage.map(usage => {
+            const costPerUnit = predictionData?.product?.boms?.find(
+                b => b.material.material_id === usage.material_id
+            )?.material?.cost_per_unit || 0;
+            return {
+                name: usage.material_name,
+                value: usage.total_usage * costPerUnit
+            };
+        }).filter(item => item.value > 0).sort((a, b) => b.value - a.value);
+    }, [predictionData]);
 
     // Calculate Total Material Cost
     const totalMaterialCost = materialCostData?.reduce((acc, curr) => acc + curr.value, 0) || 0;
@@ -280,7 +286,7 @@ export function AnalyticsDashboard() {
                                         >
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                                             <XAxis dataKey="name" tick={{ fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                                            <YAxis tick={{ fill: '#6B7280' }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
+                                            <YAxis tick={{ fill: '#6B7280' }} axisLine={false} tickLine={false} allowDecimals={false} />
                                             <RechartsTooltip
                                                 cursor={{ fill: 'transparent' }}
                                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
