@@ -1,4 +1,6 @@
+
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query, ParseIntPipe } from '@nestjs/common';
+
 
 import { CreateProductPlanDto } from '../dto/create-product-plan.dto';
 import { UpdateProductPlanDto } from '../dto/update-product-plan.dto';
@@ -10,6 +12,8 @@ import { CompletePlanDto } from '../dto/complete-plan.dto';
 import { CancelPlanDto } from '../dto/cancel-plan.dto';
 import { ReportQueryDto } from '../dto/report-query.dto';
 import { ProductPlanService } from '../product-plan.service';
+import { Role } from 'src/common/enums';
+import { Auth } from 'src/common/decorators/auth.decorator';
 
 @Controller({
   path: 'product-plans',
@@ -24,6 +28,7 @@ export class ProductPlanController {
 
   // =============== CRUD Endpoints ===============
 
+  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
   @Post()
   async create(@Body() createProductPlanDto: CreateProductPlanDto) {
     const data = await this.productPlanService.create(createProductPlanDto);
@@ -33,11 +38,13 @@ export class ProductPlanController {
     };
   }
 
+  @Auth()
   @Get()
   findAll(@Query() query: ProductPlanQueryDto) {
     return this.productPlanService.findAll(query);
   }
 
+  @Auth()
   @Get('report/summary')
   async getReportSummary(@Query() query: ReportQueryDto) {
     const data = await this.planReportService.getSummary(query);
@@ -47,16 +54,20 @@ export class ProductPlanController {
     };
   }
 
+
+  @Auth()
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productPlanService.findOne(id);
   }
 
+  @Auth()
   @Get(':id/material-requirements')
   getMaterialRequirements(@Param('id', ParseIntPipe) id: number) {
     return this.productPlanService.getMaterialRequirements(id);
   }
 
+  @Auth(Role.ADMIN, Role.SUPER_ADMIN, Role.PRODUCTION_MANAGER)
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateProductPlanDto: UpdateProductPlanDto) {
     const data = await this.productPlanService.update(id, updateProductPlanDto);
@@ -66,6 +77,8 @@ export class ProductPlanController {
     };
   }
 
+
+  @Auth(Role.ADMIN, Role.SUPER_ADMIN, Role.PRODUCTION_MANAGER)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     const data = await this.productPlanService.remove(id);
@@ -75,6 +88,7 @@ export class ProductPlanController {
     };
   }
 
+  @Auth(Role.ADMIN, Role.SUPER_ADMIN, Role.PRODUCTION_MANAGER)
   @Put(':id/restore')
   async restore(@Param('id', ParseIntPipe) id: number) {
     const data = await this.productPlanService.restore(id);
@@ -98,9 +112,6 @@ export class ProductPlanController {
     };
   }
 
-  /**
-   * Confirm Plan - ยืนยัน + จอง stock ตาม allocations ที่ user เลือก
-   */
   @Post(':id/confirm')
   async confirmPlan(
     @Param('id', ParseIntPipe) id: number,

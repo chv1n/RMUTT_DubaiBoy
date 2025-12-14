@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ISoftDeletable } from 'src/common/interfaces/soft-deletable.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+
 import { Supplier } from '../entities/supplier.entity';
 import { CreateSupplierDto } from '../dto/create-supplier.dto';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
@@ -10,6 +12,12 @@ import { QueryHelper } from 'src/common/helpers/query.helper';
 import { CrudHelper } from 'src/common/helpers/crud.helper';
 import { SoftDeleteHelper } from 'src/common/helpers/soft-delete.helper';
 
+
+
+import { Role } from 'src/common/enums';
+import { Auth } from 'src/common/decorators/auth.decorator';
+
+
 @Injectable()
 export class SupplierService implements ISoftDeletable {
     constructor(
@@ -17,27 +25,34 @@ export class SupplierService implements ISoftDeletable {
         private readonly repository: Repository<Supplier>,
     ) { }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     async create(createSupplierDto: CreateSupplierDto) {
         const entity = this.repository.create(createSupplierDto);
         return this.repository.save(entity);
     }
 
+    @Auth()
     async findAll(query: BaseQueryDto) {
         return QueryHelper.paginate(this.repository, query, { sortField: 'supplier_name' });
     }
 
+    @Auth()
     findOne(id: number) {
         return this.repository.findOneBy({ supplier_id: id });
     }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     async update(id: number, updateSupplierDto: UpdateSupplierDto) {
         return CrudHelper.update(this.repository, id, 'supplier_id', updateSupplierDto, 'ไม่พบรายการที่ต้องการแก้ไข');
     }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     async remove(id: number): Promise<void> {
         await SoftDeleteHelper.remove(this.repository, id, 'supplier_id', 'ไม่พบข้อมูลที่ต้องการลบ');
     }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     async restore(id: number): Promise<void> {
         await SoftDeleteHelper.restore(this.repository, id, 'supplier_id', 'ไม่พบข้อมูลที่ต้องการกู้คืน');
     }

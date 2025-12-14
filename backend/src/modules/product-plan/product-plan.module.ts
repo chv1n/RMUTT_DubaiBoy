@@ -33,7 +33,7 @@ import { DashboardPlanService } from './services/dash-board.service';
     PlanReportService,
     DashboardPlanService,
   ],
-  exports: [ProductPlanService, PlanWorkflowService],
+  exports: [ProductPlanService, PlanWorkflowService, DashboardPlanService]
 })
 export class ProductPlanModule { }
 

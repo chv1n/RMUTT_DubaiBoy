@@ -4,6 +4,8 @@ import { StockByWarehouseQueryDto } from '../dto/stock-by-warehouse.dto';
 import { TotalStockQueryDto } from '../dto/total-stock.dto';
 import { LotBatchQueryDto } from '../dto/lot-batch.dto';
 import { LowStockQueryDto } from '../dto/low-stock-alert.dto';
+import { Auth } from 'src/common/decorators/auth.decorator';
+import { Role } from 'src/common/enums';
 
 /**
  * Controller สำหรับ Inventory Balance Control
@@ -24,6 +26,7 @@ export class InventoryBalanceController {
      * GET /v1/inventory/balance
      * ดูยอดคงคลังตามโกดัง
      */
+    @Auth(Role.INVENTORY_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
     @Get()
     async getStockByWarehouse(@Query() query: StockByWarehouseQueryDto) {
         return this.inventoryBalanceService.getStockByWarehouse(query);
@@ -33,6 +36,7 @@ export class InventoryBalanceController {
      * GET /v1/inventory/balance/total
      * ดูยอดคงคลังรวมทั้งหมดของวัสดุ
      */
+    @Auth()
     @Get('total')
     async getTotalStock(@Query() query: TotalStockQueryDto) {
         return this.inventoryBalanceService.getTotalStock(query);
@@ -42,6 +46,7 @@ export class InventoryBalanceController {
      * GET /v1/inventory/balance/lot-batch
      * ดู Lot/Batch และแนะนำการเบิกตาม FIFO/FEFO
      */
+    @Auth(Role.INVENTORY_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
     @Get('lot-batch')
     async getLotBatchSuggestion(@Query() query: LotBatchQueryDto) {
         return this.inventoryBalanceService.getLotBatchSuggestion(query);
@@ -51,6 +56,7 @@ export class InventoryBalanceController {
      * GET /v1/inventory/balance/low-stock-alerts
      * ดูการแจ้งเตือนยอดต่ำสุด
      */
+    @Auth(Role.INVENTORY_MANAGER, Role.ADMIN, Role.SUPER_ADMIN)
     @Get('low-stock-alerts')
     async getLowStockAlerts(@Query() query: LowStockQueryDto) {
         return this.inventoryBalanceService.getLowStockAlerts(query);

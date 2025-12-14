@@ -7,6 +7,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/enums/role.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { BaseQueryDto } from 'src/common/dto/base-query.dto';
+import { Auth } from 'src/common/decorators/auth.decorator';
 
 
 @Controller({
@@ -35,27 +36,25 @@ export class UserController {
   }
 
   @Get('admin-only')
-  @UseGuards(AtGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Auth(Role.ADMIN)
   adminOnly() {
     return 'This is admin only';
   }
 
   @Get('super-admin-only')
-  @UseGuards(AtGuard, RolesGuard)
-  @Roles(Role.SUPER_ADMIN)
+  @Auth(Role.ADMIN)
   superAdminOnly() {
     return 'This is super admin only';
   }
 
 
-  @UseGuards(AtGuard)
+  @Auth()
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
   }
 
-
+  @Auth(Role.SUPER_ADMIN)
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     const data = await this.userService.update(id, updateUserDto);
@@ -65,6 +64,7 @@ export class UserController {
     };
   }
 
+  @Auth(Role.SUPER_ADMIN)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.userService.remove(id);

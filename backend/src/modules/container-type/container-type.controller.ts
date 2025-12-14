@@ -3,6 +3,8 @@ import { ContainerTypeService } from './container-type.service';
 import { CreateContainerTypeDto } from './dto/create-container-type.dto';
 import { UpdateContainerTypeDto } from './dto/update-container-type.dto';
 import { BaseQueryDto } from '../../common/dto/base-query.dto';
+import { Auth } from 'src/common/decorators/auth.decorator';
+import { Role } from 'src/common/enums';
 
 @Controller({
     path: 'container-types',
@@ -11,6 +13,8 @@ import { BaseQueryDto } from '../../common/dto/base-query.dto';
 export class ContainerTypeController {
     constructor(private readonly service: ContainerTypeService) { }
 
+
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     @Post()
     async create(@Body() createContainerTypeDto: CreateContainerTypeDto) {
         const data = await this.service.create(createContainerTypeDto);
@@ -20,16 +24,19 @@ export class ContainerTypeController {
         };
     }
 
+    @Auth()
     @Get()
     findAll(@Query() query: BaseQueryDto) {
         return this.service.findAll(query);
     }
 
+    @Auth()
     @Get(':id')
     findOne(@Param('id', ParseIntPipe) id: number) {
         return this.service.findOne(id);
     }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     @Put(':id')
     async update(@Param('id', ParseIntPipe) id: number, @Body() updateContainerTypeDto: UpdateContainerTypeDto) {
         const data = await this.service.update(id, updateContainerTypeDto);
@@ -39,7 +46,7 @@ export class ContainerTypeController {
         };
     }
 
-
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     @Delete(':id')
     async remove(@Param('id', ParseIntPipe) id: number) {
         await this.service.remove(id);
@@ -48,6 +55,7 @@ export class ContainerTypeController {
         };
     }
 
+    @Auth(Role.ADMIN, Role.SUPER_ADMIN)
     @Put(':id/restore')
     async restore(@Param('id', ParseIntPipe) id: number) {
         await this.service.restore(id);

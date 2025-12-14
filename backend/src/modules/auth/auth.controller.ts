@@ -17,6 +17,7 @@ import { RtGuard } from 'src/common/guards/rt.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
+
   @Post('login')
   @UseGuards(LocalAuthGuard)
   async login(@Request() req, @Res({ passthrough: true }) res) {

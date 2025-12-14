@@ -46,11 +46,21 @@ export class DashboardUserService {
         // Recent Activity
         const recentActivity = await this.getRecentActivity(5);
 
+        // Calculate Trend
+        // Assuming "Change" is percentage increase from previous month
+        // Previous Total = Total - New (approx for simple logic)
+        const previousTotal = totalUsers - newUsersThisMonth;
+        const changePercent = previousTotal > 0
+            ? ((newUsersThisMonth) / previousTotal) * 100
+            : (totalUsers > 0 ? 100 : 0);
+
         return {
             totalUsers,
             activeUsers,
             inactiveUsers,
             newUsersThisMonth,
+            change: parseFloat(changePercent.toFixed(2)),
+            trend: changePercent >= 0 ? 'up' : 'down',
             roleDistribution,
             userGrowth,
             recentActivity

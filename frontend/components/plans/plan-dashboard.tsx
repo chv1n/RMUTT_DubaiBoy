@@ -116,7 +116,7 @@ export function PlanDashboard() {
                                     </div>
                                     <Progress
                                         value={percentage}
-                                        color={item.status === 'COMPLETED' ? "success" : item.status === 'IN_PROGRESS' ? "primary" : "warning"}
+                                        color={item.status === 'COMPLETED' ? "success" : item.status === 'PRODUCTION' ? "primary" : "warning"}
                                         size="sm"
                                         radius="sm"
                                         showValueLabel={true}

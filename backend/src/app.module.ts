@@ -9,7 +9,10 @@ import { AppModules } from './modules';
 
 
 import * as Joi from 'joi';
-
+import { JwtAuthGuard } from './common/guards/jwt.auth.guard';
+import { Roles } from './common/decorators/roles.decorator';
+import { RolesGuard } from './common/guards/roles.guard';
+import { AtGuard } from './common/guards/at.guard';
 
 @Module({
   imports: [
@@ -39,6 +42,7 @@ import * as Joi from 'joi';
       limit: 100,
     }]),
     ...AppModules,
+
 
 
 

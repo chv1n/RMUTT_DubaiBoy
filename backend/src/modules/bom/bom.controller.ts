@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { BomService } from './bom.service';
 import { CreateBomDto } from './dto/create-bom.dto';
 import { UpdateBomDto } from './dto/update-bom.dto';
 import { GetBomDto } from './dto/get-bom.dto';
+import { Auth } from 'src/common/decorators/auth.decorator';
+import { Role } from 'src/common/enums';
 
 import { CalculateBomDto } from './dto/calculate-bom.dto';
+
 
 @Controller({
   path: 'boms',
@@ -32,16 +35,19 @@ export class BomController {
     };
   }
 
+  @Auth()
   @Get()
   findAll(@Query() query: GetBomDto) {
     return this.bomService.findAll(query);
   }
 
+  @Auth()
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.bomService.findOne(id);
   }
 
+  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateBomDto: UpdateBomDto) {
     await this.bomService.update(id, updateBomDto);
@@ -50,6 +56,7 @@ export class BomController {
     };
   }
 
+  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.bomService.remove(id);
@@ -58,6 +65,7 @@ export class BomController {
     };
   }
 
+  @Auth(Role.ADMIN, Role.SUPER_ADMIN)
   @Put(':id/restore')
   async restore(@Param('id', ParseIntPipe) id: number) {
     await this.bomService.restore(id);
