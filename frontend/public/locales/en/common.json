@@ -332,10 +332,6 @@
         "bom": "Bill of Materials",
         "bomList": "Materials List",
         "addBom": "Add Material",
-        "tabs": {
-            "info": "Information",
-            "bom": "BOM (Formula)"
-        },
         "fields": {
              "name": "Name",
              "type": "Type",
@@ -344,7 +340,22 @@
              "unit": "Unit",
              "quantity": "Quantity",
              "waste": "Waste (%)",
-             "cost": "Cost"
+             "cost": "Cost",
+             "price": "Price"
+        },
+        "features": "Key Features",
+        "specifications": "Specifications",
+        "actions": {
+            "print": "Print Label",
+            "export": "Export PDF",
+            "archive": "Archive",
+            "delete": "Delete"
+        },
+        "tabs": {
+            "info": "Information",
+            "bom": "Bill of Materials",
+            "auditLog": "Audit Log",
+            "documents": "Documents"
         },
         "overview": "Overview",
         "routing": "Routing",
