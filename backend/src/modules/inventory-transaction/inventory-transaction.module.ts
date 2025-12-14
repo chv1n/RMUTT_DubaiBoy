@@ -12,6 +12,7 @@ import { TransactionMovementService } from './services/transaction-movement.serv
 import { ReportingService } from './services/reporting.service';
 
 import { MaterialInventoryModule } from '../material-inventory/material-inventory.module';
+import { PushSubscriptionModule } from '../push-subscription/push-subscription.module';
 
 
 
@@ -24,6 +25,7 @@ import { MaterialInventoryModule } from '../material-inventory/material-inventor
       WarehouseMaster,
     ]),
     MaterialInventoryModule,
+    PushSubscriptionModule,
   ],
   controllers: [
     TransactionController,
