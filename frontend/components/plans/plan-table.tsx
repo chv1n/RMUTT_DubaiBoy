@@ -17,6 +17,8 @@ import PlanCard from './plan-card';
 import { ConfirmPlanModal, CompletePlanModal, CancelPlanModal } from './plan-modals';
 import { ConfirmModal } from '@/components/common/confirm-modal';
 import { useStartPlan, useCompletePlan, useCancelPlan, useConfirmPlan } from '@/hooks/usePlans';
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 interface PlanTableProps {
     onEdit: (plan: Plan) => void;
@@ -25,6 +27,8 @@ interface PlanTableProps {
 export default function PlanTable({ onEdit }: PlanTableProps) {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
     const [filterValue, setFilterValue] = React.useState("");
     const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
     const [view, setView] = React.useState<"list" | "board">("list");
@@ -104,7 +108,7 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
     const handleAction = React.useCallback((key: string, plan: Plan) => {
         switch (key) {
             case 'view':
-                router.push(`/super-admin/plans/${plan.id}`);
+                router.push(`${basePath}/plans/${plan.id}`);
                 break;
             case 'edit':
                 onEdit(plan);
@@ -115,7 +119,7 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
                 }
                 break;
         }
-    }, [deletePlanMutation, router, t, onEdit]);
+    }, [deletePlanMutation, router, t, onEdit, basePath]);
 
     // Drag and Drop Logic
     const [draggedPlan, setDraggedPlan] = React.useState<Plan | null>(null);

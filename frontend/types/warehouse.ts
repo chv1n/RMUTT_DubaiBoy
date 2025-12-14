@@ -134,7 +134,33 @@ export interface StockLocationResult {
     total_items: number;
 }
 
-export interface WarehouseStats {
+// --- Dashboard API Types ---
+
+export interface WarehouseDashboardStats {
+    total_warehouses: number;
+    active_warehouses: number;
+    total_inventory_value: number;
+    total_stock_items: number;
+    low_stock_alerts: number;
+    utilization_rate: number;
+}
+
+export interface WarehouseStockDistributionItem {
+    warehouse_name: string;
+    value: number;
+    item_count: number;
+    color?: string; // Optional for UI mapping
+}
+
+export interface WarehouseCapacityItem {
+    warehouse_name: string;
+    capacity: number;
+    used: number;
+    percentage: number;
+}
+
+// Deprecated or Legacy Stats
+export interface WarehouseStatsLegacy {
     totalWarehouses: number;
     activeWarehouses: number;
     totalValue: number;

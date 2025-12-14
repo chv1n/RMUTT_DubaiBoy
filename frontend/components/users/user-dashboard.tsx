@@ -14,12 +14,16 @@ import { Button } from "@heroui/button";
 import { ArrowUpRight, TrendingUp, Users, UserCheck, UserX, UserPlus, Shield } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/use-permission";
+import { getRolePath } from "@/lib/role-path";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8b5cf6', '#ec4899'];
 
 export function UserDashboard() {
     const { t } = useTranslation();
     const router = useRouter();
+    const { userRole } = usePermission();
+    const basePath = getRolePath(userRole);
 
     const { data: stats, isLoading } = useQuery({
         queryKey: ['users', 'dashboard', 'stats'],
@@ -48,7 +52,7 @@ export function UserDashboard() {
                     <Button color="primary" startContent={<ArrowUpRight size={16} />}>
                         {t('common.export')}
                     </Button>
-                    <Button variant="flat" onPress={() => router.push('/super-admin/users/all')}>
+                    <Button variant="flat" onPress={() => router.push(`${basePath}/users/all`)}>
                         {t('user.manageUsers')}
                     </Button>
                 </div>

@@ -149,3 +149,31 @@ export interface PlanPreview {
     materials: MaterialRequirement[];
 }
 
+export interface PlanDashboardStats {
+    total_plans: number;
+    active_plans: number;
+    completed_plans: number;
+    pending_plans: number;
+    delayed_plans?: number; // Kept as optional for backward compatibility if needed, but not in new JSON
+    total_production_target: number;
+    on_time_rate: number;
+    trend?: {
+        active_plans?: string;
+        on_time_rate?: string;
+    };
+}
+
+export interface PlanProgressItem {
+    plan_id: number;
+    plan_name: string;
+    progress: number;
+    status: string;
+    due_date: string;
+}
+
+export interface PlanStatusDistributionItem {
+    name: string;
+    value: number;
+    color: string;
+}
+

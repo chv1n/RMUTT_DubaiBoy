@@ -25,8 +25,32 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginRequest) => {
     try {
       const response: any = await login(data);
-      if (response.data) {
-        router.push("/super-admin");
+      // Determine user and role
+      const user = response.data || response.user;
+      if (user) {
+        const role = user.role ? user.role.toUpperCase() : '';
+        switch (role) {
+          case 'SUPER_ADMIN':
+            router.push("/super-admin");
+            break;
+          case 'ADMIN':
+            router.push("/admin");
+            break;
+          case 'USER':
+            router.push("/user");
+            break;
+          case 'INVENTORY_MANAGER':
+            router.push("/inventory-manager");
+            break;
+          case 'PRODUCTION_MANAGER':
+            router.push("/prouction-manager"); // Matching directory typo
+            break;
+          case 'PURCHASE_MANAGER':
+            router.push("/purchase-maneger"); // Matching directory typo
+            break;
+          default:
+            router.push("/user");
+        }
       }
     } catch (e) {
       // Error is handled by the hook and displayed below
