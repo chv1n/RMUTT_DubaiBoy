@@ -1,5 +1,38 @@
 {
-    "common": {
+  "purchasing": {
+    "procurement": "Procurement Intelligence",
+    "seedData": "Seed Mock Data",
+    "suggestedOrders": "Suggested Orders",
+    "noSuggestions": "No suggestions at the moment.",
+    "recentPOs": "Recent Purchase Orders",
+    "poNumber": "PO NUMBER",
+    "supplier": "SUPPLIER",
+    "status": "STATUS",
+    "expDate": "EXP. DATE",
+    "actDate": "ACT. DATE",
+    "amount": "AMOUNT",
+    "actions": "ACTIONS",
+    "findAlternative": "Find Alternative",
+    "createOrder": "Create Order",
+    "createTitle": "Create Purchase Order",
+    "cancel": "Cancel",
+    "reason": "Reason",
+    "estimatedCost": "Estimated Cost",
+    "quantity": "Quantity",
+    "selectSupplier": "Select a supplier",
+    "material": "Material",
+    "recommendationReason": "Auto-generated from recommendation. Reason: {{reason}}",
+    "failedToCreate": "Failed to create PO",
+    "alternativeTitle": "Recommended Alternative Suppliers",
+    "alternativeSubtitle": "The current order is delayed. Here are the top performing alternative suppliers you can switch to.",
+    "onTimeRate": "ON-TIME RATE",
+    "avgDelay": "AVG DELAY",
+    "select": "Select",
+    "close": "Close",
+    "noAlternatives": "No alternatives found",
+    "selectedAlert": "Selected Supplier ID {{id}}. In a full flow, this would create a new emergency PO."
+  },
+  "common": {
         "dashboard": "Dashboard",
         "home": "Home",
         "welcomeMessage": "Welcome back, here's what's happening today.",
@@ -163,6 +196,18 @@
             "email": "Email",
             "blacklist": "Blacklist",
             "activate": "Activate"
+        },
+        "performance": {
+            "onTime": "On-Time Delivery",
+            "late": "Late Deliveries",
+            "avgDelay": "Avg Delay Duration",
+            "analysis": "Performance Analysis",
+            "strengths": "Strengths",
+            "weaknesses": "Areas for Improvement",
+            "strength1": "High response rate to RFQs",
+            "strength2": "Consistent packaging quality",
+            "weakness1": "Delivery times have slipped in Q4",
+            "weakness2": "Invoicing accuracy needs attention"
         }
     },
     "ecommerce": {

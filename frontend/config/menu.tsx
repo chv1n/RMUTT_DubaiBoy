@@ -111,6 +111,7 @@ export const getSidebarItems = (role: UserRole | null): MenuItem[] => {
             allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'PURCHASE_MANAGER', 'USER'],
             children: [
                 { key: "dashboard-suppliers", label: "common.dashboard", href: `${prefix}/suppliers`, allowedRoles: ALL_ROLES },
+                { key: "procurement", label: "purchasing.procurement", href: `${prefix}/procurement`, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'PURCHASE_MANAGER'] },
                 { key: "all-suppliers", label: "suppliers.list", href: `${prefix}/suppliers/all`, allowedRoles: ['SUPER_ADMIN', 'ADMIN', 'PURCHASE_MANAGER'] },
             ],
         },
