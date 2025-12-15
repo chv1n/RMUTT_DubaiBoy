@@ -204,7 +204,7 @@ export default function PlanDetail({ plan }: PlanDetailProps) {
 
                         {/* 2. Estimated Cost */}
                         <div className="flex flex-col gap-1">
-                            <span className="text-sm text-default-500">Estimated Cost</span>
+                            <span className="text-sm text-default-500">{t('plan.estimatedCost')}</span>
                             {isPreviewLoading ? (
                                 <Skeleton className="h-6 w-32 rounded-lg" />
                             ) : (
@@ -218,7 +218,7 @@ export default function PlanDetail({ plan }: PlanDetailProps) {
 
                         {/* 3. Material Requirements Table */}
                         <div className="flex flex-col gap-2">
-                            <h5 className="font-semibold text-default-700">Material Requirements</h5>
+                            <h5 className="font-semibold text-default-700">{t('plan.materialRequirements')}</h5>
                             {isPreviewLoading ? (
                                 <div className="space-y-2">
                                     <Skeleton className="rounded-lg h-10 w-full" />

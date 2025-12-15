@@ -369,7 +369,7 @@ export function InventoryDashboard() {
                         </TableHeader>
                         <TableBody emptyContent={"No low stock items."} items={lowStockItems}>
                             {(item: any) => (
-                                <TableRow key={item.material_id}>
+                                <TableRow key={`${item.material_id}-${item.warehouse_id}`}>
                                     <TableCell>
                                         <div>
                                             <p className="font-semibold text-small">{item.material_name}</p>
