@@ -20,6 +20,8 @@ import { AuditLogModule } from "./audit-log/audit-log.module";
 
 import { MainDashboardModule } from "./main-dashboard/main-dashboard.module";
 
+import { PurchaseOrderModule } from "./purchase-order/purchase-order.module";
+
 export const AppModules = [
     AuditLogModule,
     MaterialModule,
@@ -40,5 +42,6 @@ export const AppModules = [
     PushLogModule,
     ForecastModule,
     MainDashboardModule,
+    PurchaseOrderModule,
 ]
 
