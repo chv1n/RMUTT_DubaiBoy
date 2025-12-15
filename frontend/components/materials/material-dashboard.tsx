@@ -291,9 +291,9 @@ export function MaterialDashboard() {
                                 <TableColumn>LEVEL</TableColumn>
                                 <TableColumn align="end">SHORTAGE</TableColumn>
                             </TableHeader>
-                            <TableBody emptyContent="No critical items found." items={lowStockItems}>
-                                {(item: any) => (
-                                    <TableRow key={item.material_id}>
+                            <TableBody emptyContent="No critical items found.">
+                                {lowStockItems.map((item: any, index: number) => (
+                                    <TableRow key={`${item.material_id}-${item.warehouse_id || item.warehouse_name}-${index}`}>
                                         <TableCell>
                                             <div className="font-medium">{item.material_name}</div>
                                             <div className="text-tiny text-default-400">{item.warehouse_name}</div>
@@ -306,7 +306,7 @@ export function MaterialDashboard() {
                                             <Chip color="danger" size="sm" variant="flat">-{item.shortage_quantity}</Chip>
                                         </TableCell>
                                     </TableRow>
-                                )}
+                                ))}
                             </TableBody>
                         </Table>
                     </CardBody>
@@ -333,9 +333,9 @@ export function MaterialDashboard() {
                                 <TableColumn>MAT</TableColumn>
                                 <TableColumn align="end">QTY</TableColumn>
                             </TableHeader>
-                            <TableBody emptyContent="No recent activity." items={recentTransactions.slice(0, 5)}>
-                                {(item: any) => (
-                                    <TableRow key={item.transaction_id}>
+                            <TableBody emptyContent="No recent activity.">
+                                {recentTransactions.slice(0, 5).map((item: any, index: number) => (
+                                    <TableRow key={`${item.transaction_id}-${index}`}>
                                         <TableCell>
                                             {item.transaction_date ? new Date(item.transaction_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
                                         </TableCell>
@@ -353,7 +353,7 @@ export function MaterialDashboard() {
                                             </span>
                                         </TableCell>
                                     </TableRow>
-                                )}
+                                ))}
                             </TableBody>
                         </Table>
                     </CardBody>
