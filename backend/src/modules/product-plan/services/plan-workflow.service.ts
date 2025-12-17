@@ -15,6 +15,7 @@ import { AuditEntity } from 'src/modules/audit-log/enums/audit-entity.enum';
 import { MaterialInventory } from 'src/modules/material-inventory/entities/material-inventory.entity';
 import { IPlanPreview, IMaterialRequirement, IWarehouseStock } from '../interfaces';
 import { MaterialService } from 'src/modules/material/services/material.service';
+import { TransactionMovementService } from 'src/modules/inventory-transaction/services/transaction-movement.service';
 
 /**
  * Service สำหรับจัดการ Plan Workflow
@@ -37,6 +38,7 @@ export class PlanWorkflowService {
         private readonly bomService: BomService,
         private readonly materialService: MaterialService,
         private readonly auditLogService: AuditLogService,
+        private readonly transactionMovementService: TransactionMovementService,
     ) { }
 
     /**
@@ -211,6 +213,22 @@ export class PlanWorkflowService {
 
             // Reserve stock
             await this.stockReservationService.reserveStock(stockOps, queryRunner);
+
+            // Check Low Stock (Notify based on Available Quantity)
+            for (const op of stockOps) {
+                const updatedInventory = await queryRunner.manager.findOne(MaterialInventory, {
+                    where: { id: op.inventory_id },
+                    relations: ['material']
+                });
+                if (updatedInventory) {
+                    // Pass 'true' to use Available Quantity = (Qty - Reserved)
+                    // Note: We don't await this to avoid blocking the transaction commit? 
+                    // Actually, checkLowStockAndNotify is async but just sends push. 
+                    // It is better to await to ensure logs appear in order, but failures shouldn't allow rollback?
+                    // transactionMovementService catches its own errors, so it won't throw. Safe to await.
+                    await this.transactionMovementService.checkLowStockAndNotify(updatedInventory, true);
+                }
+            }
 
             // Create allocation records
             for (const record of allocationRecords) {

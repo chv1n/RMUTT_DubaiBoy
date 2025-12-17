@@ -5,7 +5,7 @@ import { AtGuard } from 'src/common/guards/at.guard';
 import { BaseQueryDto } from 'src/common/dto/base-query.dto';
 
 @Controller({
-  path: 'push-subscriptions',
+  path: 'push',
   version: '1',
 })
 export class PushSubscriptionController {
@@ -14,9 +14,41 @@ export class PushSubscriptionController {
   @Post('subscribe')
   @UseGuards(AtGuard)
   async subscribe(@Body() body: CreatePushSubscriptionDto, @Req() req) {
-    console.log("BODY RECEIVED:", body);
     const saved = await this.service.create(body, req.user?.id);
     return { message: 'Subscription saved', data: saved };
+  }
+
+  @Post('unsubscribe')
+  async unsubscribe(@Body() body: { endpoint: string }) {
+    await this.service.deleteByEndpoint(body.endpoint);
+    return { message: 'Unsubscribed successfully' };
+  }
+
+  @Post('test')
+  @UseGuards(AtGuard)
+  async sendTestNotification(@Req() req, @Body() body: { message?: string }) {
+    const userId = req.user.id;
+    const payload = {
+      title: 'Test Notification',
+      body: body.message || 'This is a test notification from the API.',
+      data: { url: '/' }
+    };
+    await this.service.sendNotification(userId, payload);
+    return { message: 'Test notification sent' };
+  }
+
+  @Post('low-stock')
+  @UseGuards(AtGuard)
+  async sendTestLowStockNotification(@Body() body: { materialName?: string, current?: number, min?: number }) {
+    const payload = {
+      title: 'Low Stock Alert',
+      body: `Material ${body.materialName || 'Test Material (Manual Check)'} is running low. Current: ${body.current ?? 5} (Min: ${body.min ?? 10})`,
+      data: { url: '/inventory' }
+    };
+
+    // Send to all relevant roles to simulate the real system event
+    await this.service.sendToRoles(['admin', 'staff', 'super_admin', 'user'], payload);
+    return { message: 'Low stock test notification sent to admins/staff' };
   }
 
   @Get()

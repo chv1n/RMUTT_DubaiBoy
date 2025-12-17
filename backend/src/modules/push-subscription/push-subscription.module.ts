@@ -8,5 +8,6 @@ import { PushSubscription } from './entities/push-subscription.entity';
   imports: [TypeOrmModule.forFeature([PushSubscription])],
   controllers: [PushSubscriptionController],
   providers: [PushSubscriptionService],
+  exports: [PushSubscriptionService],
 })
 export class PushSubscriptionModule { }

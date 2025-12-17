@@ -7,13 +7,16 @@ import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
 import { Avatar } from '@heroui/avatar';
 import { Divider } from '@heroui/divider';
+import { Progress } from '@heroui/progress';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
 import { useTranslation } from '@/components/providers/language-provider';
 import { Supplier } from '@/types/suppliers';
 import { Material } from '@/types/materials';
 import { materialService } from '@/services/material.service';
+import { purchaseOrderService, SupplierPerformance } from '@/services/purchase-order.service';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
 import { SupplierForm } from './supplier-form';
+import { Spinner } from '@heroui/spinner';
 import {
     ArrowLeft, Phone, Mail, MapPin, Globe, Star, Shield,
     MessageSquare, AlertTriangle, FileText, CheckCircle,
@@ -31,13 +34,13 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [products, setProducts] = useState<Material[]>([]);
     const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+    const [performance, setPerformance] = useState<SupplierPerformance | null>(null);
 
     useEffect(() => {
         const loadProducts = async () => {
             if (!supplier?.id) return;
             setIsLoadingProducts(true);
             try {
-                // Fetch all materials for this supplier (limit 100 or paginate if needed)
                 const response = await materialService.getAll(1, 100, "", "all", supplier.id);
                 if (response.success && response.data) {
                     setProducts(response.data);
@@ -49,7 +52,18 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
             }
         };
 
+        const loadPerformance = async () => {
+            if (!supplier?.id) return;
+            try {
+                const data = await purchaseOrderService.getSupplierPerformance(supplier.id);
+                setPerformance(data);
+            } catch (error) {
+                console.error("Failed to load performance", error);
+            }
+        };
+
         loadProducts();
+        loadPerformance();
     }, [supplier.id]);
 
     const handleEdit = () => {
@@ -64,7 +78,6 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
 
     const handleAction = (action: string) => {
         console.log(`Action triggered: ${action}`);
-        // Implement real logic or toast here
     };
 
     const OverviewTab = () => (
@@ -145,7 +158,6 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
             </div>
 
             <div className="space-y-6">
-                {/* Rating Card */}
                 <Card className="shadow-sm border border-default-100 bg-gradient-to-br from-content1 to-default-50">
                     <CardBody className="p-6 flex flex-col items-center text-center gap-2">
                         <div className="p-3 bg-warning/20 rounded-full mb-2">
@@ -165,7 +177,6 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
                     </CardBody>
                 </Card>
 
-                {/* Key Stats */}
                 <Card className="shadow-sm border border-default-100">
                     <CardBody className="p-0">
                         <div className="p-4 border-b border-divider flex justify-between items-center">
@@ -197,11 +208,7 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
 
     const ProductsTab = () => (
         <Card className="shadow-none border border-default-200">
-            <Table
-                aria-label="Products Table"
-                shadow="none"
-                removeWrapper
-            >
+            <Table aria-label="Products Table" shadow="none" removeWrapper>
                 <TableHeader>
                     <TableColumn>NAME</TableColumn>
                     <TableColumn>SKU</TableColumn>
@@ -243,9 +250,125 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
         </Card>
     );
 
+    const PerformanceTab = () => {
+        if (!performance) return <div className="p-4 flex justify-center"><Spinner /></div>;
+
+        const getPerformanceColor = (rate: number) => {
+            if (rate >= 90) return "success";
+            if (rate >= 70) return "warning";
+            return "danger";
+        };
+
+        return (
+            <div className="flex flex-col gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* On Time Rate */}
+                    <Card className="shadow-sm border border-default-200">
+                        <CardBody className="gap-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-sm text-default-500">{t('suppliers.performance.onTime')}</span>
+                                    <span className="text-2xl font-bold">{performance.onTimeRate.toFixed(1)}%</span>
+                                </div>
+                                <div className={`p-2 rounded-lg bg-${getPerformanceColor(performance.onTimeRate)}/10 text-${getPerformanceColor(performance.onTimeRate)}`}>
+                                    <CheckCircle size={20} />
+                                </div>
+                            </div>
+                            <Progress
+                                value={performance.onTimeRate}
+                                color={getPerformanceColor(performance.onTimeRate)}
+                                className="h-2"
+                                aria-label="On Time Rate"
+                            />
+                        </CardBody>
+                    </Card>
+
+                    {/* Total Orders */}
+                    <Card className="shadow-sm border border-default-200">
+                        <CardBody className="gap-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-sm text-default-500">{t('suppliers.totalOrders')}</span>
+                                    <span className="text-2xl font-bold">{performance.totalOrders}</span>
+                                </div>
+                                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                    <Package size={20} />
+                                </div>
+                            </div>
+                            <div className="text-xs text-default-400">Lifetime orders processing</div>
+                        </CardBody>
+                    </Card>
+
+                    {/* Late Deliveries */}
+                    <Card className="shadow-sm border border-default-200">
+                        <CardBody className="gap-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-sm text-default-500">{t('suppliers.performance.late')}</span>
+                                    <span className="text-2xl font-bold text-danger">{performance.delayCount}</span>
+                                </div>
+                                <div className="p-2 rounded-lg bg-danger/10 text-danger">
+                                    <AlertTriangle size={20} />
+                                </div>
+                            </div>
+                            <div className="text-xs text-default-400">Orders delayed &gt; 24hrs</div>
+                        </CardBody>
+                    </Card>
+
+                    {/* Avg Delay */}
+                    <Card className="shadow-sm border border-default-200">
+                        <CardBody className="gap-4">
+                            <div className="flex justify-between items-start">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-sm text-default-500">{t('suppliers.performance.avgDelay')}</span>
+                                    <span className="text-2xl font-bold text-warning">{performance.avgDelayDays.toFixed(1)} <span className="text-sm font-normal text-default-400">Days</span></span>
+                                </div>
+                                <div className="p-2 rounded-lg bg-warning/10 text-warning">
+                                    <Calendar size={20} />
+                                </div>
+                            </div>
+                            <div className="text-xs text-default-400">Average time past due</div>
+                        </CardBody>
+                    </Card>
+                </div>
+
+                {/* Analysis Section */}
+                <Card className="shadow-sm border border-default-200">
+                    <CardHeader>
+                        <h4 className="font-bold text-large">{t('suppliers.performance.analysis')}</h4>
+                    </CardHeader>
+                    <Divider />
+                    <CardBody>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h5 className="font-semibold mb-2 text-success flex items-center gap-2">
+                                    <CheckCircle size={16} />
+                                    {t('suppliers.performance.strengths')}
+                                </h5>
+                                <ul className="list-disc list-inside text-sm text-default-600 space-y-1">
+                                    <li>{t('suppliers.performance.strength1')}</li>
+                                    <li>{t('suppliers.performance.strength2')}</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 className="font-semibold mb-2 text-danger flex items-center gap-2">
+                                    <AlertTriangle size={16} />
+                                    {t('suppliers.performance.weaknesses')}
+                                </h5>
+                                <ul className="list-disc list-inside text-sm text-default-600 space-y-1">
+                                    <li>{t('suppliers.performance.weakness1')}</li>
+                                    <li>{t('suppliers.performance.weakness2')}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </CardBody>
+                </Card>
+            </div>
+        );
+    };
+
     return (
         <div className="space-y-6 max-w-7xl mx-auto pb-10">
-            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <Button isIconOnly variant="flat" onPress={() => router.back()} className="rounded-full">
@@ -263,12 +386,7 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
                             <h1 className="text-2xl font-bold text-foreground">
                                 {supplier.name}
                             </h1>
-                            <Chip
-                                size="sm"
-                                variant="dot"
-                                color={supplier.status === 'active' ? "success" : supplier.status === 'blacklisted' ? "danger" : "default"}
-                                className="capitalize border-none"
-                            >
+                            <Chip size="sm" variant="dot" color={supplier.status === 'active' ? "success" : "default"} className="capitalize border-none">
                                 {t(`suppliers.${supplier.status}`) || supplier.status}
                             </Chip>
                         </div>
@@ -277,26 +395,6 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                    {supplier.status !== 'blacklisted' ? (
-                        <Button
-                            color="danger"
-                            variant="flat"
-                            startContent={<AlertTriangle size={18} />}
-                            onPress={() => handleAction('blacklist')}
-                        >
-                            {t('suppliers.actions.blacklist')}
-                        </Button>
-                    ) : (
-                        <Button
-                            color="success"
-                            variant="flat"
-                            startContent={<CheckCircle size={18} />}
-                            onPress={() => handleAction('activate')}
-                        >
-                            {t('suppliers.actions.activate')}
-                        </Button>
-                    )}
-
                     <Button variant="ghost" startContent={<Edit size={18} />} onPress={onOpen}>
                         {t('common.edit')}
                     </Button>
@@ -315,10 +413,7 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
                                 <SupplierForm
                                     mode="edit"
                                     initialData={supplier}
-                                    onSuccess={() => {
-                                        onClose();
-                                        window.location.reload();
-                                    }}
+                                    onSuccess={() => { onClose(); window.location.reload(); }}
                                     onCancel={onClose}
                                 />
                             </ModalBody>
@@ -328,45 +423,15 @@ export default function SupplierDetail({ supplier }: SupplierDetailProps) {
                 </ModalContent>
             </Modal>
 
-            {/* Tabs */}
             <Tabs aria-label="Supplier Details" color="primary" variant="underlined">
-                <Tab key="overview" title={
-                    <div className="flex items-center gap-2">
-                        <Shield size={16} />
-                        <span>{t('suppliers.tab.overview')}</span>
-                    </div>
-                }>
+                <Tab key="overview" title={<div className="flex items-center gap-2"><Shield size={16} /><span>{t('suppliers.tab.overview')}</span></div>}>
                     <OverviewTab />
                 </Tab>
-                <Tab key="products" title={
-                    <div className="flex items-center gap-2">
-                        <Package size={16} />
-                        <span>{t('suppliers.tab.products')}</span>
-                    </div>
-                }>
+                <Tab key="products" title={<div className="flex items-center gap-2"><Package size={16} /><span>{t('suppliers.tab.products')}</span></div>}>
                     <ProductsTab />
                 </Tab>
-                <Tab key="performance" title={
-                    <div className="flex items-center gap-2">
-                        <Star size={16} />
-                        <span>{t('suppliers.tab.performance')}</span>
-                    </div>
-                }>
-                    <Card className="shadow-none border border-default-200 p-10 flex flex-col items-center justify-center text-default-400">
-                        <p>Performance charts placeholder</p>
-                    </Card>
-                </Tab>
-                <Tab key="documents" title={
-                    <div className="flex items-center gap-2">
-                        <FileText size={16} />
-                        <span>{t('suppliers.tab.documents')}</span>
-                    </div>
-                }>
-                    <Card className="shadow-none border border-default-200 p-8 flex flex-col items-center justify-center text-default-400 border-dashed">
-                        <FileText size={48} className="mb-4 opacity-50" />
-                        <p>No documents.</p>
-                        <Button size="sm" variant="flat" className="mt-4">Upload Document (Mock)</Button>
-                    </Card>
+                <Tab key="performance" title={<div className="flex items-center gap-2"><Star size={16} /><span>{t('suppliers.tab.performance')}</span></div>}>
+                    <PerformanceTab />
                 </Tab>
             </Tabs>
         </div>

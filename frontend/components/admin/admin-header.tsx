@@ -8,6 +8,7 @@ import { ThemeSwitch } from "@/components/theme-switch";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import { useTranslation } from "@/components/providers/language-provider";
+import { PushNotificationButton } from "@/components/common/PushNotificationButton";
 
 
 type AdminHeaderProps = {
@@ -45,9 +46,9 @@ export function AdminHeader({ toggleMobileSidebar }: AdminHeaderProps) {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
-                <Button isIconOnly variant="light" size="sm" radius="full" className="hidden sm:flex">
-                    <Bell size={20} className="text-default-500" />
-                </Button>
+                <div className="hidden sm:flex">
+                    <PushNotificationButton />
+                </div>
                 <Button isIconOnly variant="light" size="sm" radius="full" className="hidden sm:flex">
                     <Settings size={20} className="text-default-500" />
                 </Button>

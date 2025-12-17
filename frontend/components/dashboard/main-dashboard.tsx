@@ -215,7 +215,13 @@ export default function MainDashboard() {
                                             <span className="text-small text-default-500">
                                                 Start: {new Date(plan.start_date).toLocaleDateString()}
                                             </span>
-                                            <Button size="sm" color="danger" variant="flat" className="font-medium">
+                                            <Button
+                                                size="sm"
+                                                color="danger"
+                                                variant="flat"
+                                                className="font-medium"
+                                                onPress={() => router.push(`${basePath}/plans/${plan.plan_id}`)}
+                                            >
                                                 View Plan
                                             </Button>
                                         </div>
@@ -243,7 +249,7 @@ export default function MainDashboard() {
                                 {alerts.map((alert) => (
                                     <div key={alert.id} className="flex gap-3 p-3 hover:bg-default-100 rounded-lg cursor-pointer transition-colors border-b border-dashed border-default-100 last:border-0">
                                         <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${alert.severity === 'HIGH' ? 'bg-danger' :
-                                                alert.severity === 'MEDIUM' ? 'bg-warning' : 'bg-primary'
+                                            alert.severity === 'MEDIUM' ? 'bg-warning' : 'bg-primary'
                                             }`} />
                                         <div className="flex-1">
                                             <div className="flex justify-between items-start">

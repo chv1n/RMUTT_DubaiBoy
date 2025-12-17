@@ -15,6 +15,7 @@ import { PlanReportService } from './services/plan-report.service';
 import { ProductPlanController } from './controlles/product-plan.controller';
 import { PlanDashboardController } from './controlles/dashboard.controller';
 import { DashboardPlanService } from './services/dash-board.service';
+import { InventoryTransactionModule } from '../inventory-transaction/inventory-transaction.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DashboardPlanService } from './services/dash-board.service';
     MaterialModule,
     AuditLogModule,
     BomModule,
+    InventoryTransactionModule,
   ],
   controllers: [ProductPlanController, PlanDashboardController],
   providers: [

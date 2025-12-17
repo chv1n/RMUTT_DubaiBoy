@@ -32,6 +32,20 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
     const [filterValue, setFilterValue] = React.useState("");
     const [statusFilter, setStatusFilter] = React.useState<Selection>("all");
     const [view, setView] = React.useState<"list" | "board">("list");
+
+    // Load view preference
+    React.useEffect(() => {
+        const saved = localStorage.getItem('planViewMode');
+        if (saved === 'board' || saved === 'list') {
+            setView(saved);
+        }
+    }, []);
+
+    const handleViewChange = (newView: "list" | "board") => {
+        setView(newView);
+        localStorage.setItem('planViewMode', newView);
+    };
+
     const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
         column: "lastUpdated",
         direction: "descending",
@@ -329,7 +343,7 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
                             variant={view === 'board' ? 'solid' : 'light'}
                             color={view === 'board' ? 'primary' : 'default'}
                             isIconOnly
-                            onPress={() => setView('board')}
+                            onPress={() => handleViewChange('board')}
                         >
                             <LayoutGrid size={16} />
                         </Button>
@@ -338,7 +352,7 @@ export default function PlanTable({ onEdit }: PlanTableProps) {
                             variant={view === 'list' ? 'solid' : 'light'}
                             color={view === 'list' ? 'primary' : 'default'}
                             startContent={<List size={16} />}
-                            onPress={() => setView('list')}
+                            onPress={() => handleViewChange('list')}
                         >
                             List
                         </Button>

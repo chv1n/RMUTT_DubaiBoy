@@ -10,6 +10,7 @@ import { GoodsIssueDto } from '../dto/goods-issue.dto';
 import { WarehouseTransferDto, TransferResultDto } from '../dto/warehouse-transfer.dto';
 import { InventoryAdjustmentDto } from '../dto/inventory-adjustment.dto';
 import { TransactionType } from '../../../common/enums';
+import { PushSubscriptionService } from '../../push-subscription/push-subscription.service';
 
 /**
  * Service สำหรับบันทึกรายการเคลื่อนไหว (Transaction & Movement)
@@ -32,6 +33,7 @@ export class TransactionMovementService {
         @InjectRepository(WarehouseMaster)
         private readonly warehouseRepository: Repository<WarehouseMaster>,
         private readonly dataSource: DataSource,
+        private readonly pushService: PushSubscriptionService,
     ) { }
 
     /**
@@ -119,7 +121,12 @@ export class TransactionMovementService {
                 reason_remarks: dto.reason_remarks || 'Goods Issue',
             });
 
-            return await queryRunner.manager.save(transaction);
+            const savedTransaction = await queryRunner.manager.save(transaction);
+
+            // Check low stock
+            await this.checkLowStockAndNotify(inventory);
+
+            return savedTransaction;
         });
     }
 
@@ -172,6 +179,10 @@ export class TransactionMovementService {
             this.validateAdjustmentQuantity(inventory.quantity, dto.quantity_change);
 
             await this.updateInventoryQuantity(queryRunner, inventory, dto.quantity_change);
+
+            if (dto.quantity_change < 0) {
+                await this.checkLowStockAndNotify(inventory);
+            }
 
             return this.createAndSaveTransaction(queryRunner, {
                 inventory,
@@ -367,6 +378,9 @@ export class TransactionMovementService {
     ): Promise<InventoryTransaction> {
         await this.updateInventoryQuantity(queryRunner, inventory, -dto.quantity);
 
+        // Check low stock
+        await this.checkLowStockAndNotify(inventory);
+
         return this.createAndSaveTransaction(queryRunner, {
             inventory,
             warehouse,
@@ -447,5 +461,45 @@ export class TransactionMovementService {
         const timestamp = Date.now().toString(36).toUpperCase();
         const random = Math.random().toString(36).substring(2, 6).toUpperCase();
         return `${prefix}-${timestamp}-${random}`;
+    }
+
+    private lastNotificationTime = new Map<number, number>();
+
+    public async checkLowStockAndNotify(inventory: MaterialInventory, useAvailableQuantity: boolean = false) {
+        try {
+            if (inventory.material && inventory.material.container_min_stock !== undefined && inventory.material.container_min_stock !== null) {
+
+                const stockLevel = useAvailableQuantity
+                    ? (inventory.quantity - (inventory.reserved_quantity || 0))
+                    : inventory.quantity;
+
+                if (stockLevel <= inventory.material.container_min_stock) {
+                    const materialId = inventory.material.material_id;
+                    const now = Date.now();
+                    const lastTime = this.lastNotificationTime.get(materialId);
+                    // Cooldown check temporarily disabled for immediate testing
+                    // if (lastTime && (now - lastTime) < 60000) {
+                    //     return;
+                    // }
+
+                    const typeText = useAvailableQuantity ? "Available" : "Current";
+
+                    const payload = {
+                        title: 'Low Stock Alert',
+                        body: `Material ${inventory.material.material_name} is running low. ${typeText}: ${stockLevel} (Min: ${inventory.material.container_min_stock})`,
+                        data: { url: '/inventory' }
+                    };
+                    await this.pushService.sendToRoles(['admin', 'staff', 'super_admin', 'user'], payload);
+                    console.log(`[LowStock] Notification sent for material: ${inventory.material.material_name}`); // Debug
+                    this.lastNotificationTime.set(materialId, now);
+                } else {
+                    console.log(`[LowStock] Stock OK: ${stockLevel} > ${inventory.material.container_min_stock}`);
+                }
+            } else {
+                console.log(`[LowStock] Min stock not defined or material missing for ID: ${inventory.material?.material_id}`);
+            }
+        } catch (error) {
+            console.error('Failed to trigger push notification', error);
+        }
     }
 }
