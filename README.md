@@ -33,33 +33,6 @@
 
 ---
 
-## 📁 Project Structure (Sample)
-
-```
-RMUTT_DubaiBoy/
-├── backend/                 # NestJS Backend API
-│   ├── src/
-│   │   ├── auth/           # Authentication module
-│   │   ├── users/          # User management
-│   │   ├── materials/      # Material management
-│   │   ├── products/       # Product management
-│   │   ├── product-plans/  # Production plan management
-│   │   └── database/       # Database config & migrations
-│   ├── .env                # Environment variables
-│   └── package.json
-│
-├── frontend/               # Next.js Frontend
-│   ├── app/               # App router pages
-│   ├── components/        # Reusable components
-│   ├── services/          # API services
-│   ├── .env.local         # Environment variables
-│   └── package.json
-│
-└── README.md
-```
-
----
-
 ## 🚀 Installation
 
 ### Prerequisites
@@ -103,7 +76,7 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_password
-POSTGRES_DB=rmutt_db
+POSTGRES_DB=matcore_db
 
 # Redis
 REDIS_HOST=localhost
